@@ -1,7 +1,7 @@
 /* Very simple, retro-inspired styles */
 *{box-sizing:border-box}
 body{font-family: 'Trebuchet MS',Verdana,Arial,sans-serif;background:linear-gradient(#f8f8ff,#e6eef8);color:#222;margin:0}
-.site-header{background:#0055aa;color:#fff;padding:12px 16px;display:flex;align-items:center;justify-content:space-between}
+.site-header {background:#12a802;color:#fff;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;max-width:900px;margin:0 auto;border-radius:0 0 6px 6px;}
 .site-title{font-weight:bold;color:#fff;text-decoration:none;font-size:1.3rem}
 .main-nav a{color:#fff;text-decoration:none;margin:0 6px}
 .container{display:block;max-width:900px;margin:22px auto;padding:0 16px}
