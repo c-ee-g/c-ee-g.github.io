@@ -1,37 +1,55 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>Colby's Corner</title>
-  <style>
-    body { font-family: Georgia, serif; background:#f2f2f2; color:#000; }
-    #page { width: 760px; margin: 20px auto; background:#fff; border:1px solid #ccc; }
-    #header { background:#008000; color:#fff; padding: 15px 20px; }
-    #nav { background:#e5e5e5; padding: 8px 20px; }
-    #nav a { margin-right: 12px; color:#008000; text-decoration: underline; }
-    #content { padding: 20px; }
-    #footer { background:#e5e5e5; padding: 10px 20px; font-size: 12px; }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pixel Diary — Home</title>
+<link rel="stylesheet" href="css/style.css">
+<script src="js/site.js" defer></script>
 </head>
 <body>
-  <div id="page">
-    <div id="header">
-      <h1>Colby's Corner</h1>
-      <p>notes, updates, ruminations</p>
-    </div>
-    <div id="nav">
-      <a href="index.html">Home</a>
-      <a href="about.html">About</a>
-      <a href="posts/post1.html">First Post</a>
-      <a href="posts/post2.html">Second Post</a>
-    </div>
-    <div id="content">
-      <h2>Welcome</h2>
-      <p>Welcome, my name is Colby. Feel free to linger awhile in this enclave of sanity.</p>
-    </div>
-    <div id="footer">
-      &copy; 2025 My Simple Blog
-    </div>
-  </div>
+<header class="site-header">
+<a class="site-title" href="index.html">Pixel Diary</a>
+<nav class="main-nav">
+<a href="index.html">Home</a> |
+<a href="about.html">About</a> |
+<a href="interwebs.html">Interwebs</a> |
+<a href="posts.html">Posts</a>
+</nav>
+</header>
+
+
+<main class="container">
+<h1>Welcome to Pixel Diary</h1>
+<p class="blurb">A small corner of the interwebs — retro vibes, quick updates, and weird links.</p>
+
+
+<section class="recent">
+<h2>Recent Posts</h2>
+<ul class="post-list">
+<li>
+<a href="posts/post1.html">My 2000s Micro-Guide to Making a Homepage</a>
+<small class="meta">— Aug 12, 2004</small>
+</li>
+<li>
+<a href="posts/post2.html">Top 10 Animated GIFs You Forgot About</a>
+<small class="meta">— Jun 01, 2003</small>
+</li>
+</ul>
+<p><a href="posts.html">View all posts →</a></p>
+</section>
+
+
+<aside class="sidebar">
+<h3>Random</h3>
+<p><a href="interwebs.html">My Favourite Links</a></p>
+<p class="hitcounter">Visitors: <span id="visitors">12345</span></p>
+</aside>
+</main>
+
+
+<footer class="site-footer">
+<p>&copy; 2004 Pixel Diary — made with table-based love and bad gradients.</p>
+</footer>
 </body>
 </html>
