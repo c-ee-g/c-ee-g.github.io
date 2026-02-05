@@ -1,7 +1,7 @@
-title: Colby’s Weblog
-description: Personal writings from the information superhighway
+title: Colby’s Corner
+description: Articles, links, and writings...
 baseurl: ""
-url: "https://yourusername.github.io"
+url: "https://c-eeg.github.io"
 
 markdown: kramdown
 permalink: /:year/:month/:day/:title/
