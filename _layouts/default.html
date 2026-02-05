@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ page.title }} | {{ site.title }}</title>
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1><a href="/">{{ site.title }}</a></h1>
+    <p class="tagline">{{ site.description }}</p>
+
+    <nav class="nav">
+      <a href="/">Home</a> |
+      <a href="/about.html">About</a> |
+      <a href="/posts.html">Posts</a> |
+      <a href="/resources.html">Resources</a>
+    </nav>
+
+    <hr>
+  </header>
+
+  <main>
+    {{ content }}
+  </main>
+
+  <footer>
+    <hr>
+    <p>© {{ "now" | date: "%Y" }} · Hand-coded HTML</p>
+  </footer>
+</div>
+
+</body>
+</html>
