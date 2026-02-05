@@ -1,0 +1,7 @@
+title: Colby’s Weblog
+description: Personal writings from the information superhighway
+baseurl: ""
+url: "https://yourusername.github.io"
+
+markdown: kramdown
+permalink: /:year/:month/:day/:title/
