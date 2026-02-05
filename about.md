@@ -3,9 +3,8 @@ layout: default
 title: About
 ---
 
-This is a personal weblog.
+This is a personal blog.
 
-Maintained by hand.
-No tracking, no algorithms, no infinite scroll.
+You probably didn't have trouble loading it.
 
 Inspired by the early web.
