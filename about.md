@@ -3,8 +3,4 @@ layout: default
 title: About
 ---
 
-This is a personal blog.
-
-You probably didn't have trouble loading it.
-
-Inspired by the early web.
+Neat info that is not easily found elsewhere. Topics covered include philosphy, culture, music, food, books, genealogy, art, devotions, tech etc.
