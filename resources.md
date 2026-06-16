@@ -3,7 +3,7 @@ layout: default
 title: Resources
 ---
 
-A long list of things worth bookmarking.
+A long list of things worth bookmarking. Hope to sort it soon...
 
 - <a href="https://rumble.com/c/nickjfuentes">Nick Fuentes' Channel</a>
 - <a href="https://rumble.com/user/TimothyGordon/channels">Tim Gordon's Channel</a>
