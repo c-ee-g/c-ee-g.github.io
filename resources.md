@@ -40,7 +40,7 @@ A long list of things worth bookmarking.
 - <a href="https://catholicharboroffaithandmorals.com/St.%20Thomas%20Aquinas%20Lenten%20Meditations.html">Lenten Meditations</a>
 - <a href="https://lynx.invisible-island.net/">Text based web browser</a>
 - <a href="https://penelope.uchicago.edu/Thayer/E/Roman/Texts/Apicius/7*.html">Apicius, On the Subject of Cooking</a>
-- <a href="https://colbyscorner.com/assets/628363188-Examination-of-Conscience-7-Deadly-Sins.pdf">Examination of Conscience: 7 Deadly Sins</a>
+- <a href="https://colbyscorner.com/assets/628363188-Examination-of-Conscience-7-Deadly-Sins.pdf">Examination of Conscience: 7 Deadly Sins (from Cathy Benkovicon on Scribd)</a>
 
 
 More links to come.
