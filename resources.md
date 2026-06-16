@@ -7,7 +7,7 @@ A long list of things worth bookmarking.
 
 - <a href="https://rumble.com/c/nickjfuentes">Nick Fuentes' Channel</a>
 - <a href="https://rumble.com/user/TimothyGordon/channels">Tim Gordon's Channel</a>
-- <a href="https://rumble.com/embed/v4r2wnu)">The Illuminati and the C.F.R.</a>
+- <a href="https://rumble.com/embed/v4r2wnu">The Illuminati and the C.F.R.</a>
 - <a href="https://wiby.me">Wiby Search Engine</a>
 - <a href="https://www.traditionalcatholic.co/free-catholicbooks/">Free Traditional Catholic Books</a>
 - <a href="https://www.drbo.org/">Online Bible</a>
