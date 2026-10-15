@@ -10,9 +10,9 @@ Bookmarks
 - <a href="https://rumble.com/embed/v4r2wnu">The Illuminati and the C.F.R.</a>
 - <a href="https://wiby.me">Wiby Search Engine</a>
 - <a href="https://www.traditionalcatholic.co/free-catholicbooks/">Free Traditional Catholic Books</a>
-- <a href="https://www.drbo.org/">Online Bible</a>
-- <a href="https://www.baronius.com/">Beautiful copies of Catholic books</a>
-- <a href="https://www.familysearch.org/">My favorite Genealogy website</a>
+- <a href="https://www.drbo.org/">Online DRBO Bible</a>
+- <a href="https://www.baronius.com/">Baronius Press</a>
+- <a href="https://www.familysearch.org/">Family Search</a>
 - <a href="https://www.findagrave.com/">FindaGrave</a>
 - <a href="https://maps.gavinr.com/usa-catholic-dioceses/">Find your Catholic Diocese in the USA</a>
 - <a href="https://www.nococcm.org/fr-freihofers-resources/">Catholic prayers and spiritual advice</a>
@@ -53,8 +53,8 @@ Bookmarks
 - <a href="https://www.aroucapress.com/index.php?route=common/home">Arouca Press</a>
 - <a href="https://angelicopress.com/">Angelico Press</a>
 - <a href="https://exhibits.stanford.edu/copyrightrenewals">Copyright renewal database</a>
-- <a href="https://www.adropofhoney.org/product-page/25-pounds">Good deal on bulk Beeswax</a>
-- <a href="https://www.vatican.va/content/leo-xiii/en/encyclicals/documents/hf_l-xiii_enc_15051891_rerum-novarum.html">Leo XXIII Rerum Novarum</a>
+- <a href="https://www.adropofhoney.org/product-page/25-pounds">Cheap bulk beeswax</a>
+- <a href="https://www.vatican.va/content/leo-xiii/en/encyclicals/documents/hf_l-xiii_enc_15051891_rerum-novarum.html">Leo XIII Rerum Novarum</a>
 - <a href="https://www.wikiart.org/">Art Encyclopedia</a>
 - <a href="https://www.ccwatershed.org/wp-content/uploads/2020/05/78148-Saint-Michael-Hymnal-Index-0CRd.pdf">Saint Michael Hymnal Index</a>
 - <a href="https://www.bluearmy.com/first-saturday-devotion/">First Saturday Devotion</a>
@@ -62,4 +62,4 @@ Bookmarks
 - <a href="https://goodcatholicbooks.org/resources.html">More Catholic book resources</a>
 - <a href="https://www.fisheaters.com/catholiclibrary.html">FishEaters Library</a>
 - <a href="https://www.vulnerablepeopleproject.com/">Help Christians in Gaza (maybe?)</a>
-- <a href="https://www.newadvent.org/cathen/">Catholic Encyclopedia</a>
+- <a href="https://www.artvee.com">Free Art</a>
