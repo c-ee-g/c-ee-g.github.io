@@ -3,4 +3,5 @@ layout: default
 title: About
 ---
 
-Neat info that is not easily found elsewhere. Topics covered include philosphy, culture, music, food, books, genealogy, art, devotions, tech etc.
+This site is a way for me to access my bookmarks, apps, and  other random things across devices. 
+If you happened upon it, then welcome.
