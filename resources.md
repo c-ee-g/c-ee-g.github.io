@@ -1,9 +1,9 @@
 ---
 layout: default
-title: Resources
+title: Bookmarks
 ---
 
-A long list of things worth bookmarking. Hope to sort it soon...
+Bookmarks
 
 - <a href="https://rumble.com/c/nickjfuentes">Nick Fuentes' Channel</a>
 - <a href="https://rumble.com/user/TimothyGordon/channels">Tim Gordon's Channel</a>
@@ -40,7 +40,7 @@ A long list of things worth bookmarking. Hope to sort it soon...
 - <a href="https://catholicharboroffaithandmorals.com/St.%20Thomas%20Aquinas%20Lenten%20Meditations.html">Lenten Meditations</a>
 - <a href="https://lynx.invisible-island.net/">Text based web browser</a>
 - <a href="https://penelope.uchicago.edu/Thayer/E/Roman/Texts/Apicius/7*.html">Apicius, On the Subject of Cooking</a>
-- <a href="https://colbyscorner.com/assets/628363188-Examination-of-Conscience-7-Deadly-Sins.pdf">Examination of Conscience: 7 Deadly Sins (from Cathy Benkovicon on Scribd)</a>
+- <a href="https://colbyscorner.com/assets/628363188-Examination-of-Conscience-7-Deadly-Sins.pdf">Examination of Conscience: 7 Deadly Sins (from Cathy Benkovic on Scribd)</a>
 - <a href="https://www.basilica.ca/documents/2016/10/Brother%20Lawrence-The%20Practice%20of%20the%20Presence%20of%20God.pdf">The Practice of the Presence of God</a>
 - <a href="https://www.gregorian-chant-hymns.com/">Gregorian Chant Resources</a>
 - <a href="https://www.amicivaticani.org/">Papel Tiara Campaign</a>
@@ -63,7 +63,3 @@ A long list of things worth bookmarking. Hope to sort it soon...
 - <a href="https://www.fisheaters.com/catholiclibrary.html">FishEaters Library</a>
 - <a href="https://www.vulnerablepeopleproject.com/">Help Christians in Gaza (maybe?)</a>
 - <a href="https://www.newadvent.org/cathen/">Catholic Encyclopedia</a>
-
-
-- <a href=""></a>
-More links to come.
