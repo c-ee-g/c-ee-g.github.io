@@ -1,0 +1,871 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Book Formatter Manual</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,600;1,400&family=EB+Garamond:ital,wght@0,500;1,500&display=swap">
+<style>
+:root{--bg:#f6f7f5;--panel:#eceeeb;--ink:#1b2220;--muted:#5a6561;--line:#d3d9d5;--accent:#2c5c4c;--accent-2:#e3eee9;color-scheme:light}
+@media (prefers-color-scheme:dark){:root{--bg:#141917;--panel:#1b211f;--ink:#e2e8e4;--muted:#9aa6a0;--line:#2f3935;--accent:#86c3ab;--accent-2:#22322c;color-scheme:dark}}
+*{box-sizing:border-box}
+html{scroll-padding-top:20px}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 "IBM Plex Sans",system-ui,sans-serif}
+.wrap{display:grid;grid-template-columns:260px minmax(0,1fr);max-width:1180px;margin:0 auto}
+nav.side{position:sticky;top:0;height:100vh;overflow:auto;padding:28px 20px 40px;border-right:1px solid var(--line)}
+nav.side .brand{display:flex;gap:10px;align-items:center;font:500 22px "EB Garamond",Georgia,serif;margin-bottom:18px}
+nav.side .mark{display:grid;place-items:center;width:30px;height:30px;border-radius:6px;background:var(--accent);color:var(--bg);font-size:19px}
+nav.side ul{list-style:none;margin:0;padding:0}
+nav.side li a{display:block;padding:6px 8px;border-radius:6px;color:var(--ink);text-decoration:none;font-size:14.5px}
+nav.side li a:hover{background:var(--accent-2)}
+.open{display:inline-block;margin-top:18px;padding:8px 14px;border-radius:6px;background:var(--accent);color:var(--bg);text-decoration:none;font-weight:600;font-size:14px}
+main{padding:40px max(20px,4vw) 120px;min-width:0}
+h1{font:500 44px/1.1 "EB Garamond",Georgia,serif;margin:0 0 8px}
+.lead{color:var(--muted);margin:0 0 36px;max-width:62ch}
+h2{font:500 32px/1.2 "EB Garamond",Georgia,serif;margin:56px 0 12px;padding-top:18px;border-top:1px solid var(--line)}
+h3{font-size:17px;margin:30px 0 8px}
+p,li{max-width:70ch}
+a{color:var(--accent)}
+code{font:14px ui-monospace,Menlo,Consolas,monospace;background:var(--panel);padding:1px 5px;border-radius:4px}
+table{border-collapse:collapse;width:100%;margin:12px 0 20px;font-size:14.5px;display:block;overflow-x:auto}
+th,td{text-align:left;vertical-align:top;padding:8px 12px;border-bottom:1px solid var(--line)}
+th{font-weight:600;background:var(--panel)}
+td:first-child{font-weight:600;white-space:nowrap}
+@media (max-width:820px){.wrap{grid-template-columns:minmax(0,1fr)}nav.side{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line)}td:first-child{white-space:normal}h1{font-size:36px}}
+@media print{nav.side{display:none}.wrap{display:block}main{padding:0}h2{break-before:page;border:0}table{display:table}}
+</style></head><body>
+<div class="wrap">
+<nav class="side" aria-label="Chapters"><div class="brand"><span class="mark">¶</span>Book Formatter</div>
+
+<ul>
+<li><a href="#1-getting-started">1. Getting started</a></li>
+<li><a href="#2-bringing-in-a-manuscript">2. Bringing in a manuscript</a></li>
+<li><a href="#3-sections">3. Sections</a></li>
+<li><a href="#4-writing-and-formatting-text">4. Writing and formatting text</a></li>
+<li><a href="#5-designing-the-book">5. Designing the book</a></li>
+<li><a href="#6-hyphenation">6. Hyphenation</a></li>
+<li><a href="#7-previewing-and-proofing">7. Previewing and proofing</a></li>
+<li><a href="#8-exporting-and-printing">8. Exporting and printing</a></li>
+<li><a href="#9-running-it-outside-claude-troubleshooting-and-shortcuts">9. Running it outside Claude, troubleshooting and shortcuts</a></li>
+</ul>
+
+
+<a class="open" href="index.html">Open the app</a></nav>
+<main><h1>User manual</h1><p class="lead">How to bring in a manuscript, format and design it, check it for errors, and export a print-ready PDF and an ebook.</p>
+<h2 id="1-getting-started">1. Getting started</h2>
+<p>Book Formatter turns a manuscript into a print-ready book interior (PDF) and an ebook (EPUB). Every page in its preview is a real page: what you see is exactly what goes to the printer.</p>
+<h3 id="the-four-tabs">The four tabs</h3>
+<table>
+<thead>
+<tr>
+<th>Tab</th>
+<th>What you do there</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Write</td>
+<td>Organize sections and edit text. A live view of the current section's pages sits on the right on wide screens.</td>
+</tr>
+<tr>
+<td>Design</td>
+<td>Set page size, margins, type, chapter headings, running heads, footnotes, hyphenation and book details. Apply a template.</td>
+</tr>
+<tr>
+<td>Preview</td>
+<td>Read every page as spreads or single pages, and see the Proofing panel of layout and typing problems.</td>
+</tr>
+<tr>
+<td>Export</td>
+<td>Download the PDF, EPUB, Word or LibreOffice file, project file or plain text. Preflight checklist and cover-size calculator.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="your-books">Your books</h3>
+<p>Click the book title at the top left to open <strong>Your books</strong>. From there you can open another book, duplicate one, delete one, open a project file, or start a <strong>New book</strong> from a template.</p>
+<h3 id="saving-and-backups">Saving and backups</h3>
+<ul>
+<li>The app saves automatically a moment after every change. The status at the top right reads "Saving…" and then "Saved" with the page count. Ctrl+S (Cmd+S on a Mac) saves immediately.</li>
+<li>Books are saved in the browser you are using, on that device only. Clearing your browser's site data deletes them.</li>
+<li><strong>Keep backups.</strong> Go to Export → Download project to save a <code>.json</code> file of the whole book, settings included. Open it later from Your books → Open project file. Do this whenever you finish a working session.</li>
+</ul>
+<h2 id="2-bringing-in-a-manuscript">2. Bringing in a manuscript</h2>
+<p>Click <strong>Import</strong> at the top right. Drop a file onto the box, click <strong>choose a file</strong>, or paste text into the large box. The summary at the bottom shows how many sections, chapters, words and footnotes were found before anything changes.</p>
+<h3 id="file-types">File types</h3>
+<table>
+<thead>
+<tr>
+<th>Source</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Word (.docx)</td>
+<td>Keeps bold, italic, underline, small caps, superscript, footnotes, endnotes, images and centered or right-aligned paragraphs. "Heading 1" or "Title" paragraphs start new chapters.</td>
+</tr>
+<tr>
+<td>LibreOffice (.odt)</td>
+<td>The same as Word: bold, italic, underline, small caps, superscript, footnotes, images and alignment. "Heading 1" or "Title" paragraphs start new chapters. A table of contents in the file is skipped.</td>
+</tr>
+<tr>
+<td>Ebook (.epub)</td>
+<td>Each chapter file of the ebook becomes a section, using the book's title and author. Italics, small caps, images and linked footnotes are kept. Project Gutenberg headers, licences, title pages and linked contents pages are left out.</td>
+</tr>
+<tr>
+<td>Rich text (.rtf)</td>
+<td>Bold, italic, underline, small caps, superscript, footnotes and centered or right-aligned paragraphs are kept. "Heading 1" paragraphs start new chapters.</td>
+</tr>
+<tr>
+<td>PDF (.pdf)</td>
+<td>Reads the text layer of the PDF and rebuilds paragraphs, headings, italics, verse, block quotes and footnotes from where the text sits on the page. Running heads and page numbers are removed and words hyphenated at line ends are rejoined. The result is approximate, so expect some tidying (see below).</td>
+</tr>
+<tr>
+<td>Plain text (.txt)</td>
+<td>Paragraphs are split at blank lines, or at each line when there are none. Indented short lines become verse.</td>
+</tr>
+<tr>
+<td>Markdown (.md)</td>
+<td><code>#</code> starts a chapter, <code>##</code> a subheading, <code>&gt;</code> a block quote, <code>*italic*</code>, <code>**bold**</code>, <code>^[note]</code> a footnote.</td>
+</tr>
+<tr>
+<td>Web page (.html)</td>
+<td>Formatting is cleaned up; <code>h1</code> headings start chapters.</td>
+</tr>
+<tr>
+<td>Project file (.json)</td>
+<td>Opens as its own book.</td>
+</tr>
+</tbody>
+</table>
+<p>Old Word .doc files can't be read. Save them as .docx or .odt first.</p>
+<h3 id="importing-a-pdf">Importing a PDF</h3>
+<p>A PDF records where each word sits on the page, not where paragraphs and chapters begin, so the import works those out from the layout. It usually gets the text itself right, but check these after importing:</p>
+<ul>
+<li><strong>Chapter breaks.</strong> The title page, half-title and copyright page are dropped, since the app makes its own. Look over the section list for a chapter that was split in two or two chapters that ran together. Use <strong>Merge with next section</strong> or <strong>Split section here</strong> to fix them.</li>
+<li><strong>Italics and bold</strong> come from the font names in the PDF. Most PDFs name their fonts clearly, but some don't, and then the italics are lost.</li>
+<li><strong>Footnotes</strong> are matched by the small raised number in the text and the note at the foot of the same page. A note that continues onto the next page may be cut short.</li>
+<li><strong>Paragraph breaks</strong> are guessed from indents and short last lines. A paragraph that ends exactly at the right margin can run into the next one.</li>
+<li><strong>Small caps, drop caps and letter-spaced headings</strong> are put back into ordinary text.</li>
+</ul>
+<p>Afterwards, the <strong>Clean up text</strong> button (the wand on the toolbar) fixes leftover spacing and punctuation, and the proofing panel in Preview points out anything odd on the pages.</p>
+<p>A scanned PDF is only pictures of pages, with no text in it. The import tells you when this happens. Run it through OCR (text recognition) first. Adobe Acrobat, ABBYY FineReader, or the free OCRmyPDF can add a text layer, then import the result.</p>
+<h3 id="finding-chapters">Finding chapters</h3>
+<ul>
+<li><strong>Lines like "Chapter IV", "Part Two", "Sermon I", "Preface"</strong> become sections of the right type. Words such as Letter, Book, Lecture, Homily and Conference are recognised too. When most chapters use one word (for example "Sermon"), the book's chapter label is set to it.</li>
+<li>If a chapter line has no title after the number, a short line straight after it is taken as the title.</li>
+<li><strong>Word headings and Markdown # headings</strong> also start chapters.</li>
+<li><strong>Lines that are only a Roman numeral</strong> (off by default) start chapters for books numbered that way.</li>
+<li><strong>Convert ALL-CAPS titles to Title Case</strong> tidies scanned headings like "THE ARRIVAL".</li>
+<li>A printed "Contents" list in the source is dropped, because the book builds its own. A short title line before the first chapter becomes the book's title.</li>
+</ul>
+<h3 id="cleanup-on-import">Cleanup on import</h3>
+<ul>
+<li><strong>Remove Project Gutenberg header and licence</strong> keeps only the text between the START and END markers.</li>
+<li><strong>Join lines broken mid-paragraph</strong> and <strong>Rejoin words hyphenated at line ends</strong> fix hard-wrapped text.</li>
+<li><strong>Remove lines that are only page numbers</strong> removes stray numbers left from scans.</li>
+<li><strong>Footnotes:</strong> <code>[Footnote 1: …]</code> blocks with <code>[1]</code> markers (the Gutenberg style), Markdown <code>[^1]</code> notes and <code>^[…]</code> become real footnotes.</li>
+<li><strong><em>Underscores</em> to italics</strong>, <strong>curly quotes, em dashes, ellipses</strong>, and <strong>lines of * * * to scene breaks</strong>.</li>
+</ul>
+<h3 id="where-it-goes">Where it goes</h3>
+<ul>
+<li><strong>Replace the chapters in this book</strong> keeps your title page, copyright, dedication, contents and back matter, and swaps in the new chapters.</li>
+<li><strong>Add to the end</strong> appends everything.</li>
+<li><strong>Start a new book</strong> creates a separate book with standard front matter.</li>
+</ul>
+<h2 id="3-sections">3. Sections</h2>
+<p>A book is a list of sections, shown in the left panel of Write and grouped as front matter, body and back matter. The number beside each section is the page it starts on. The <strong>☰</strong> button at the left of the section title hides or shows the list, for full-width writing; on a phone it opens the list as a drawer.</p>
+<h3 id="section-types">Section types</h3>
+<table>
+<thead>
+<tr>
+<th>Group</th>
+<th>Types</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Front matter</td>
+<td>Half title, Also by, Frontispiece, Title page, Copyright, Dedication, Epigraph, Contents, Foreword, Preface, Introduction, Acknowledgments</td>
+</tr>
+<tr>
+<td>Body</td>
+<td>Part, Chapter, Prologue, Epilogue</td>
+</tr>
+<tr>
+<td>Back matter</td>
+<td>Afterword, Appendix, Notes (endnotes), Glossary, Bibliography, Acknowledgments, About the author, Also by</td>
+</tr>
+<tr>
+<td>Other</td>
+<td>Blank page, Other</td>
+</tr>
+</tbody>
+</table>
+<p>The half title, title page, contents and notes are built automatically. The title pages use your book details; the contents lists every section marked "In contents" with its real page number; Notes gathers footnotes when they are set to print at the end of the book. Each type comes with sensible defaults, such as the copyright page starting on a left-hand page with small text at the foot of the page.</p>
+<h3 id="managing-sections">Managing sections</h3>
+<ul>
+<li><strong>Add:</strong> click <strong>Add</strong> and pick a type. Front matter is placed among the front matter; anything else goes after the current section.</li>
+<li><strong>Reorder:</strong> drag a section by its dotted handle, or use the up and down arrows at the bottom of the list.</li>
+<li><strong>Duplicate</strong>, <strong>Merge with next section</strong> and <strong>Delete</strong> (with a confirmation) are the other buttons along the bottom of the list. Merging turns the next section's title into a subheading.</li>
+<li><strong>Split:</strong> put the cursor where a new section should begin and click the split button on the toolbar. If the cursor is on a subheading or a "Chapter…" line, it becomes the new section's title.</li>
+<li><strong>Change type</strong> with the menu at the top of the editor.</li>
+</ul>
+<h3 id="title-subtitle-and-label">Title, subtitle and label</h3>
+<p>Type the title in the large box above the editor and an optional subtitle or chapter summary below it. The label ("Chapter One") is set automatically from Design; type your own in <strong>Label</strong> under the section options to override it.</p>
+<h3 id="page-and-heading-options">Page and heading options</h3>
+<p>Open <strong>Page and heading options</strong> with the Options (gear) button beside the section title. The subtitle box is there too:</p>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Starts on</td>
+<td>Book setting, right-hand page (recto), left-hand page (verso) or next page. A blank page is added when needed.</td>
+</tr>
+<tr>
+<td>Vertical position</td>
+<td>Top, one-third down, centered or bottom. For short pages such as a dedication or copyright.</td>
+</tr>
+<tr>
+<td>Text style</td>
+<td>Body text, centered, centered italic, small, epigraph or hanging indent.</td>
+</tr>
+<tr>
+<td>Drop cap</td>
+<td>Book setting, none, or 2, 3 or 4 lines.</td>
+</tr>
+<tr>
+<td>Label</td>
+<td>Replaces the automatic label.</td>
+</tr>
+<tr>
+<td>Running head</td>
+<td>Shorter text for the running head when the title is long.</td>
+</tr>
+<tr>
+<td>Appears in</td>
+<td>Print and ebook, print only, or ebook only.</td>
+</tr>
+<tr>
+<td>Show heading on the page</td>
+<td>Turns the printed title on or off.</td>
+</tr>
+<tr>
+<td>Numbered</td>
+<td>Counts this chapter or part in the numbering.</td>
+</tr>
+<tr>
+<td>In contents</td>
+<td>Lists it on the contents page.</td>
+</tr>
+<tr>
+<td>Running heads / Page numbers</td>
+<td>Shows or hides them for this section.</td>
+</tr>
+<tr>
+<td>Leave out of book</td>
+<td>Keeps the section but omits it from the book and all exports.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="recto-and-verso">Recto and verso</h3>
+<p>Page 1 of the book is a right-hand page (recto), and odd page numbers always fall on the right. When a section must start on a particular side and the previous one ends on that side, a blank page is inserted automatically. The first body section always starts on a right-hand page numbered 1, and the book is padded to an even page count.</p>
+<h2 id="4-writing-and-formatting-text">4. Writing and formatting text</h2>
+<p>The editor works like a word processor: select text and click a toolbar button. Hover over any button to see its name. When the window is too narrow for every button, the rest are under More at the right end of the toolbar. The toolbar stays at the top of the window as you scroll.</p>
+<h3 id="the-toolbar-left-to-right">The toolbar, left to right</h3>
+<table>
+<thead>
+<tr>
+<th>Button</th>
+<th>Use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Undo, Redo</td>
+<td>Every change can be undone, including the tools below.</td>
+</tr>
+<tr>
+<td>Paragraph style</td>
+<td>Body text, No indent, Subheading, Minor heading, Block quote, Verse / poetry, Centered, Right (signature), Small text, Hanging indent, Caption.</td>
+</tr>
+<tr>
+<td>B, I, U, S</td>
+<td>Bold, italic, underline, strikethrough.</td>
+</tr>
+<tr>
+<td>Sc</td>
+<td>Small capitals. Select text, click once to apply, click again inside it to remove.</td>
+</tr>
+<tr>
+<td>x², x₂</td>
+<td>Superscript and subscript.</td>
+</tr>
+<tr>
+<td>Alignment</td>
+<td>Left, center, right, justify for the current paragraph. Click again to return to the book setting.</td>
+</tr>
+<tr>
+<td>Lists</td>
+<td>Bulleted and numbered lists.</td>
+</tr>
+<tr>
+<td>Footnote</td>
+<td>Inserts a footnote at the cursor and opens a box to type it.</td>
+</tr>
+<tr>
+<td>Scene break</td>
+<td>Adds a scene break after the current paragraph. Its look is set in Design.</td>
+</tr>
+<tr>
+<td>Page break</td>
+<td>Forces the following text onto a new page.</td>
+</tr>
+<tr>
+<td>Image</td>
+<td>Inserts a picture. Click it afterwards to set its width (25, 50, 75 or 100%), add a caption or remove it.</td>
+</tr>
+<tr>
+<td>Ω</td>
+<td>Special characters: dashes, curly quotes, ©, §, †, ✠, ✝, ℟, ℣, æ, œ, accented letters, a non-breaking space and a thin space.</td>
+</tr>
+<tr>
+<td>Tighten, Loosen</td>
+<td>Squeezes or opens the letter spacing of the current paragraph by a small step (up to three steps each way). Used to pull back a runt or widow. Adjusted paragraphs show a thin colored bar at the left in the editor.</td>
+</tr>
+<tr>
+<td>Hyphenation</td>
+<td>Opens the hyphenation review (chapter 6).</td>
+</tr>
+<tr>
+<td>Clear formatting</td>
+<td>Removes bold, italic, small caps and the like from the selection.</td>
+</tr>
+<tr>
+<td>Find and replace</td>
+<td>Searches the whole book or the current section.</td>
+</tr>
+<tr>
+<td>Clean up text</td>
+<td>Fixes common problems in a section or the whole book.</td>
+</tr>
+<tr>
+<td>Split</td>
+<td>Starts a new section at the cursor.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="views-and-zoom">Views and zoom</h3>
+<p>The view and zoom controls work like the ones in LibreOffice Writer:</p>
+<ul>
+<li><strong>Draft</strong> is a comfortable writing view.</li>
+<li><strong>Page</strong> sets the text at the book's real page width, margins, typeface, size and line spacing, so lines break much as they will in print. A dashed red line with a label marks where each printed page begins.</li>
+<li><strong>Pages side by side</strong> (the two-page button at the top right of the editor) shows the laid-out pages beside the editor. The paragraph your cursor is in is shaded on its page, and clicking a paragraph on a page moves the cursor there. Use −, Fit and + at the top of that pane to size the pages.</li>
+<li><strong>Zoom</strong> with the slider, the − and + buttons, Ctrl and the mouse wheel, or Ctrl + and Ctrl −. Click the percentage to return to 100%, and the arrows button to fit the width.</li>
+</ul>
+<p>The app remembers your view and zoom.</p>
+<h3 id="paragraphs-and-line-breaks">Paragraphs and line breaks</h3>
+<p>Press Enter for a new paragraph and Shift+Enter for a line break inside one, which is how verse keeps its lines together. The first paragraph after a heading or scene break is set without an indent automatically.</p>
+<h3 id="footnotes">Footnotes</h3>
+<p>Click where the note mark belongs and press the footnote button (or Ctrl+Alt+F). Type the note, using the I, B and Sc buttons for italics, bold and small caps, then click <strong>Done</strong>. Marks number themselves. Click a mark later to edit or delete its note. Where notes print, and how they are numbered, is set in Design → Footnotes.</p>
+<h3 id="typing-helpers">Typing helpers</h3>
+<p>With <strong>Curly quotes and dashes while typing</strong> on (Design → Body text), straight quotes become “curly” as you type, two hyphens become an em dash, and three periods become an ellipsis. Pasted text is cleaned of web and Word styling but keeps bold, italic, headings and lists.</p>
+<h3 id="placeholders">Placeholders</h3>
+<p>Words in braces such as <code>{title}</code>, <code>{author}</code>, <code>{publisher}</code>, <code>{year}</code> and <code>{isbn}</code> are filled in from Book details when the page is laid out. A line whose only content is an empty field, like "ISBN {isbn}" with no ISBN entered, is left out.</p>
+<h3 id="find-and-replace">Find and replace</h3>
+<p>Press Ctrl+F or the magnifier. Choose match case, whole words, or a pattern (regular expression), and whether to search the whole book or the current section. Results are listed by section with a sample; <strong>Show</strong> jumps there and highlights each match. <strong>Replace all</strong> replaces every match in the chosen scope, and the change can be undone.</p>
+<h3 id="clean-up-text">Clean up text</h3>
+<p>The wand button offers: straight quotes to curly, double hyphens and spaced hyphens to em dashes, removing spaces around em dashes, three periods to an ellipsis, collapsing repeated spaces, removing empty paragraphs, turning lines of * or # into scene breaks, turning short all-capitals lines into subheadings, and turning <em>underscored</em> words into italics. Apply it to the section or to the whole book.</p>
+<h2 id="5-designing-the-book">5. Designing the book</h2>
+<p>Everything about the book's look is on the Design tab, in groups you open and close. The pages on the right update as you change settings. <strong>Chapter opening</strong> shows a sample of key pages; <strong>Whole book</strong> shows every page.</p>
+<h3 id="templates">Templates</h3>
+<p>Click <strong>Templates</strong> at the top of Design to restyle the current book, or <strong>New book</strong> in Your books to start one. Each template shows a real first page.</p>
+<table>
+<thead>
+<tr>
+<th>Template</th>
+<th>Size</th>
+<th>Type</th>
+<th>Character</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Novel</td>
+<td>5.5 × 8.5 in</td>
+<td>EB Garamond 11.5 pt</td>
+<td>Classic centered opening, drop caps, small-cap lead-in</td>
+</tr>
+<tr>
+<td>Classic reprint</td>
+<td>5.5 × 8.5 in</td>
+<td>Libre Caslon Text 10.5 pt</td>
+<td>Period style, fleuron ornament, footnotes at the foot of the page</td>
+</tr>
+<tr>
+<td>Devotional and sermons</td>
+<td>5.5 × 8.5 in</td>
+<td>EB Garamond 12 pt</td>
+<td>Cross above headings, "Sermon I" labels, Nihil Obstat and Imprimatur page</td>
+</tr>
+<tr>
+<td>Nonfiction and history</td>
+<td>6 × 9 in</td>
+<td>Source Serif 4 10.5 pt</td>
+<td>Left-aligned headings, parts, bibliography</td>
+</tr>
+<tr>
+<td>Memoir and biography</td>
+<td>6 × 9 in</td>
+<td>Lora 10.75 pt</td>
+<td>Large chapter numerals, prologue and epilogue</td>
+</tr>
+<tr>
+<td>Poetry collection</td>
+<td>6 × 9 in</td>
+<td>Crimson Pro 11.5 pt</td>
+<td>Ragged right, no hyphenation, poems one to a page</td>
+</tr>
+<tr>
+<td>Children's chapter book</td>
+<td>5.25 × 8 in</td>
+<td>Literata 12.5 pt</td>
+<td>Friendly numerals, generous spacing</td>
+</tr>
+<tr>
+<td>Large print</td>
+<td>6 × 9 in</td>
+<td>PT Serif 16 pt</td>
+<td>Ragged right, no hyphenation</td>
+</tr>
+</tbody>
+</table>
+<p>Restyling keeps your text and sections. Tick <strong>Also add the template's front and back matter pages</strong> to add any of its pages the book lacks. A new book from a template has placeholder text in [brackets] to replace.</p>
+<h3 id="book-details">Book details</h3>
+<p>Title, subtitle, author, publisher or imprint, place of publication, year, print ISBN, ebook ISBN, edition, language (which sets hyphenation rules for English US or UK, French, Spanish, Italian and Latin; for German, turn hyphenation off, since German rules aren't included), a description for the ebook, and a publisher logo shown on the title page.</p>
+<h3 id="page-size-and-margins">Page size and margins</h3>
+<p>Pick a trim size (5 × 8, 5.06 × 7.81, 5.25 × 8, 5.5 × 8.5, 6 × 9, 6.14 × 9.21, 6.69 × 9.61, 7 × 10, 7.5 × 9.25, 8 × 10, 8.5 × 11 in) or type a custom width and height. Set the top, bottom, inside (gutter, next to the binding) and outside margins in inches. A hint suggests the inside margin printers recommend for your page count, with a button to apply it. <strong>Page numbering</strong> is either roman numerals for front matter then 1, 2, 3, or one sequence from the first page.</p>
+<h3 id="body-text">Body text</h3>
+<ul>
+<li><strong>Typeface:</strong> 19 book faces, including EB Garamond, Libre Caslon Text, Libre Baskerville, Crimson Pro, Cormorant Garamond, Lora, Source Serif 4, Literata, Spectral, Gentium Book Plus, Cardo, PT Serif, Old Standard TT, Sorts Mill Goudy and IM Fell English. All are embedded in the PDF.</li>
+<li><strong>Size</strong> in points and <strong>line spacing</strong> (1.35 to 1.45 suits most novels).</li>
+<li><strong>Paragraphs:</strong> first-line indent (with indent size) or space between (with spacing).</li>
+<li><strong>Indent the first paragraph after a heading</strong> (off by convention), <strong>Justify text</strong>.</li>
+<li><strong>Widow lines</strong> and <strong>Orphan lines:</strong> the fewest lines of a paragraph allowed at the top or foot of a page. The layout enforces them.</li>
+<li><strong>Curly quotes and dashes while typing.</strong></li>
+</ul>
+<h3 id="chapter-openings">Chapter openings</h3>
+<ul>
+<li>Six one-click styles: Classic, Heritage, Devotional, Modern, Elegant, Plain.</li>
+<li><strong>Heading typeface</strong>, <strong>alignment</strong>, <strong>drop from top</strong> (space above the heading) and <strong>space after heading</strong>.</li>
+<li><strong>Chapter word</strong> (Chapter, Sermon, Letter, Book, or none) and <strong>chapter numbers</strong> (One, Two; I, II; 1, 2).</li>
+<li><strong>Label style</strong> (small capitals, spaced capitals, italic, plain, or a large number alone) and size; <strong>title style</strong> (italic, roman, small capitals, spaced capitals) and size.</li>
+<li><strong>Ornament</strong> (rule, asterisks, asterism, fleuron, hedera, cross, dagger, dots) and where it sits.</li>
+<li><strong>Drop cap</strong> (2 to 4 lines) and <strong>small-cap opening words</strong> (how many words of the first line are set in small capitals).</li>
+<li><strong>Chapters start on</strong> a right-hand page, the next page, or a left-hand page.</li>
+<li><strong>Part word</strong> and <strong>part numbers</strong> for part-title pages.</li>
+</ul>
+<h3 id="scene-breaks">Scene breaks</h3>
+<p>Choose * * *, ⁂, ❦, ❧, ☙, ☩, ✝, †, dots, a short rule, a blank line, or your own text.</p>
+<h3 id="running-heads-and-page-numbers">Running heads and page numbers</h3>
+<ul>
+<li><strong>Left-hand</strong> and <strong>right-hand pages</strong> each show the author, book title, chapter title, chapter number or nothing.</li>
+<li><strong>Head style</strong> (small capitals, italic, spaced capitals, plain) and size.</li>
+<li><strong>Page numbers:</strong> bottom center, bottom outside corner, top outside beside the head, or none; style 12 or – 12 –.</li>
+<li><strong>Number chapter opening pages:</strong> untick to hide the number on every page where a chapter starts.</li>
+</ul>
+<p>Running heads are always left off chapter openings and blank pages.</p>
+<h3 id="footnotes_1">Footnotes</h3>
+<ul>
+<li><strong>Place notes</strong> at the foot of the page, the end of each chapter, or the end of the book (in a Notes section).</li>
+<li><strong>Numbering restarts</strong> each chapter, each page, or never.</li>
+<li><strong>Marks:</strong> 1, 2, 3 or *, †, ‡, §.</li>
+<li><strong>Note size</strong> and the <strong>separator rule</strong> (short, full width or none).</li>
+</ul>
+<p>A note too long for its page continues at the foot of the next page.</p>
+<h3 id="contents-page">Contents page</h3>
+<p>Page numbers on the right with dot leaders, on the right without leaders, straight after the title, or none; and whether to include labels such as "Chapter One". The numbers are read from the finished layout, so they are always correct.</p>
+<h2 id="6-hyphenation">6. Hyphenation</h2>
+<p>Words are split at line ends to keep justified spacing even. The split points come from the standard TeX hyphenation patterns, the rules professional typesetting software uses, with these house rules on top:</p>
+<ul>
+<li>At least 2 letters stay on the line and at least 3 carry over.</li>
+<li>Words shorter than the <strong>shortest word to split</strong> (6 letters by default) are never split.</li>
+<li>Numbers, words in all capitals, and short contractions are never split. A possessive splits only before the apostrophe.</li>
+<li>The last word of a paragraph is left whole unless you allow it.</li>
+<li>Splits that would read as a different, misleading word are avoided (for example "the-rapist").</li>
+</ul>
+<h3 id="words-that-wait-for-you">Words that wait for you</h3>
+<p>Some words are left whole until you approve them, because the patterns may get them wrong:</p>
+<table>
+<thead>
+<tr>
+<th>Reason</th>
+<th>Examples</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Name</td>
+<td>Ignatius, Constantinople (any capitalized word mid-sentence; days and months are exempt)</td>
+</tr>
+<tr>
+<td>Latin</td>
+<td>Dominus, vobiscum, Imprimatur, words ending -orum, -ibus, words with æ or œ (split with Latin rules once approved)</td>
+</tr>
+<tr>
+<td>Foreign word</td>
+<td>Words with accented letters, apart from common English borrowings such as café</td>
+</tr>
+<tr>
+<td>Splits by meaning</td>
+<td>present, record, project, object, minute (pres-ent or pre-sent depends on the sense)</td>
+</tr>
+<tr>
+<td>Awkward split</td>
+<td>A word where the only split forms a misleading fragment</td>
+</tr>
+</tbody>
+</table>
+<h3 id="the-review-window">The review window</h3>
+<p>Open it with the hyphenation button on the toolbar, Design → Hyphenation → <strong>Review words</strong>, or <strong>Review</strong> on a Proofing item.</p>
+<ol>
+<li><strong>Needs review</strong> lists the waiting words, most frequent first. <strong>All words</strong> lists every word that can be split. <strong>Your decisions</strong> lists words you have set. Use the search box to find one.</li>
+<li>Each word is shown with its proposed splits marked by a short line between letters. Click between any two letters to add or remove a split.</li>
+<li>Click <strong>Approve</strong> (or <strong>Save</strong>) to use the splits shown, <strong>Never split</strong> to keep the word whole, or <strong>Reset</strong> to go back to the automatic rule.</li>
+</ol>
+<p>A decision applies to every occurrence in the book and is saved with it. Names are matched exactly as written; other words regardless of capitals.</p>
+<h3 id="settings">Settings</h3>
+<p>In Design → Hyphenation, or at the top of the review window: hyphenate on or off, shortest word to split, most hyphenated lines in a row (Proofing flags longer stacks), split names without asking, and split the last word of a paragraph. Ragged-right books such as poetry and large print usually have hyphenation off.</p>
+<h2 id="7-previewing-and-proofing">7. Previewing and proofing</h2>
+<p>The Preview tab shows every page exactly as it will print. Click any page to jump to its section in Write.</p>
+<h3 id="preview-controls">Preview controls</h3>
+<ul>
+<li><strong>Spreads</strong> shows facing pages as in an open book; <strong>Single pages</strong> shows one at a time.</li>
+<li><strong>Zoom</strong> sets the page size on screen. On a phone the pages fit the screen until you move the slider.</li>
+<li><strong>Margin guides</strong> outline the text area (red dashes) and the running-head and page-number areas (blue dots).</li>
+<li><strong>Page:</strong> type a page number, roman (ix) or arabic (12), and press Enter to jump to it.</li>
+<li><strong>Proofing</strong> shows or hides the Proofing panel.</li>
+</ul>
+<h3 id="the-proofing-panel">The Proofing panel</h3>
+<p>Proofing checks every page a moment after the layout changes, then lists what it finds in groups. With <strong>Highlight on pages</strong> on, each problem is outlined on the page in its group's color. Click a highlight to find it in the list, or click a list item to scroll to its page. Open an item to see its fixes.</p>
+<table>
+<thead>
+<tr>
+<th>Color</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Red</td>
+<td>Must fix before printing</td>
+</tr>
+<tr>
+<td>Orange</td>
+<td>A problem a careful typesetter would fix</td>
+</tr>
+<tr>
+<td>Purple</td>
+<td>Your call: a split waiting for your approval</td>
+</tr>
+<tr>
+<td>Yellow</td>
+<td>A suggestion</td>
+</tr>
+</tbody>
+</table>
+<h3 id="what-it-checks">What it checks</h3>
+<table>
+<thead>
+<tr>
+<th>Check</th>
+<th>What it means</th>
+<th>Fixes offered</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Text runs past the margin</td>
+<td>An image or a very long footnote doesn't fit</td>
+<td>Edit</td>
+</tr>
+<tr>
+<td>Widows</td>
+<td>A paragraph's last line alone at the top of a page</td>
+<td>Tighten, Loosen, Edit</td>
+</tr>
+<tr>
+<td>Orphans</td>
+<td>A paragraph's first line alone at the foot of a page</td>
+<td>Tighten, Loosen, Edit</td>
+</tr>
+<tr>
+<td>Runts</td>
+<td>One word, or a word fragment, alone on a paragraph's last line</td>
+<td>Tighten, Loosen, Edit</td>
+</tr>
+<tr>
+<td>Headings stranded at page foot</td>
+<td>A subheading or scene break is the last thing on a page</td>
+<td>Start a new page here, Edit</td>
+</tr>
+<tr>
+<td>Scene breaks lost at a page edge</td>
+<td>A blank-line scene break falls at the top or foot of a page, where it can't be seen</td>
+<td>Use * * * for scene breaks</td>
+</tr>
+<tr>
+<td>Words split across pages</td>
+<td>The page's last line ends in a hyphen</td>
+<td>Don't split this word, Tighten, Loosen</td>
+</tr>
+<tr>
+<td>Hyphen stacks</td>
+<td>More hyphenated lines in a row than your limit</td>
+<td>Tighten, Loosen</td>
+</tr>
+<tr>
+<td>Splits waiting for your review</td>
+<td>A loose line that could close up if a waiting word were split</td>
+<td>Review the word</td>
+</tr>
+<tr>
+<td>Loose lines</td>
+<td>Word spacing more than about twice normal</td>
+<td>Tighten</td>
+</tr>
+<tr>
+<td>Stacked words</td>
+<td>The same word starts or ends three lines in a row</td>
+<td>Tighten, Loosen</td>
+</tr>
+<tr>
+<td>Short final pages</td>
+<td>A section ends with three or fewer lines on its last page</td>
+<td>Tighten</td>
+</tr>
+<tr>
+<td>Double spaces, straight quotes, hyphens used as dashes, three periods</td>
+<td>Typing slips in the manuscript</td>
+<td>Fix all</td>
+</tr>
+<tr>
+<td>Space before punctuation</td>
+<td>"word ,"</td>
+<td>Fix all</td>
+</tr>
+<tr>
+<td>Missing space after punctuation</td>
+<td>"end.Next"</td>
+<td>Edit</td>
+</tr>
+<tr>
+<td>Repeated words</td>
+<td>"the the" (sometimes correct, as in "had had")</td>
+<td>Edit</td>
+</tr>
+<tr>
+<td>Unmatched quotation marks</td>
+<td>A closing mark with no opening one, or a quotation left open</td>
+<td>Edit</td>
+</tr>
+<tr>
+<td>Empty paragraphs used for spacing</td>
+<td>Two or more blank paragraphs in a row</td>
+<td>Edit</td>
+</tr>
+</tbody>
+</table>
+<h3 id="how-the-fixes-work">How the fixes work</h3>
+<ul>
+<li><strong>Tighten</strong> and <strong>Loosen</strong> change the letter spacing of that one paragraph by a small step, so lines rebreak. One step usually pulls a runt back onto the line above or pushes a widow's partner line over. You can step up to three times either way; the same buttons are on the editor toolbar.</li>
+<li><strong>Edit</strong> opens the paragraph in Write, flashes it and highlights the words concerned.</li>
+<li><strong>Fix all</strong> corrects that kind of typing slip everywhere in the book, footnotes included. It can be undone in the editor.</li>
+<li><strong>Check again</strong> reruns the check at any time.</li>
+</ul>
+<p>If a widow or orphan won't go away, it is often because Design → Body text → Widow lines or Orphan lines is set to 1. Set both to 2 and the layout prevents them.</p>
+<h2 id="8-exporting-and-printing">8. Exporting and printing</h2>
+<p>The Export tab downloads your book in six forms. In the Claude app you confirm each download; elsewhere the file downloads straight away.</p>
+<table>
+<thead>
+<tr>
+<th>Download</th>
+<th>What you get</th>
+<th>Use it for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Print-ready PDF</td>
+<td>Every page exactly as in the preview, at your trim size, all fonts embedded</td>
+<td>The interior file for IngramSpark or KDP</td>
+</tr>
+<tr>
+<td>EPUB ebook</td>
+<td>A reflowable ebook with linked contents, pop-up footnotes and your cover image</td>
+<td>Kindle, Apple Books, Kobo, IngramSpark ebook</td>
+</tr>
+<tr>
+<td>Word document</td>
+<td>A .docx with chapter headings, styles, real footnotes, your trim size and mirrored margins (images appear as "[image]")</td>
+<td>An editor or proofreader</td>
+</tr>
+<tr>
+<td>LibreOffice document</td>
+<td>An .odt with the same chapters, styles, footnotes, trim size and mirrored margins as the Word file. In LibreOffice, choose Tools → Update → Update All to fill in the contents page</td>
+<td>Editing or sharing in LibreOffice Writer</td>
+</tr>
+<tr>
+<td>Project file</td>
+<td>The whole book and its settings as .json</td>
+<td>Backups and moving between devices</td>
+</tr>
+<tr>
+<td>Plain text</td>
+<td>The text with chapter headings and footnotes in brackets</td>
+<td>Checking, archiving, other tools</td>
+</tr>
+</tbody>
+</table>
+<p>Use Chrome, Edge or Safari when making the PDF so it matches the preview exactly. The PDF is a standard PDF, not the PDF/X format some printers prefer; run it through your printer's file checker before ordering.</p>
+<h3 id="preflight">Preflight</h3>
+<p>The right-hand column of Export checks the book before you send it:</p>
+<ul>
+<li>Page count is even (blank pages are added automatically) and at least 24 pages (IngramSpark accepts 18).</li>
+<li>Trim size is a standard printer size.</li>
+<li>Inside margin is wide enough for the page count (0.375 in up to 150 pages, 0.5 in to 300, 0.625 in to 500, 0.75 in to 700, 0.875 in beyond).</li>
+<li>Outer margins are at least 0.5 in (anything under 0.25 in risks being trimmed).</li>
+<li>Fonts are embedded.</li>
+<li>No content runs past the margins.</li>
+<li>No empty sections, a contents page if there are several chapters, and a print ISBN.</li>
+<li>Images are at least 300 dpi at their printed size.</li>
+<li>A summary of the Proofing results.</li>
+</ul>
+<h3 id="cover-size">Cover size</h3>
+<p>Choose your paper (IngramSpark creme or white 50 lb, white 70 lb, or KDP white or cream). The calculator gives the spine width from your page count, the full cover size with 0.125 in bleed, and its size in pixels at 300 dpi. These are estimates; download your printer's own cover template before finishing the artwork. Spines under about 100 pages are usually too narrow for text.</p>
+<h3 id="ebook-cover-image">Ebook cover image</h3>
+<p>Add a JPEG or PNG, ideally 1600 × 2560 pixels. It is used only in the EPUB.</p>
+<h3 id="a-typical-ingramspark-workflow">A typical IngramSpark workflow</h3>
+<ol>
+<li>Start the book from the <strong>Classic reprint</strong> or <strong>Devotional and sermons</strong> template, then Import the text with <strong>Replace the chapters in this book</strong>.</li>
+<li>Fill in Book details, including the ISBN, and check the copyright page.</li>
+<li>Read through in Preview. Work down the Proofing list until nothing orange or red remains.</li>
+<li>Review waiting words in the hyphenation window.</li>
+<li>Check Export → Preflight, apply the suggested inside margin if needed, then download the PDF.</li>
+<li>Use the page count with IngramSpark's cover template generator for the cover.</li>
+<li>Download a project file as your master copy.</li>
+</ol>
+<h2 id="9-running-it-outside-claude-troubleshooting-and-shortcuts">9. Running it outside Claude, troubleshooting and shortcuts</h2>
+<h3 id="running-your-own-copy">Running your own copy</h3>
+<p>The standalone copy is a folder containing <code>index.html</code> and the <code>fonts</code>, <code>hyph</code> and <code>lib</code> folders. It must be served by a web server; double-clicking <code>index.html</code> won't load the fonts, because browsers don't let a page opened from your disk read other files on your disk.</p>
+<ul>
+<li><strong>GitHub Pages:</strong> upload the folder to your <code>C-ee-g.github.io</code> repository (Add file → Upload files) and visit <code>https://c-ee-g.github.io/book-formatter/</code>. If anything fails to load, add an empty file named <code>.nojekyll</code> at the top of the repository. The site is public, but each visitor's books stay in their own browser.</li>
+<li><strong>Cloudflare Pages or Netlify Drop:</strong> upload or drag in the folder.</li>
+<li><strong>Your own computer:</strong> in a terminal in the folder, run <code>python3 -m http.server 8000</code>, then visit <code>http://localhost:8000</code>.</li>
+</ul>
+<p>Each copy keeps its own books. Move a book with Export → Download project, then Your books → Open project file in the other copy.</p>
+<h3 id="troubleshooting">Troubleshooting</h3>
+<table>
+<thead>
+<tr>
+<th>Problem</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A download does nothing in Claude</td>
+<td>Accept the confirmation that appears. If downloads are unavailable in that view, open the app in the Claude app or in a browser.</td>
+</tr>
+<tr>
+<td>"The book's fonts didn't load" when making a PDF</td>
+<td>Reload the page and try again. Fonts come from the app's own files, so a running copy outside Claude must be on a web server.</td>
+</tr>
+<tr>
+<td>Plain fonts and no hyphenation</td>
+<td>The same cause: the app's files can't be reached.</td>
+</tr>
+<tr>
+<td>My books are gone</td>
+<td>Books live in one browser on one device. Open your latest project file.</td>
+</tr>
+<tr>
+<td>A chapter starts on the wrong side</td>
+<td>Check the section's <strong>Starts on</strong> option and Design → Chapters start on.</td>
+</tr>
+<tr>
+<td>A blank page I didn't add</td>
+<td>It keeps a chapter or the first page of the body on a right-hand page. Change <strong>Starts on</strong> to Next page to remove it.</td>
+</tr>
+<tr>
+<td>An image runs off the page</td>
+<td>Click it in the editor and choose a smaller width. Proofing flags it in red.</td>
+</tr>
+<tr>
+<td>Contents numbers look wrong</td>
+<td>They are read from the layout; wait for "Saved" and check Preview. A section missing from the contents needs <strong>In contents</strong> ticked.</td>
+</tr>
+<tr>
+<td>An empty "ISBN" line</td>
+<td>Lines with only an empty placeholder are dropped. Type the ISBN in Book details.</td>
+</tr>
+<tr>
+<td>The PDF doesn't match the preview</td>
+<td>Make the PDF in Chrome, Edge or Safari.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="keyboard-shortcuts">Keyboard shortcuts</h3>
+<table>
+<thead>
+<tr>
+<th>Keys (Cmd on a Mac)</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Ctrl+B, Ctrl+I, Ctrl+U</td>
+<td>Bold, italic, underline</td>
+</tr>
+<tr>
+<td>Ctrl+Shift+K</td>
+<td>Small capitals</td>
+</tr>
+<tr>
+<td>Ctrl+Alt+F</td>
+<td>Insert a footnote</td>
+</tr>
+<tr>
+<td>Ctrl+Z, Ctrl+Y (or Ctrl+Shift+Z)</td>
+<td>Undo, redo</td>
+</tr>
+<tr>
+<td>Ctrl+F</td>
+<td>Find and replace</td>
+</tr>
+<tr>
+<td>Ctrl+S</td>
+<td>Save now</td>
+</tr>
+<tr>
+<td>Ctrl+ +, Ctrl+ −, Ctrl+0</td>
+<td>Zoom the editor in, out, back to 100%</td>
+</tr>
+<tr>
+<td>Shift+Enter</td>
+<td>Line break inside a paragraph</td>
+</tr>
+<tr>
+<td>Esc</td>
+<td>Close a menu or the footnote box</td>
+</tr>
+<tr>
+<td>Up and down arrows, Enter</td>
+<td>Move through and open sections in the section list</td>
+</tr>
+</tbody>
+</table>
+</main></div></body></html>
