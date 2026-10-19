@@ -1,0 +1,660 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>US Book Copyright Search</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,500;7..72,700&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a catalog-desk tool. Query bar on top, the verdict as a stamped slip,
+   then the two record ledgers (renewals / registrations) side by side, then outside sources. */
+:root {
+  --paper: #eef1f4;
+  --card: #ffffff;
+  --ink: #17233a;
+  --ink-soft: #4b5870;
+  --rule: #d5dbe4;
+  --accent: #2446a8;
+  --accent-soft: #e3e9f8;
+  --renewed: #a8322a;
+  --renewed-soft: #f8e6e4;
+  --pd: #1f7a4d;
+  --pd-soft: #e2f3ea;
+  --warn: #8a5a00;
+  --warn-soft: #fbf0d9;
+  --mark: #fff1a8;
+  --font-display: "Literata", "Georgia", "Times New Roman", serif;
+  --font-body: "Public Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #10151f; --card: #18202d; --ink: #e4e9f2; --ink-soft: #9aa6bb; --rule: #2b3546;
+    --accent: #8ea8ff; --accent-soft: #1f2a48; --renewed: #f08a80; --renewed-soft: #3a1e1c;
+    --pd: #6fd3a0; --pd-soft: #15301f; --warn: #f0c060; --warn-soft: #36290f; --mark: #5a4d10;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #10151f; --card: #18202d; --ink: #e4e9f2; --ink-soft: #9aa6bb; --rule: #2b3546;
+  --accent: #8ea8ff; --accent-soft: #1f2a48; --renewed: #f08a80; --renewed-soft: #3a1e1c;
+  --pd: #6fd3a0; --pd-soft: #15301f; --warn: #f0c060; --warn-soft: #36290f; --mark: #5a4d10;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--paper); color: var(--ink); font-family: var(--font-body); font-size: 15px; line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 20px 48px;
+}
+.wrap { max-width: 1120px; margin: 0 auto; display: grid; gap: 20px; }
+header.top { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 12px 24px; }
+h1 { font-family: var(--font-display); font-weight: 700; font-size: clamp(26px, 4vw, 34px); line-height: 1.1; margin: 0; text-wrap: balance; letter-spacing: -0.01em; }
+.sub { color: var(--ink-soft); margin: 6px 0 0; max-width: 62ch; }
+.load { font-family: var(--font-mono); font-size: 12px; color: var(--ink-soft); display: flex; flex-direction: column; gap: 4px; min-width: 220px; }
+.bar { height: 4px; background: var(--rule); border-radius: 2px; overflow: hidden; }
+.bar i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .3s; }
+nav.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--rule); flex-wrap: wrap; }
+nav.tabs button { font: 600 14px var(--font-body); background: none; border: 0; color: var(--ink-soft); padding: 10px 14px; border-bottom: 3px solid transparent; cursor: pointer; margin-bottom: -1px; }
+nav.tabs button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
+nav.tabs button:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+form.q { background: var(--card); border: 1px solid var(--rule); border-radius: 10px; padding: 16px; display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr) 110px auto; gap: 12px; align-items: end; }
+@media (max-width: 760px) { form.q { grid-template-columns: 1fr 1fr; } form.q .f-title { grid-column: 1 / -1; } form.q .go { grid-column: 1 / -1; } }
+label { display: grid; gap: 4px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-soft); }
+input, textarea { font: 15px var(--font-body); color: var(--ink); background: var(--paper); border: 1px solid var(--rule); border-radius: 6px; padding: 9px 10px; width: 100%; min-width: 0; text-transform: none; letter-spacing: 0; }
+textarea { font-family: var(--font-mono); font-size: 13px; min-height: 180px; resize: vertical; }
+.btn { font: 600 15px var(--font-body); background: var(--accent); color: var(--card); border: 0; border-radius: 6px; padding: 10px 18px; cursor: pointer; white-space: nowrap; }
+.btn:disabled { opacity: .5; cursor: wait; }
+.btn.ghost { background: var(--accent-soft); color: var(--accent); }
+.btn.small { font-size: 13px; padding: 6px 12px; }
+.examples { display: flex; flex-wrap: wrap; gap: 6px 10px; font-size: 13px; color: var(--ink-soft); align-items: center; }
+.examples button { font: 13px var(--font-body); background: none; border: 1px dashed var(--rule); color: var(--accent); border-radius: 99px; padding: 3px 10px; cursor: pointer; }
+
+/* Verdict slip */
+.verdict { border-radius: 10px; padding: 18px 20px; border: 1px solid var(--rule); background: var(--card); display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 18px; align-items: start; }
+.stamp { grid-row: span 2; font: 700 12px var(--font-mono); letter-spacing: .1em; text-transform: uppercase; border: 2px solid currentColor; border-radius: 6px; padding: 8px 10px; text-align: center; line-height: 1.25; transform: rotate(-2deg); min-width: 108px; }
+.verdict h2 { font-family: var(--font-display); font-size: 21px; font-weight: 700; margin: 0; text-wrap: balance; }
+.verdict p { margin: 0; color: var(--ink-soft); max-width: 75ch; }
+.verdict.renewed { background: var(--renewed-soft); border-color: transparent; } .verdict.renewed .stamp { color: var(--renewed); }
+.verdict.pd { background: var(--pd-soft); border-color: transparent; } .verdict.pd .stamp { color: var(--pd); }
+.verdict.warn { background: var(--warn-soft); border-color: transparent; } .verdict.warn .stamp { color: var(--warn); }
+.verdict.neutral .stamp { color: var(--ink-soft); }
+@media (max-width: 520px) { .verdict { grid-template-columns: 1fr; } .stamp { grid-row: auto; justify-self: start; } }
+
+.ledgers { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+@media (max-width: 860px) { .ledgers { grid-template-columns: 1fr; } }
+section.ledger { background: var(--card); border: 1px solid var(--rule); border-radius: 10px; min-width: 0; display: grid; grid-template-rows: auto 1fr; }
+.ledger > header { padding: 14px 16px 10px; border-bottom: 1px solid var(--rule); display: grid; gap: 2px; }
+.ledger h3 { font: 700 16px var(--font-display); margin: 0; display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.ledger h3 span { font: 500 12px var(--font-mono); color: var(--ink-soft); }
+.ledger .hint { font-size: 13px; color: var(--ink-soft); margin: 0; }
+.recs { list-style: none; margin: 0; padding: 0; max-height: 560px; overflow-y: auto; }
+.rec { padding: 12px 16px; border-bottom: 1px solid var(--rule); display: grid; gap: 4px; }
+.rec:last-child { border-bottom: 0; }
+.rec .t { font-weight: 600; overflow-wrap: anywhere; }
+.rec .a { color: var(--ink-soft); font-size: 14px; overflow-wrap: anywhere; }
+.rec .ids { font: 12.5px var(--font-mono); color: var(--ink); display: flex; flex-wrap: wrap; gap: 4px 14px; font-variant-numeric: tabular-nums; }
+.rec .ids b { font-weight: 500; color: var(--ink-soft); }
+.rec .n { font-size: 13px; color: var(--ink-soft); overflow-wrap: anywhere; }
+.pill { display: inline-block; font: 600 11px var(--font-body); letter-spacing: .04em; text-transform: uppercase; border-radius: 99px; padding: 2px 8px; }
+.pill.r { background: var(--renewed-soft); color: var(--renewed); }
+.pill.p { background: var(--pd-soft); color: var(--pd); }
+.pill.w { background: var(--warn-soft); color: var(--warn); }
+mark { background: var(--mark); color: inherit; border-radius: 2px; padding: 0 1px; }
+.empty { padding: 18px 16px; color: var(--ink-soft); font-size: 14px; display: grid; gap: 10px; justify-items: start; }
+
+.sources { background: var(--card); border: 1px solid var(--rule); border-radius: 10px; padding: 16px; display: grid; gap: 12px; }
+.sources h3 { font: 700 16px var(--font-display); margin: 0; }
+.srcgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px; }
+.src { border: 1px solid var(--rule); border-radius: 8px; padding: 10px 12px; display: grid; gap: 4px; text-decoration: none; color: var(--ink); background: var(--paper); }
+.src:hover { border-color: var(--accent); }
+.src strong { font-size: 14px; color: var(--accent); }
+.src span { font-size: 12.5px; color: var(--ink-soft); }
+.copyrow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 13px; color: var(--ink-soft); }
+.copyrow code { font: 12.5px var(--font-mono); background: var(--paper); border: 1px solid var(--rule); border-radius: 4px; padding: 3px 6px; color: var(--ink); overflow-wrap: anywhere; }
+
+.panel { background: var(--card); border: 1px solid var(--rule); border-radius: 10px; padding: 18px; display: grid; gap: 14px; min-width: 0; }
+.panel h2 { font: 700 20px var(--font-display); margin: 0; }
+.panel p, .panel li { max-width: 72ch; }
+.tablewrap { overflow-x: auto; border: 1px solid var(--rule); border-radius: 8px; }
+table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+th { font-size: 11.5px; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-soft); background: var(--paper); position: sticky; top: 0; }
+td.mono { font-family: var(--font-mono); font-size: 12.5px; white-space: nowrap; }
+.rules { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; }
+.rules div { border-left: 3px solid var(--rule); padding: 4px 12px; }
+.rules b { display: block; font-family: var(--font-mono); font-size: 13px; }
+.status-line { font-size: 13px; color: var(--ink-soft); }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } .stamp { transform: none; } }
+</style>
+</head>
+<body>
+
+
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1>US Book Copyright Search</h1>
+      <p class="sub">Checks a book against every US copyright renewal filed 1950–1991 and the book registrations of 1931–1963, then tells you whether it is likely in the public domain.</p>
+    </div>
+    <div class="load" aria-live="polite">
+      <span id="loadText">Starting…</span>
+      <div class="bar"><i id="loadBar"></i></div>
+    </div>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button role="tab" id="tab-search" aria-selected="true" data-tab="search">Search one book</button>
+    <button role="tab" id="tab-batch" aria-selected="false" data-tab="batch">Check a list</button>
+    <button role="tab" id="tab-about" aria-selected="false" data-tab="about">How it decides</button>
+  </nav>
+
+  <div id="view-search" class="wrap">
+    <form class="q" id="qform">
+      <label class="f-title">Title<input id="qTitle" autocomplete="off" placeholder="e.g. Clipper Ship Days"></label>
+      <label>Author<input id="qAuthor" autocomplete="off" placeholder="Surname is enough"></label>
+      <label>Year published<input id="qYear" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="1952"></label>
+      <button class="btn go" id="goBtn" type="submit">Search</button>
+    </form>
+    <div class="examples">Try:
+      <button type="button" data-ex="Clipper Ship Days|Jennings|1952">Clipper Ship Days, 1952</button>
+      <button type="button" data-ex="The Santa Fe Trail|Adams|1951">The Santa Fe Trail, 1951</button>
+      <button type="button" data-ex="The Ruby Cross|Keon|1917">The Ruby Cross, 1917</button>
+      <button type="button" data-ex="Mister Bell Invents the Telephone|Shippen|1952">Mr. Bell Invents the Telephone</button>
+    </div>
+
+    <div id="verdict" class="verdict neutral">
+      <div class="stamp">Waiting</div>
+      <h2>Getting the records for this search</h2>
+      <p>Each search downloads only the years it needs, a few megabytes at a time.</p>
+    </div>
+
+    <div class="ledgers">
+      <section class="ledger" aria-labelledby="renH">
+        <header>
+          <h3 id="renH">Renewals <span id="renCount"></span></h3>
+          <p class="hint">Filed with the Copyright Office 1950–1991. A book from 1931–1963 is protected today only if it appears here.</p>
+        </header>
+        <ul class="recs" id="renList"><li class="empty">Search to see matching renewals.</li></ul>
+      </section>
+      <section class="ledger" aria-labelledby="regH">
+        <header>
+          <h3 id="regH">Original registrations <span id="regCount"></span></h3>
+          <p class="hint">From the Catalog of Copyright Entries, 1931–1963. Each is cross-checked against the renewals.</p>
+        </header>
+        <ul class="recs" id="regList"><li class="empty">Add the year published to search that year's registrations.</li></ul>
+      </section>
+    </div>
+
+    <div class="sources">
+      <h3>Check other sources</h3>
+      <div class="copyrow" id="copyRow"></div>
+      <div class="srcgrid" id="srcGrid"></div>
+    </div>
+  </div>
+
+  <div id="view-batch" class="wrap" hidden>
+    <div class="panel">
+      <h2>Check a list of books</h2>
+      <p>Paste one book per line as <code>Title | Author | Year</code>. Author and year are optional, but the year is what turns matches into a verdict.</p>
+      <textarea id="batchIn" spellcheck="false">Clipper Ship Days | Jennings | 1952
+The Barbary Pirates | Forester | 1953
+The First Overland Mail | Pinkerton | 1953
+The Santa Fe Trail | Adams | 1951
+The Monitor and the Merrimac | Pratt | 1951
+The Story of Scotland Yard | Thompson | 1954</textarea>
+      <div class="copyrow">
+        <button class="btn" id="batchGo" type="button">Check list</button>
+        <button class="btn ghost" id="batchCopy" type="button" disabled>Copy results</button>
+        <span id="batchStatus" class="status-line"></span>
+      </div>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>Title</th><th>Year</th><th>Verdict</th><th>Renewal</th><th>Registration</th><th>Public domain on</th></tr></thead>
+          <tbody id="batchOut"><tr><td colspan="6" class="status-line">Results appear here.</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div id="view-about" class="wrap" hidden>
+    <div class="panel">
+      <h2>How it decides</h2>
+      <p>US copyright for a published book depends on when it came out. The year you enter picks the rule:</p>
+      <div class="rules" id="rulesBox"></div>
+      <p><strong>Renewed</strong> means a renewal matching the title and author was filed for a registration in the year you gave (±1). <strong>Registered, no renewal found</strong> means the book's original registration is in the catalog and no renewal was filed against that registration number. That is the strongest evidence these records can give.</p>
+      <p><strong>Limits.</strong> Transcriptions contain typos, so a near-miss title can hide a renewal: always try a shorter title and the author's surname alone. Books first published outside the US may have had copyright restored in 1996 even without renewal. Illustrations, forewords and revised editions can carry their own copyright. This tool is research help, not legal advice.</p>
+      <h2>Where the records come from</h2>
+      <ul>
+        <li>Renewals: <a href="https://github.com/NYPL/cce-renewals" target="_blank" rel="noopener">NYPL CCE renewals dataset</a> (Catalog of Copyright Entries 1950–1977 transcribed by Project Gutenberg volunteers, plus the Copyright Office's own database for 1978–1991).</li>
+        <li>Registrations: <a href="https://github.com/NYPL/catalog_of_copyright_entries_project" target="_blank" rel="noopener">NYPL Catalog of Copyright Entries project</a>, book volumes 1931–1963.</li>
+        <li>Stanford's renewal database covers the same 1950–1992 book renewals, but has no registrations, so it can't show that a book was registered and then left unrenewed.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  const $ = (id) => document.getElementById(id);
+  const DATA = (p) => new URL("data/" + p, location.href).href;
+  const NOW_YEAR = new Date().getFullYear();
+  const PD_CUTOFF = NOW_YEAR - 96; // works published in or before this year are PD in the US
+  const REG_YEARS = [1931, 1963]; // registrations and renewals shipped with the page (earlier books are PD by date)
+  const STOP = new Set("the a an and of to in on at for by from with or as is its it de la le".split(" "));
+
+  // ---------- Worker: holds the big text shards and does the scanning ----------
+  const workerSrc = `
+    const STOP = new Set(${JSON.stringify([...STOP])});
+    const ren = {}; const regs = {};
+    async function gunzip(url) {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error("HTTP " + res.status + " for " + url);
+      const buf = new Uint8Array(await res.arrayBuffer());
+      if (buf[0] === 0x1f && buf[1] === 0x8b) {
+        const ds = new DecompressionStream("gzip");
+        const stream = new Blob([buf]).stream().pipeThrough(ds);
+        return await new Response(stream).text();
+      }
+      return new TextDecoder().decode(buf);
+    }
+    function esc(s) { return s.replace(/[.*+?^\${}()|[\\]\\\\]/g, "\\\\$&"); }
+    function words(s) {
+      return (s || "").toLowerCase().normalize("NFD").replace(/[\\u0300-\\u036f]/g, "")
+        .replace(/['’]/g, "").replace(/&/g, " and ").split(/[^a-z0-9]+/).filter(w => w && !STOP.has(w));
+    }
+    function lineAt(text, i) {
+      const s = text.lastIndexOf("\\n", i) + 1; let e = text.indexOf("\\n", i); if (e < 0) e = text.length;
+      return [s, text.slice(s, e)];
+    }
+    // scan a text for lines that contain all tokens (word-start match), anchored on the rarest-looking token
+    function scan(text, tokens, maxHits) {
+      if (!tokens.length) return [];
+      const anchor = tokens.slice().sort((a, b) => b.length - a.length)[0];
+      const re = new RegExp("(^|[^a-z0-9])" + esc(anchor), "gi");
+      const tests = tokens.map(t => new RegExp("(^|[^a-z0-9])" + esc(t) + "(?![a-z0-9])", "i"));
+      const out = []; const seen = new Set(); let m;
+      while ((m = re.exec(text)) && out.length < maxHits) {
+        const [start, line] = lineAt(text, m.index + m[1].length);
+        if (seen.has(start)) continue; seen.add(start);
+        const plain = line.normalize("NFD").replace(/[\\u0300-\\u036f]/g, "").replace(/['’]/g, "").replace(/&/g, " and ");
+        if (tests.every(t => t.test(plain))) out.push(line);
+        if (re.lastIndex <= m.index) re.lastIndex = m.index + 1;
+      }
+      return out;
+    }
+    function scanRegnums(regnums) {
+      // find renewals that cite any of these original registration numbers
+      if (!regnums.length) return {};
+      const re = new RegExp("\\t(" + regnums.map(esc).join("|") + ")\\t", "g");
+      const found = {};
+      for (const text of Object.values(ren)) {
+        let m; re.lastIndex = 0;
+        while ((m = re.exec(text))) {
+          const [, line] = lineAt(text, m.index + 1);
+          const f = line.split("\\t");
+          if (f[3] === m[1]) (found[m[1]] = found[m[1]] || []).push(line);
+        }
+      }
+      return found;
+    }
+    onmessage = async (e) => {
+      const { id, op } = e.data;
+      try {
+        if (op === "load") {
+          const store = e.data.kind === "ren" ? ren : regs;
+          if (store[e.data.key] == null) store[e.data.key] = await gunzip(e.data.url);
+          postMessage({ id, done: true });
+        } else if (op === "search") {
+          const tw = words(e.data.title), aw = words(e.data.author);
+          const tokens = [...tw, ...aw.slice(-1)];
+          const renTexts = e.data.renKeys.map(k => ren[k]).filter(t => t != null);
+          const renHits = [];
+          for (const t of renTexts) renHits.push(...scan(t, tokens, 400));
+          let regHits = [];
+          for (const y of e.data.regYears) if (regs[y] != null) regHits.push(...scan(regs[y], tokens, 400));
+          // if the author filter leaves nothing, retry renewals with the title alone so a misspelt name still surfaces candidates
+          let relaxed = false;
+          if (!renHits.length && aw.length && tw.length) {
+            for (const t of renTexts) renHits.push(...scan(t, tw, 200)); relaxed = renHits.length > 0;
+          }
+          // pull in the registration each renewal cites, even if its title is worded differently
+          const renRegnums = [...new Set(renHits.map(l => l.split("\\t")[3]).filter(Boolean))].slice(0, 300);
+          const regByNum = {};
+          if (renRegnums.length) {
+            const re = new RegExp("\\t(" + renRegnums.map(esc).join("|") + ")\\t", "g");
+            const have = new Set(regHits);
+            for (const y of e.data.regYears) {
+              const text = regs[y]; if (text == null) continue;
+              let m; re.lastIndex = 0;
+              while ((m = re.exec(text))) {
+                const [, line] = lineAt(text, m.index + 1);
+                if (line.split("\\t")[4] !== m[1]) continue;
+                (regByNum[m[1]] = regByNum[m[1]] || []).push(line);
+                if (!have.has(line)) { have.add(line); regHits.push(line); }
+              }
+            }
+          }
+          const regnums = [...new Set(regHits.map(l => l.split("\\t")[4]).filter(Boolean))].slice(0, 400);
+          const cross = scanRegnums(regnums);
+          postMessage({ id, done: true, renHits, regHits, cross, regByNum, relaxed, tokens: tw, atokens: aw });
+        }
+      } catch (err) { postMessage({ id, error: String(err && err.message || err) }); }
+    };`;
+  const worker = new Worker(URL.createObjectURL(new Blob([workerSrc], { type: "text/javascript" })));
+  let reqId = 0; const pending = new Map();
+  worker.onmessage = (e) => {
+    const p = pending.get(e.data.id); if (!p) return;
+    if (e.data.progress != null && p.onProgress) p.onProgress(e.data.progress);
+    if (e.data.error) { pending.delete(e.data.id); p.reject(new Error(e.data.error)); }
+    else if (e.data.done) { pending.delete(e.data.id); p.resolve(e.data); }
+  };
+  function call(msg, onProgress) {
+    return new Promise((resolve, reject) => { const id = ++reqId; pending.set(id, { resolve, reject, onProgress }); worker.postMessage({ ...msg, id }); });
+  }
+
+  // ---------- helpers ----------
+  const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  function words(s) {
+    return (s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/['’]/g, "").replace(/&/g, " and ")
+      .split(/[^a-z0-9]+/).filter((w) => w && !STOP.has(w));
+  }
+  function highlight(text, tokens) {
+    let h = esc(text);
+    if (!tokens.length) return h;
+    const re = new RegExp("(^|[^A-Za-z0-9])(" + tokens.map((t) => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|") + ")(?![A-Za-z0-9])", "gi");
+    return h.replace(re, "$1<mark>$2</mark>");
+  }
+  const yearOf = (d) => { const m = /^(\d{4})/.exec(d || ""); return m ? +m[1] : null; };
+  function fmtDate(d) {
+    if (!d) return "—";
+    const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(d);
+    if (!m) return d;
+    return new Date(Date.UTC(+m[1], +m[2] - 1, +m[3])).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric", timeZone: "UTC" });
+  }
+  const parseRen = (l) => { const f = l.split("\t"); return { title: f[0], author: f[1], odat: f[2], oreg: f[3], rid: f[4], rdat: f[5], claim: f[6], note: f[7] }; };
+  const parseReg = (l) => { const f = l.split("\t"); return { title: f[0], author: f[1], pub: f[2], date: f[3], num: f[4], extra: f[5] }; };
+  function titleScore(rec, tw) {
+    const rw = new Set(words(rec.title));
+    if (!tw.length) return 0;
+    let hit = 0; for (const t of tw) if (rw.has(t)) hit++;
+    const cover = hit / tw.length;
+    const extra = Math.max(0, rw.size - tw.length);
+    return cover - Math.min(0.3, extra * 0.02);
+  }
+
+  // ---------- data loading (one small file per year, fetched only when a search needs it) ----------
+  const loaded = { ren: new Set(), reg: new Set() };
+  const ALL_REN = [];
+  for (let y = REG_YEARS[0]; y <= REG_YEARS[1]; y++) ALL_REN.push(String(y));
+  ALL_REN.push("x");
+  function showLoaded() {
+    const n = loaded.ren.size;
+    $("loadText").textContent = n ? "Ready · records loaded for " + yearSpan([...loaded.ren].filter((k) => k !== "x")) : "Ready · records load by year as you search";
+    $("loadBar").style.width = Math.round((loaded.ren.size + loaded.reg.size) / (ALL_REN.length * 2 - 1) * 100) + "%";
+  }
+  function yearSpan(keys) {
+    const ys = keys.map(Number).sort((a, b) => a - b); if (!ys.length) return "no years yet";
+    const parts = []; let s = ys[0], p = ys[0];
+    for (const y of ys.slice(1).concat([null])) { if (y === p + 1) { p = y; continue; } parts.push(s === p ? String(s) : s + "–" + p); s = p = y; }
+    return parts.join(", ");
+  }
+  async function ensure(kind, keys, label) {
+    const need = keys.filter((k) => !loaded[kind].has(k));
+    for (let i = 0; i < need.length; i++) {
+      const k = need[i];
+      $("loadText").textContent = "Loading " + (k === "x" ? "undated" : k) + " " + label + (need.length > 3 ? " (" + (i + 1) + " of " + need.length + ")" : "") + "…";
+      await call({ op: "load", kind, key: k, url: DATA(kind + k + ".txt") });
+      loaded[kind].add(k);
+      showLoaded();
+    }
+  }
+  const inRange = (v) => v >= REG_YEARS[0] && v <= REG_YEARS[1];
+  const regYearsFor = (y) => (y == null ? [] : [y - 1, y, y + 1].filter(inRange).map(String));
+  function renKeysFor(y) {
+    if (y == null) return ALL_REN.slice();
+    if (y <= PD_CUTOFF || y >= 1964) return [];
+    return [y - 1, y, y + 1].filter(inRange).map(String).concat(["x"]);
+  }
+
+  // ---------- core check (shared by single search and batch) ----------
+  async function check(title, author, year) {
+    const regYears = regYearsFor(year);
+    const renKeys = renKeysFor(year);
+    await ensure("ren", renKeys, "renewals");
+    await ensure("reg", regYears, "registrations");
+    const r = await call({ op: "search", title, author, regYears, renKeys });
+    const tw = r.tokens, aw = r.atokens;
+    const sameYear = (a, b) => !a || !b || (yearOf(a) != null && yearOf(b) != null && Math.abs(yearOf(a) - yearOf(b)) <= 1);
+    let rens = r.renHits.map(parseRen).map((x) => ({ ...x, score: titleScore(x, tw),
+      reg: (r.regByNum[x.oreg] || []).map(parseReg).find((g) => sameYear(g.date, x.odat)) || null }));
+    const linkedNums = new Set(rens.filter((x) => x.reg).map((x) => x.reg.num));
+    let regs = r.regHits.map(parseReg).map((x) => ({ ...x, score: titleScore(x, tw), linked: linkedNums.has(x.num),
+      renewals: (r.cross[x.num] || []).map(parseRen).filter((rr) => sameYear(rr.odat, x.date)) }));
+    regs = regs.filter((x) => x.score >= 0.5 || x.linked);
+    const near = (d) => year == null || (yearOf(d) != null && Math.abs(yearOf(d) - year) <= 1);
+    rens.sort((a, b) => (near(b.odat) - near(a.odat)) || (b.score - a.score) || ((a.odat || "").localeCompare(b.odat || "")));
+    regs.sort((a, b) => (b.linked - a.linked) || (b.score - a.score) || ((a.date || "").localeCompare(b.date || "")));
+    return { rens, regs, relaxed: r.relaxed, tw, aw, verdict: decide(year, rens, regs, r.relaxed) };
+  }
+
+  function decide(year, rens, regs, relaxed) {
+    const strong = (x) => x.score >= 0.75;
+    if (year == null) {
+      return { cls: "neutral", stamp: "Need year", head: "Add the year published for a verdict",
+        body: "Copyright rules depend on the publication year. The records below are every match for your words." };
+    }
+    if (year <= PD_CUTOFF) {
+      return { cls: "pd", stamp: "Public domain", head: "Public domain in the US",
+        body: "Books published in " + PD_CUTOFF + " or earlier have passed the 95-year limit, renewed or not. (A later revised edition can still carry its own copyright.)" };
+    }
+    if (year >= 1978) {
+      return { cls: "renewed", stamp: "In copyright", head: "Almost certainly under copyright",
+        body: "Books from 1978 on are protected for the author's life plus 70 years (95 years from publication for works made for hire). No renewal was needed." };
+    }
+    if (year >= 1964) {
+      return { cls: "renewed", stamp: "In copyright", head: "Under copyright until January 1, " + (year + 96),
+        body: "Renewal became automatic for books first published 1964–1977, so these stay protected for 95 years if they carried a copyright notice." };
+    }
+    const renNear = rens.filter((x) => strong(x) && yearOf(x.odat) != null && Math.abs(yearOf(x.odat) - year) <= 1 && !relaxed);
+    const regNear = regs.filter(strong);
+    const regRenewed = regNear.filter((x) => x.renewals.length);
+    if (renNear.length || regRenewed.length) {
+      const best = renNear[0] || regRenewed[0].renewals[0];
+      const y = yearOf(best.odat) || year;
+      return { cls: "renewed", stamp: "Renewed", head: "Renewed: under copyright until January 1, " + (y + 96),
+        body: "Renewal " + best.rid + " was filed " + fmtDate(best.rdat) + (best.claim ? " by " + best.claim : "") + ". Make sure the record below is your book and not another one with the same title." };
+    }
+    if (regNear.length) {
+      const g = regNear[0];
+      return { cls: "pd", stamp: "No renewal", head: "Registered, but no renewal found: likely public domain",
+        body: "Registered as " + g.num + " on " + fmtDate(g.date) + ". No renewal cites that registration, and none matches the title" + (rens.length ? " for that year" : "") + ". A renewal was due in " + (year + 27) + "–" + (year + 28) + ". Confirm in the Copyright Office records before you publish." };
+    }
+    if (relaxed) {
+      return { cls: "warn", stamp: "Check name", head: "Title matches, but not with that author",
+        body: "Renewals with this title exist under a different author spelling. Look through them below, and try the surname alone." };
+    }
+    return { cls: "warn", stamp: "Unclear", head: "No renewal or registration found",
+      body: "Nothing matches in " + (year - 1) + "–" + (year + 1) + ". That leans toward public domain, but it can also mean a transcription typo or a different title on the registration. Try fewer title words, then check the other sources." };
+  }
+
+  // ---------- rendering ----------
+  function renderVerdict(v) {
+    const el = $("verdict"); el.className = "verdict " + v.cls;
+    el.innerHTML = '<div class="stamp">' + esc(v.stamp) + "</div><h2>" + esc(v.head) + "</h2><p>" + esc(v.body) + "</p>";
+  }
+  function renRec(x, tokens, year) {
+    const off = year != null && yearOf(x.odat) != null && Math.abs(yearOf(x.odat) - year) > 1;
+    return '<li class="rec">' +
+      '<div class="t">' + highlight(x.title, tokens) + "</div>" +
+      (x.author ? '<div class="a">' + highlight(x.author, tokens) + "</div>" : "") +
+      '<div class="ids"><span><b>Renewal</b> ' + esc(x.rid || "—") + "</span><span><b>Filed</b> " + esc(fmtDate(x.rdat)) + "</span>" +
+      "<span><b>Orig.</b> " + esc(x.oreg || "—") + " · " + esc(fmtDate(x.odat)) + "</span></div>" +
+      (x.claim ? '<div class="n">Claimant: ' + esc(x.claim) + "</div>" : "") +
+      (x.note ? '<div class="n">' + esc(x.note) + "</div>" : "") +
+      regLink(x) +
+      (off ? '<div><span class="pill w">Different year</span></div>' : "") + "</li>";
+  }
+  function regClass(num) {
+    const m = /^([A-Z]+)/.exec(num || ""); const c = m ? m[1] : "";
+    if (c === "A") return "book";
+    if (c === "B" || c === "BB" || c === "AA") return "a periodical or a contribution to one";
+    if (c === "AI" || c === "AF" || c === "AFO" || c === "AIO") return "a foreign or interim edition";
+    return "artwork, music, drama or another non-book class";
+  }
+  function regLink(x) {
+    const y = yearOf(x.odat);
+    if (y == null || !loaded.reg.has(String(y))) return "";
+    if (x.reg) return '<div class="n">Original registration: ' + esc(x.reg.num) + " · " + esc(fmtDate(x.reg.date)) + (x.reg.pub ? " · " + esc(x.reg.pub) : "") + "</div>";
+    const cls = regClass(x.oreg);
+    const why = cls === "book" ? "missing from the transcribed " + y + " catalog (typo or gap in the transcription)"
+      : cls === "a foreign or interim edition" ? "an interim or foreign registration, usually listed separately"
+      : "registered as " + cls + ", which the book catalog doesn't include";
+    return '<div class="n">Registration ' + esc(x.oreg || "?") + " not found: " + esc(why) + ".</div>";
+  }
+  function regRec(x, tokens) {
+    const ren = x.renewals.length
+      ? '<span class="pill r">Renewed ' + esc(x.renewals.map((r) => r.rid).join(", ")) + "</span>"
+      : '<span class="pill p">No renewal on file</span>';
+    return '<li class="rec">' +
+      '<div class="t">' + highlight(x.title, tokens) + "</div>" +
+      (x.author ? '<div class="a">' + highlight(x.author, tokens) + "</div>" : "") +
+      (x.pub ? '<div class="n">' + esc(x.pub) + "</div>" : "") +
+      '<div class="ids"><span><b>Reg.</b> ' + esc(x.num || "—") + "</span><span><b>Date</b> " + esc(fmtDate(x.date)) + "</span>" +
+      (x.extra ? "<span>" + esc(x.extra) + "</span>" : "") + "</div><div>" + ren + "</div></li>";
+  }
+  function renderLists(res, year) {
+    const tokens = [...res.tw, ...res.aw];
+    const rl = $("renList"), gl = $("regList");
+    $("renCount").textContent = res.rens.length ? res.rens.length + (res.rens.length >= 400 ? "+" : "") + " found" : "";
+    if (year != null && (year <= PD_CUTOFF || year >= 1964)) {
+      $("renCount").textContent = "";
+      rl.innerHTML = '<li class="empty">' + (year <= PD_CUTOFF ? "Not needed: a book from " + year + " is out of copyright by date alone." : "Not needed: books from 1964 on were renewed automatically.") + "</li>";
+    } else rl.innerHTML = res.rens.length ? res.rens.slice(0, 150).map((x) => renRec(x, tokens, year)).join("")
+      : '<li class="empty">No renewal mentions all of those words.' + (res.tw.length > 2 ? " Try fewer title words." : "") + "</li>";
+    if (year == null) {
+      $("regCount").textContent = "";
+      gl.innerHTML = '<li class="empty">Add the year published to search that year\'s registrations (they load one year at a time).</li>';
+    } else if (year < REG_YEARS[0] || year > REG_YEARS[1]) {
+      $("regCount").textContent = "";
+      gl.innerHTML = '<li class="empty">Registrations here cover ' + REG_YEARS[0] + "–" + REG_YEARS[1] + ", the years where renewal decides copyright." + (year <= PD_CUTOFF ? " Earlier books are public domain regardless." : "") + "</li>";
+    } else {
+      const ys = regYearsFor(year);
+      $("regCount").textContent = (res.regs.length ? res.regs.length + " found · " : "") + ys[0] + "–" + ys[ys.length - 1];
+      gl.innerHTML = res.regs.length ? res.regs.slice(0, 150).map((x) => regRec(x, tokens)).join("")
+        : '<li class="empty">No registration in ' + ys[0] + "–" + ys[ys.length - 1] + " mentions all of those words. Registrations often use a subtitle or a different spelling of the author.</li>";
+    }
+  }
+
+  const SOURCES = [
+    { name: "Stanford Copyright Renewals", why: "Book renewals 1950–1992", url: (q) => "https://exhibits.stanford.edu/copyrightrenewals/catalog?q=" + encodeURIComponent(q.title) + "&search_field=search" },
+    { name: "Copyright Office Public Records", why: "Official records from 1978 on. Paste the title or renewal number.", url: () => "https://publicrecords.copyright.gov/" },
+    { name: "NYPL CCE Search", why: "Registrations and renewals, all years. Paste the title.", url: () => "https://cce-search.nypl.org/" },
+    { name: "Catalog of Copyright Entries scans", why: "The printed catalogs, " + "page images by year", url: (q) => "https://archive.org/search?query=" + encodeURIComponent('"catalog of copyright entries"' + (q.year ? " " + (q.year >= 1950 ? q.year + 28 : q.year) : "")) },
+    { name: "HathiTrust full text", why: "Searches inside scanned books, including the CCE volumes", url: (q) => "https://babel.hathitrust.org/cgi/ls?q1=" + encodeURIComponent(q.title) + "&anyall1=phrase&lmt=all" },
+    { name: "HathiTrust catalog", why: "Shows if a scan is open as public domain", url: (q) => "https://catalog.hathitrust.org/Search/Home?lookfor=" + encodeURIComponent((q.title + " " + q.author).trim()) + "&type=all" },
+    { name: "Online Books Page", why: "Free online editions and copyright notes", url: (q) => "https://onlinebooks.library.upenn.edu/webbin/book/search?author=" + encodeURIComponent(q.author) + "&amode=words&title=" + encodeURIComponent(q.title) + "&tmode=words" },
+    { name: "Internet Archive", why: "Scans you could source a reprint from", url: (q) => "https://archive.org/search?query=" + encodeURIComponent((q.title + " " + q.author).trim()) },
+    { name: "Google Books", why: "Scans and edition details", url: (q) => "https://www.google.com/search?tbm=bks&q=" + encodeURIComponent('"' + q.title + '" ' + q.author) },
+    { name: "Project Gutenberg", why: "Already transcribed public-domain texts", url: (q) => "https://www.gutenberg.org/ebooks/search/?query=" + encodeURIComponent((q.title + " " + q.author).trim()) },
+    { name: "Open Library", why: "Editions and first publication dates", url: (q) => "https://openlibrary.org/search?q=" + encodeURIComponent((q.title + " " + q.author).trim()) },
+    { name: "WorldCat", why: "Library holdings, US vs foreign first editions", url: (q) => "https://search.worldcat.org/search?q=" + encodeURIComponent((q.title + " " + q.author).trim()) },
+  ];
+  function renderSources(q, res) {
+    if (!q.title && !q.author) { $("srcGrid").innerHTML = ""; $("copyRow").innerHTML = '<span>Run a search to get links prefilled with your book.</span>'; return; }
+    $("srcGrid").innerHTML = SOURCES.map((s) => '<a class="src" target="_blank" rel="noopener" href="' + esc(s.url(q)) + '"><strong>' + esc(s.name) + " ↗</strong><span>" + esc(s.why) + "</span></a>").join("");
+    const ids = [];
+    const firstRen = res && res.rens[0]; if (firstRen && firstRen.rid) ids.push(firstRen.rid);
+    const firstReg = res && res.regs[0]; if (firstReg && firstReg.num) ids.push(firstReg.num);
+    const chips = [q.title, ...ids].filter(Boolean);
+    $("copyRow").innerHTML = "<span>For sites that open blank, copy and paste:</span>" + chips.map((c, i) => '<code>' + esc(c) + '</code><button type="button" class="btn ghost small" data-copy="' + esc(c) + '">Copy</button>').join("");
+  }
+  document.addEventListener("click", async (e) => {
+    const b = e.target.closest("[data-copy]"); if (!b) return;
+    const text = b.getAttribute("data-copy");
+    try { await navigator.clipboard.writeText(text); b.textContent = "Copied"; }
+    catch { const code = b.previousElementSibling; const r = document.createRange(); r.selectNodeContents(code); const s = getSelection(); s.removeAllRanges(); s.addRange(r); b.textContent = "Selected"; }
+    setTimeout(() => (b.textContent = "Copy"), 1500);
+  });
+
+  // ---------- single search ----------
+  function readYear(v) { const m = /^\s*(\d{4})\s*$/.exec(v || ""); return m ? +m[1] : null; }
+  let searching = false;
+  async function runSearch() {
+    const q = { title: $("qTitle").value.trim(), author: $("qAuthor").value.trim(), year: readYear($("qYear").value) };
+    if (!q.title && !q.author) { renderVerdict({ cls: "neutral", stamp: "Empty", head: "Enter a title or an author", body: "A few distinctive title words and the author's surname work best." }); return; }
+    if ($("qYear").value.trim() && q.year == null) { renderVerdict({ cls: "warn", stamp: "Check year", head: "Year needs four digits", body: "Enter the year of first publication, like 1952." }); return; }
+    if (searching) return; searching = true; $("goBtn").disabled = true; $("goBtn").textContent = "Searching…";
+    try {
+      const res = await check(q.title, q.author, q.year);
+      renderVerdict(res.verdict); renderLists(res, q.year); renderSources(q, res);
+      try { localStorage.setItem("crs-last", JSON.stringify(q)); } catch {}
+    } catch (err) {
+      renderVerdict({ cls: "warn", stamp: "Error", head: "The search didn't finish", body: String(err.message || err) + ". Reload the page and try again." });
+    } finally { searching = false; $("goBtn").disabled = false; $("goBtn").textContent = "Search"; }
+  }
+  $("qform").addEventListener("submit", (e) => { e.preventDefault(); runSearch(); });
+  document.querySelectorAll("[data-ex]").forEach((b) => b.addEventListener("click", () => {
+    const [t, a, y] = b.dataset.ex.split("|"); $("qTitle").value = t; $("qAuthor").value = a; $("qYear").value = y; runSearch();
+  }));
+
+  // ---------- batch ----------
+  let batchRows = [];
+  $("batchGo").addEventListener("click", async () => {
+    const lines = $("batchIn").value.split("\n").map((l) => l.trim()).filter(Boolean).slice(0, 300);
+    if (!lines.length) { $("batchStatus").textContent = "Paste at least one line."; return; }
+    $("batchGo").disabled = true; batchRows = []; const out = $("batchOut"); out.innerHTML = "";
+    for (let i = 0; i < lines.length; i++) {
+      const [t = "", a = "", y = ""] = lines[i].split("|").map((s) => s.trim());
+      $("batchStatus").textContent = "Checking " + (i + 1) + " of " + lines.length + "…";
+      const year = readYear(y);
+      let row;
+      try {
+        const res = await check(t, a, year);
+        const v = res.verdict;
+        const ren = res.rens.find((x) => x.score >= 0.75 && (year == null || Math.abs((yearOf(x.odat) || 0) - year) <= 1));
+        const reg = (ren && ren.reg) || res.regs.find((x) => x.linked || x.score >= 0.75);
+        const regRen = reg && reg.renewals[0];
+        const pdOn = year == null ? "" : v.cls === "pd" ? (year <= PD_CUTOFF ? "Already" : "Likely already") : year >= 1978 ? "Life + 70 years" : "Jan 1, " + (year + 96);
+        row = { title: t, author: a, year: y, verdict: v.stamp, head: v.head, cls: v.cls, ren: ren ? ren.rid + " (" + fmtDate(ren.rdat) + ")" : regRen ? regRen.rid : "", reg: reg ? reg.num + " (" + fmtDate(reg.date) + ")" : "", pdOn };
+      } catch (err) { row = { title: t, author: a, year: y, verdict: "Error", head: String(err.message || err), cls: "warn", ren: "", reg: "", pdOn: "" }; }
+      batchRows.push(row);
+      const pill = row.cls === "pd" ? "p" : row.cls === "renewed" ? "r" : "w";
+      out.insertAdjacentHTML("beforeend", "<tr><td><strong>" + esc(row.title) + "</strong>" + (row.author ? "<br><span class=\"status-line\">" + esc(row.author) + "</span>" : "") + "</td><td class=\"mono\">" + esc(row.year) + "</td><td><span class=\"pill " + pill + "\">" + esc(row.verdict) + "</span><br><span class=\"status-line\">" + esc(row.head) + "</span></td><td class=\"mono\">" + esc(row.ren || "—") + "</td><td class=\"mono\">" + esc(row.reg || "—") + "</td><td>" + esc(row.pdOn || "—") + "</td></tr>");
+    }
+    $("batchStatus").textContent = "Checked " + lines.length + (lines.length === 1 ? " book." : " books.");
+    $("batchGo").disabled = false; $("batchCopy").disabled = false;
+  });
+  $("batchCopy").addEventListener("click", async () => {
+    const tsv = ["Title\tAuthor\tYear\tVerdict\tDetail\tRenewal\tRegistration\tPublic domain on", ...batchRows.map((r) => [r.title, r.author, r.year, r.verdict, r.head, r.ren, r.reg, r.pdOn].join("\t"))].join("\n");
+    try { await navigator.clipboard.writeText(tsv); $("batchStatus").textContent = "Copied. Paste into a spreadsheet."; }
+    catch { $("batchStatus").textContent = "Your browser blocked copying. Select the table and copy it instead."; }
+  });
+
+  // ---------- tabs & rules ----------
+  document.querySelectorAll("nav.tabs button").forEach((b) => b.addEventListener("click", () => {
+    document.querySelectorAll("nav.tabs button").forEach((x) => x.setAttribute("aria-selected", String(x === b)));
+    ["search", "batch", "about"].forEach((t) => ($("view-" + t).hidden = t !== b.dataset.tab));
+  }));
+  $("rulesBox").innerHTML = [
+    ["≤ " + PD_CUTOFF, "Public domain. The 95-year term has run out."],
+    [(PD_CUTOFF + 1) + "–1963", "Protected only if renewed in its 28th year. Unrenewed books fell into the public domain. This is where the search matters."],
+    ["1964–1977", "Renewal was automatic. Protected for 95 years from publication."],
+    ["1978 on", "Life of the author plus 70 years, or 95 years for work made for hire."],
+  ].map(([y, t]) => "<div><b>" + esc(y) + "</b>" + esc(t) + "</div>").join("");
+
+  // ---------- start in a working state ----------
+  let start = { title: "Clipper Ship Days", author: "Jennings", year: "1952" };
+  try { const last = JSON.parse(localStorage.getItem("crs-last") || "null"); if (last && (last.title || last.author)) start = { title: last.title, author: last.author, year: last.year ? String(last.year) : "" }; } catch {}
+  $("qTitle").value = start.title; $("qAuthor").value = start.author; $("qYear").value = start.year;
+  renderSources({ title: start.title, author: start.author, year: readYear(start.year) }, null);
+  showLoaded();
+  runSearch();
+})();
+</script>
+
+</body>
+</html>
