@@ -70,7 +70,7 @@ td:first-child{font-weight:600;white-space:nowrap}
 </tr>
 <tr>
 <td>Preview</td>
-<td>Read every page as spreads or single pages, and see the Proofing panel of layout and typing problems.</td>
+<td>Read every page as spreads or single pages, edit paragraphs right on the page, and work through the Proofing list of layout and typing problems.</td>
 </tr>
 <tr>
 <td>Export</td>
@@ -205,7 +205,7 @@ td:first-child{font-weight:600;white-space:nowrap}
 <li><strong>Add:</strong> click <strong>Add</strong> and pick a type. Front matter is placed among the front matter; anything else goes after the current section.</li>
 <li><strong>Reorder:</strong> drag a section by its dotted handle, or use the up and down arrows at the bottom of the list.</li>
 <li><strong>Duplicate</strong>, <strong>Merge with next section</strong> and <strong>Delete</strong> (with a confirmation) are the other buttons along the bottom of the list. Merging turns the next section's title into a subheading.</li>
-<li><strong>Split:</strong> put the cursor where a new section should begin and click the split button on the toolbar. If the cursor is on a subheading or a "Chapter…" line, it becomes the new section's title.</li>
+<li><strong>Split:</strong> put the cursor where a new section should begin and click the split button on the toolbar. The text from the cursor onward moves into the new section. If the cursor is on a subheading or a "Chapter…" line, it becomes the new section's title.</li>
 <li><strong>Change type</strong> with the menu at the top of the editor.</li>
 </ul>
 <h3 id="title-subtitle-and-label">Title, subtitle and label</h3>
@@ -221,8 +221,12 @@ td:first-child{font-weight:600;white-space:nowrap}
 </thead>
 <tbody>
 <tr>
+<td>Description for the contents page</td>
+<td>A few words on what the chapter covers, as old books often printed under each title in the contents ("The lamp goes out. A stranger at the gate."). Shown in the contents when Design → Contents page → Chapter descriptions is on, and under the chapter heading too if you choose.</td>
+</tr>
+<tr>
 <td>Starts on</td>
-<td>Book setting, right-hand page (recto), left-hand page (verso) or next page. A blank page is added when needed.</td>
+<td>Book setting, right-hand page (recto), left-hand page (verso), next page, or same page (runs straight on below the end of the section before, with a little space above its heading). A blank page is added when needed.</td>
 </tr>
 <tr>
 <td>Vertical position</td>
@@ -317,7 +321,7 @@ td:first-child{font-weight:600;white-space:nowrap}
 </tr>
 <tr>
 <td>Scene break</td>
-<td>Adds a scene break after the current paragraph. Its look is set in Design.</td>
+<td>Adds a scene break or divider after the current paragraph. Its look (asterisks, a rule, an ornament, a blank line) is set in Design → Scene breaks.</td>
 </tr>
 <tr>
 <td>Page break</td>
@@ -325,7 +329,7 @@ td:first-child{font-weight:600;white-space:nowrap}
 </tr>
 <tr>
 <td>Image</td>
-<td>Inserts a picture. Click it afterwards to set its width (25, 50, 75 or 100%), add a caption or remove it.</td>
+<td>Inserts a picture at its original size, or at the text width if it's bigger than that. Click it afterwards to change its size, let text wrap around it, add a caption or remove it (see Pictures below).</td>
 </tr>
 <tr>
 <td>Ω</td>
@@ -357,12 +361,21 @@ td:first-child{font-weight:600;white-space:nowrap}
 </tr>
 </tbody>
 </table>
+<p>The paragraph style and alignment apply to the paragraph the cursor is in, or to every paragraph you have selected. A triple-click selects one paragraph only. Right (signature) and the alignment buttons also work in sections with their own text style, such as the copyright page.</p>
+<p>Italic headings: subheadings are set in italic by default. Select words inside one and click <strong>I</strong> to set them upright, the usual way to show a book title inside an italic heading. Design → <strong>Subheadings</strong> sets the style (italic, roman or bold), alignment (centered, left or right) and size of all subheadings and minor headings. To set one heading differently, put the cursor in it and use the alignment buttons.</p>
+<h3 id="pictures">Pictures</h3>
+<p>Click a picture in the editor to open its settings.</p>
+<ul>
+<li><strong>Size</strong> is a percentage of the largest the picture can be: 100 fills the text width, or the text height for a tall picture. Type any number from 1 to 100, or use − and + to step by 1 (hold the button to keep going; the arrow keys work in the box too). <strong>Full width</strong> and <strong>Half width</strong> are shortcuts. A new picture starts at its own scanned size if that's smaller than the text area.</li>
+<li><strong>Position:</strong> <strong>Left</strong>, <strong>Center</strong> or <strong>Right</strong>. With Left or Right, <strong>Wrap text</strong> lets the following paragraphs flow around the side of the picture, as with a small diagram in a how-to book; click it again to stop wrapping and the picture sits on its own line at that side. A centered picture can't have text on both sides: the reader would have to jump across it in the middle of every line, so books don't set text that way. Put the picture just before the paragraph that should wrap around it. A caption directly below a wrapped picture stays with it.</li>
+<li>The line under the settings shows how big the picture will print and at what resolution. 300 ppi is ideal for print; below 150 ppi it warns that the picture may look soft.</li>
+</ul>
 <h3 id="views-and-zoom">Views and zoom</h3>
 <p>The view and zoom controls work like the ones in LibreOffice Writer:</p>
 <ul>
 <li><strong>Draft</strong> is a comfortable writing view.</li>
 <li><strong>Page</strong> sets the text at the book's real page width, margins, typeface, size and line spacing, so lines break much as they will in print. A dashed red line with a label marks where each printed page begins.</li>
-<li><strong>Pages side by side</strong> (the two-page button at the top right of the editor) shows the laid-out pages beside the editor. The paragraph your cursor is in is shaded on its page, and clicking a paragraph on a page moves the cursor there. Use −, Fit and + at the top of that pane to size the pages.</li>
+<li><strong>Pages side by side</strong> (the two-page button at the top right of the editor) shows the laid-out pages beside the editor. The paragraph your cursor is in is shaded on its page, and clicking a paragraph on a page moves the cursor there. Use <strong>1</strong> (one page at a time, larger) or <strong>2</strong> (facing pages), and −, Fit and + at the top of that pane to size the pages.</li>
 <li><strong>Zoom</strong> with the slider, the − and + buttons, Ctrl and the mouse wheel, or Ctrl + and Ctrl −. Click the percentage to return to 100%, and the arrows button to fit the width.</li>
 </ul>
 <p>The app remembers your view and zoom.</p>
@@ -464,9 +477,13 @@ td:first-child{font-weight:600;white-space:nowrap}
 <li><strong>Label style</strong> (small capitals, spaced capitals, italic, plain, or a large number alone) and size; <strong>title style</strong> (italic, roman, small capitals, spaced capitals) and size.</li>
 <li><strong>Ornament</strong> (rule, asterisks, asterism, fleuron, hedera, cross, dagger, dots) and where it sits.</li>
 <li><strong>Drop cap</strong> (2 to 4 lines) and <strong>small-cap opening words</strong> (how many words of the first line are set in small capitals).</li>
-<li><strong>Chapters start on</strong> a right-hand page, the next page, or a left-hand page.</li>
+<li><strong>Chapters start on</strong> a right-hand page, the next page, a left-hand page, or the same page, right after the previous chapter. With <strong>Same page</strong>, a chapter begins below the end of the one before whenever there's room, and its heading gets a smaller space above it. This saves pages in books of short chapters, sermons or meditations. The first chapter of the body still starts on a right-hand page, and sections such as the title page, contents, parts and back matter always start a page of their own. The contents page lists each chapter at the page where it actually begins.</li>
 <li><strong>Part word</strong> and <strong>part numbers</strong> for part-title pages.</li>
 </ul>
+<h3 id="subheadings">Subheadings</h3>
+<p>Style (italic, roman or bold), alignment and size for subheadings, and style and alignment for minor headings.</p>
+<h3 id="title-page">Title page</h3>
+<p>Alignment, title style and size, and author style. Extra lines such as "A Tale of the Penal Days", "Translated from the French by…" or "With a preface by…" are typed on the Title page section itself in Write, in the boxes below the subtitle, above or below the author, and above the publisher. Each line of a box prints as its own line.</p>
 <h3 id="scene-breaks">Scene breaks</h3>
 <p>Choose * * *, ⁂, ❦, ❧, ☙, ☩, ✝, †, dots, a short rule, a blank line, or your own text.</p>
 <h3 id="running-heads-and-page-numbers">Running heads and page numbers</h3>
@@ -487,6 +504,7 @@ td:first-child{font-weight:600;white-space:nowrap}
 <p>A note too long for its page continues at the foot of the next page.</p>
 <h3 id="contents-page">Contents page</h3>
 <p>Page numbers on the right with dot leaders, on the right without leaders, straight after the title, or none; and whether to include labels such as "Chapter One". The numbers are read from the finished layout, so they are always correct.</p>
+<p><strong>Chapter descriptions</strong> prints each chapter's description (typed in its Options in the Write tab) on a line in italics below its title, or run on after the title. Choose <strong>Leave out</strong> to hide them. <strong>Also print the description under the chapter heading</strong> repeats it on the chapter's opening page.</p>
 <h2 id="6-hyphenation">6. Hyphenation</h2>
 <p>Words are split at line ends to keep justified spacing even. The split points come from the standard TeX hyphenation patterns, the rules professional typesetting software uses, with these house rules on top:</p>
 <ul>
@@ -539,7 +557,7 @@ td:first-child{font-weight:600;white-space:nowrap}
 <h3 id="settings">Settings</h3>
 <p>In Design → Hyphenation, or at the top of the review window: hyphenate on or off, shortest word to split, most hyphenated lines in a row (Proofing flags longer stacks), split names without asking, and split the last word of a paragraph. Ragged-right books such as poetry and large print usually have hyphenation off.</p>
 <h2 id="7-previewing-and-proofing">7. Previewing and proofing</h2>
-<p>The Preview tab shows every page exactly as it will print. Click any page to jump to its section in Write.</p>
+<p>The Preview tab shows every page exactly as it will print. You can also correct the book right on these pages.</p>
 <h3 id="preview-controls">Preview controls</h3>
 <ul>
 <li><strong>Spreads</strong> shows facing pages as in an open book; <strong>Single pages</strong> shows one at a time.</li>
@@ -547,10 +565,27 @@ td:first-child{font-weight:600;white-space:nowrap}
 <li><strong>Margin guides</strong> outline the text area (red dashes) and the running-head and page-number areas (blue dots).</li>
 <li><strong>Page:</strong> type a page number, roman (ix) or arabic (12), and press Enter to jump to it.</li>
 <li><strong>Proofing</strong> shows or hides the Proofing panel. Its badge shows how many problems are left, or a check mark when there are none. The arrow at the top of the panel hides it too, and the pages widen to fill the space. The app remembers whether you left it open.</li>
-<li>On a phone or narrow window, the panel slides in from the left over the pages. Tap <strong>Proofing</strong> to open it, tap a problem to jump to its page (the panel closes so you can see it), and tap outside the panel or its arrow to close it.</li>
+<li>On a phone or narrow window, the panel slides in from the left over the pages. Tap <strong>Proofing</strong> to open it and tap a problem: the panel closes, the pages move to the problem, and its fixes appear at the bottom of the screen.</li>
 </ul>
+<h3 id="editing-on-the-page">Editing on the page</h3>
+<p>Click any paragraph on a page to edit it there. A small editor opens beside it with:</p>
+<ul>
+<li>the paragraph's text, which you can retype. <strong>B</strong>, <strong>I</strong> and <strong>Sc</strong> set bold, italic and small caps. Shift+Enter adds a line break.</li>
+<li><strong>Spacing − / +</strong>, which tightens or loosens that paragraph's letter spacing one step at a time. The change shows on the page straight away, so you can watch a runt pull back or a line push over.</li>
+<li><strong>New page</strong>, which starts a new page before the paragraph.</li>
+<li><strong>Open in Write</strong>, which takes you to the paragraph in the full editor.</li>
+</ul>
+<p>Click <strong>Apply</strong> (or press Ctrl+Enter) to save the text, or <strong>Cancel</strong> (or Escape) to drop it. Clicking somewhere else on the page saves it too. The pages update in well under a second, even in a long book, because only the changed chapter is laid out and checked again.</p>
+<p><strong>Undo</strong>, at the top of the Proofing panel, takes back the last change made on the Preview tab: an edit, a fix, an ignored problem or a word decision. Ctrl+Z does the same while you're on the Preview tab.</p>
 <h3 id="the-proofing-panel">The Proofing panel</h3>
-<p>Proofing checks every page a moment after the layout changes, then lists what it finds in groups. With <strong>Highlight on pages</strong> on, each problem is outlined on the page in its group's color. Click a highlight to find it in the list, or click a list item to scroll to its page. Open an item to see its fixes.</p>
+<p>Proofing only suggests. Nothing changes until you choose a fix or edit the text.</p>
+<p>It checks the pages as soon as the layout changes. After an edit, only the pages that changed are measured again, and the list stays where it was while that happens.</p>
+<ul>
+<li><strong>By page</strong> lists every problem in page order, which is the best way to work: fix from the front of the book to the back. A fix can only move the pages after it, so pages you've already finished stay finished. <strong>By type</strong> groups the problems, as before.</li>
+<li>Click a problem and the pages scroll to it and flash it. Its fixes appear under it. The up and down arrows (or the J and K keys) step to the previous or next problem, and "3 of 45" shows where you are.</li>
+<li>With <strong>Highlight</strong> on, each problem is outlined on the page in its group's color. Click a highlight to see that problem's fixes in a small pop-up right on the page, with arrows to step to the next one.</li>
+<li>After you fix a problem, the next one in the book is selected and shown, so you can work straight down the list.</li>
+</ul>
 <table>
 <thead>
 <tr>
@@ -577,6 +612,9 @@ td:first-child{font-weight:600;white-space:nowrap}
 </tr>
 </tbody>
 </table>
+<h3 id="ignoring-problems">Ignoring problems</h3>
+<p>Some flagged lines are fine as they are. <strong>Ignore</strong> removes a problem from the list and the pages and moves on to the next. In <strong>By type</strong>, each group also has <strong>Ignore all</strong> and <strong>Turn off this check</strong>, for suggestions you don't want, such as loose lines in a book with narrow pages.</p>
+<p>Ignored problems and turned-off checks are saved with the book. They're listed under <strong>Ignored</strong> at the bottom of the panel, where <strong>Restore</strong> or <strong>Turn back on</strong> brings them back. If you change the text of an ignored paragraph so that it lays out differently, it's checked afresh.</p>
 <h3 id="what-it-checks">What it checks</h3>
 <table>
 <thead>
@@ -590,27 +628,27 @@ td:first-child{font-weight:600;white-space:nowrap}
 <tr>
 <td>Text runs past the margin</td>
 <td>An image or a very long footnote doesn't fit</td>
-<td>Edit</td>
+<td>Edit here</td>
 </tr>
 <tr>
 <td>Widows</td>
 <td>A paragraph's last line alone at the top of a page</td>
-<td>Tighten, Loosen, Edit</td>
+<td>Find a fix, Tighten, Loosen, Edit here</td>
 </tr>
 <tr>
 <td>Orphans</td>
 <td>A paragraph's first line alone at the foot of a page</td>
-<td>Tighten, Loosen, Edit</td>
+<td>Find a fix, Tighten, Loosen, Edit here</td>
 </tr>
 <tr>
 <td>Runts</td>
 <td>One word, or a word fragment, alone on a paragraph's last line</td>
-<td>Tighten, Loosen, Edit</td>
+<td>Find a fix, Tighten, Loosen, Edit here</td>
 </tr>
 <tr>
 <td>Headings stranded at page foot</td>
 <td>A subheading or scene break is the last thing on a page</td>
-<td>Start a new page here, Edit</td>
+<td>New page here, Edit here</td>
 </tr>
 <tr>
 <td>Scene breaks lost at a page edge</td>
@@ -620,27 +658,27 @@ td:first-child{font-weight:600;white-space:nowrap}
 <tr>
 <td>Words split across pages</td>
 <td>The page's last line ends in a hyphen</td>
-<td>Don't split this word, Tighten, Loosen</td>
+<td>Find a fix, Don't split this word, Tighten, Loosen</td>
 </tr>
 <tr>
 <td>Hyphen stacks</td>
 <td>More hyphenated lines in a row than your limit</td>
-<td>Tighten, Loosen</td>
+<td>Find a fix, Tighten, Loosen</td>
 </tr>
 <tr>
 <td>Splits waiting for your review</td>
 <td>A loose line that could close up if a waiting word were split</td>
-<td>Review the word</td>
+<td>Allow split, Keep whole, Review word</td>
 </tr>
 <tr>
 <td>Loose lines</td>
 <td>Word spacing more than about twice normal</td>
-<td>Tighten</td>
+<td>Find a fix, Tighten</td>
 </tr>
 <tr>
 <td>Stacked words</td>
 <td>The same word starts or ends three lines in a row</td>
-<td>Tighten, Loosen</td>
+<td>Find a fix, Tighten, Loosen</td>
 </tr>
 <tr>
 <td>Short final pages</td>
@@ -650,40 +688,42 @@ td:first-child{font-weight:600;white-space:nowrap}
 <tr>
 <td>Double spaces, straight quotes, hyphens used as dashes, three periods</td>
 <td>Typing slips in the manuscript</td>
-<td>Fix all</td>
+<td>Fix this, Fix all</td>
 </tr>
 <tr>
 <td>Space before punctuation</td>
 <td>"word ,"</td>
-<td>Fix all</td>
+<td>Fix this, Fix all</td>
 </tr>
 <tr>
 <td>Missing space after punctuation</td>
 <td>"end.Next"</td>
-<td>Edit</td>
+<td>Edit here</td>
 </tr>
 <tr>
 <td>Repeated words</td>
 <td>"the the" (sometimes correct, as in "had had")</td>
-<td>Edit</td>
+<td>Edit here</td>
 </tr>
 <tr>
 <td>Unmatched quotation marks</td>
 <td>A closing mark with no opening one, or a quotation left open</td>
-<td>Edit</td>
+<td>Edit here</td>
 </tr>
 <tr>
 <td>Empty paragraphs used for spacing</td>
 <td>Two or more blank paragraphs in a row</td>
-<td>Edit</td>
+<td>Edit here</td>
 </tr>
 </tbody>
 </table>
 <h3 id="how-the-fixes-work">How the fixes work</h3>
 <ul>
-<li><strong>Tighten</strong> and <strong>Loosen</strong> change the letter spacing of that one paragraph by a small step, so lines rebreak. One step usually pulls a runt back onto the line above or pushes a widow's partner line over. You can step up to three times either way; the same buttons are on the editor toolbar.</li>
-<li><strong>Edit</strong> opens the paragraph in Write, flashes it and highlights the words concerned.</li>
-<li><strong>Fix all</strong> corrects that kind of typing slip everywhere in the book, footnotes included. It can be undone in the editor.</li>
+<li><strong>Find a fix</strong> is the one to use first. It tries every small spacing change on this paragraph and on the few paragraphs before it (up to about two dozen), lays out the pages each would give, and checks them. Then it applies the smallest change that clears the problem without creating a new one on the surrounding pages, and says what it did. This stops the back-and-forth where loosening fixes a split word but leaves a loose line, and tightening that line brings the split back. If every possible change trades this problem for another real one (a widow for an orphan, say), it shows you the trade and lets you choose: make the trade, edit the paragraph, or ignore the problem. If nothing helps at all, it says so; rewording a few words is then the usual cure. It takes a second or two.</li>
+<li><strong>Tighten</strong> and <strong>Loosen</strong> change the letter spacing of that one paragraph by a small step, so lines rebreak. One step usually pulls a runt back onto the line above or pushes a widow's partner line over. You can step up to three times either way. The same control is in the on-page editor and on the Write tab's toolbar.</li>
+<li><strong>Don't split this word</strong> (for a word broken across two pages) and <strong>Keep whole</strong> (for a waiting split) record that the word is never hyphenated anywhere in the book. <strong>Allow split</strong> accepts a waiting split. Change your mind later in the hyphenation review.</li>
+<li><strong>Fix this</strong> corrects one typing slip; <strong>Fix all</strong> (in By type) corrects that kind of slip everywhere in the book, footnotes included.</li>
+<li><strong>Edit here</strong> scrolls the pages to the problem and opens the on-page editor just below the paragraph, never on top of it. The words concerned (the split word, the runt, the widowed line) are highlighted in yellow in the editor, and the paragraph is outlined on the page.</li>
 <li><strong>Check again</strong> reruns the check at any time.</li>
 </ul>
 <p>If a widow or orphan won't go away, it is often because Design → Body text → Widow lines or Orphan lines is set to 1. Set both to 2 and the layout prevents them.</p>
@@ -802,7 +842,7 @@ td:first-child{font-weight:600;white-space:nowrap}
 </tr>
 <tr>
 <td>An image runs off the page</td>
-<td>Click it in the editor and choose a smaller width. Proofing flags it in red.</td>
+<td>Click it in the editor and make it smaller. Proofing flags it in red.</td>
 </tr>
 <tr>
 <td>Contents numbers look wrong</td>
