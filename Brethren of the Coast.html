@@ -1,0 +1,1139 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Brethren of the Coast</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=Pixelify+Sans:wght@500;700&family=Alegreya:ital,wght@0,400;0,600;1,400&family=Alegreya+Sans+SC:wght@500;700&display=swap">
+<style>
+:root{
+  /* Layout: a chart table — HUD strip, full-bleed sea chart, command bar; parchment orders slide up over the chart */
+  --tar:#16110c; --plank:#231a12; --plank-2:#2e2318;
+  --brass:#d3a64f; --brass-d:#8d6b2c;
+  --parch:#ecdfbf; --parch-2:#ddcba1; --ink:#2a1f14; --ink-2:#6b5639;
+  --fg:#efe3c8; --muted:#a8977a; --blood:#a8402c; --good:#4d7a3a; --guard:#3f6aa8;
+  --f-display:"IM Fell English SC","Iowan Old Style",Georgia,serif;
+  --f-body:"Alegreya",Georgia,"Times New Roman",serif;
+  --f-label:"Alegreya Sans SC","Gill Sans","Trebuchet MS",system-ui,sans-serif;
+  color-scheme:dark;
+}
+html,body{height:100%}
+[hidden]{display:none!important}
+body{background:var(--tar);color:var(--fg);font-family:var(--f-body);font-size:16px;overflow:hidden;-webkit-tap-highlight-color:transparent}
+#app{height:100%;display:flex;flex-direction:column}
+.hud{display:flex;flex-wrap:wrap;gap:4px 14px;align-items:baseline;padding-block:8px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));background:var(--plank);border-bottom:1px solid var(--brass-d)}
+.hud .date{font-family:var(--f-display);font-size:18px;color:var(--brass);flex-basis:100%;display:flex;justify-content:space-between}
+.hud .date small{font-family:var(--f-label);font-size:12px;color:var(--muted);letter-spacing:.06em}
+.chip{font-family:var(--f-label);font-size:12px;letter-spacing:.06em;color:var(--muted);font-variant-numeric:tabular-nums}
+.chip b{font-size:15px;color:var(--fg);font-weight:700;margin-left:3px}
+.chip.warn b{color:#e57a5d}
+.mapwrap{flex:1;position:relative;min-height:0;overflow:hidden;touch-action:none}
+#map{position:absolute;inset:0;width:100%;height:100%;display:block}
+.bar{display:flex;gap:8px;padding-block:8px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));background:var(--plank);border-top:1px solid var(--brass-d)}
+.bar button{flex:1}
+button{font:inherit;cursor:pointer}
+.cmd{font-family:var(--f-label);font-size:14px;letter-spacing:.06em;background:var(--plank-2);color:var(--fg);border:1px solid var(--brass-d);border-radius:3px;padding:10px 6px;min-height:44px}
+.cmd:active{background:var(--brass-d)}
+button:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
+.toast{position:absolute;left:50%;top:12px;transform:translateX(-50%);background:var(--parch);color:var(--ink);font-family:var(--f-body);font-style:italic;padding:8px 14px;border-radius:2px;box-shadow:0 4px 14px rgba(0,0,0,.4);max-width:86%;text-align:center;pointer-events:none;transition:opacity .3s}
+.hint-tap{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);font-family:var(--f-label);font-size:12px;letter-spacing:.08em;color:var(--parch);background:rgba(22,17,12,.7);padding:5px 10px;border-radius:2px;pointer-events:none;white-space:nowrap}
+
+/* Parchment orders */
+.veil{position:fixed;inset:0;background:rgba(10,7,4,.6);display:flex;align-items:flex-end;justify-content:center;z-index:20}
+.sheet{width:min(580px,100%);max-height:92%;overflow-y:auto;overscroll-behavior:contain;background:var(--parch);background-image:radial-gradient(ellipse at 20% 0%,rgba(255,255,255,.35),transparent 60%),radial-gradient(ellipse at 90% 100%,rgba(120,85,40,.18),transparent 55%);color:var(--ink);border-top:3px solid var(--brass);border-radius:6px 6px 0 0;padding-block:18px calc(18px + env(safe-area-inset-bottom,0px));padding-left:max(18px,env(safe-area-inset-left,0px));padding-right:max(18px,env(safe-area-inset-right,0px));box-shadow:0 -10px 30px rgba(0,0,0,.5)}
+.sheet h2{font-family:var(--f-display);font-weight:400;font-size:28px;line-height:1.1;margin:0 0 6px;text-wrap:balance;color:var(--ink)}
+.sheet h3{font-family:var(--f-display);font-weight:400;font-size:20px;margin:14px 0 6px}
+.sheet p{margin:0 0 10px;line-height:1.45;max-width:62ch}
+.eyebrow{font-family:var(--f-label);font-size:12px;letter-spacing:.14em;color:var(--blood);margin:0 0 2px!important;text-transform:uppercase}
+.sub{color:var(--ink-2);font-style:italic}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.btn{font-family:var(--f-label);font-size:15px;letter-spacing:.05em;background:transparent;color:var(--ink);border:1.5px solid var(--ink);border-radius:3px;padding:10px 14px;min-height:44px;flex:1 1 auto}
+.btn.pri{background:var(--ink);color:var(--parch)}
+.btn.red{background:var(--blood);border-color:var(--blood);color:var(--parch)}
+.btn:disabled{opacity:.38;cursor:default}
+.btn:active:not(:disabled){transform:translateY(1px)}
+.tabs{display:flex;gap:4px;overflow-x:auto;margin:10px 0 12px;border-bottom:1.5px solid var(--ink-2)}
+.tabs button{font-family:var(--f-label);font-size:14px;letter-spacing:.05em;background:none;border:0;color:var(--ink-2);padding:8px 10px;border-bottom:3px solid transparent;margin-bottom:-1.5px;white-space:nowrap}
+.tabs button[aria-pressed="true"]{color:var(--ink);border-bottom-color:var(--blood)}
+dl.stats{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;margin:8px 0;font-variant-numeric:tabular-nums}
+dl.stats dt{font-family:var(--f-label);font-size:13px;letter-spacing:.05em;color:var(--ink-2)}
+dl.stats dd{margin:0;font-weight:600}
+table.t{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:15px}
+table.t th{font-family:var(--f-label);font-weight:500;font-size:12px;letter-spacing:.06em;color:var(--ink-2);text-align:left;border-bottom:1px solid var(--ink-2);padding:4px 6px 4px 0}
+table.t td{padding:5px 6px 5px 0;border-bottom:1px dotted rgba(42,31,20,.25)}
+.flag{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;border:1px solid var(--ink);vertical-align:0}
+.pick{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin:6px 0 12px}
+.pick button{font-family:var(--f-body);font-size:15px;text-align:left;background:transparent;border:1.5px solid var(--ink-2);border-radius:3px;color:var(--ink);padding:8px 10px;min-height:44px}
+.pick button small{display:block;font-size:12.5px;color:var(--ink-2);line-height:1.25}
+.pick button[aria-pressed="true"]{border-color:var(--ink);background:var(--ink);color:var(--parch)}
+.pick button[aria-pressed="true"] small{color:var(--parch-2)}
+label.lbl{font-family:var(--f-label);font-size:13px;letter-spacing:.08em;color:var(--ink-2);display:block;margin-top:6px}
+input.txt{font:inherit;font-size:17px;width:100%;box-sizing:border-box;background:rgba(255,255,255,.35);border:1.5px solid var(--ink-2);border-radius:3px;padding:9px 10px;color:var(--ink);margin:4px 0 10px}
+.title-art{font-family:var(--f-display);font-size:40px;line-height:.95;margin:4px 0 4px;text-wrap:balance}
+.loglist{list-style:none;padding:0;margin:0}
+.loglist li{padding:6px 0;border-bottom:1px dotted rgba(42,31,20,.25);line-height:1.35}
+.loglist li i{display:block;font-family:var(--f-label);font-style:normal;font-size:11.5px;letter-spacing:.06em;color:var(--ink-2)}
+.note{font-size:14px;color:var(--ink-2)}
+
+/* Battle */
+.stage{width:100%;height:150px;display:block;border-radius:3px;background:#3b6b70}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0 6px}
+.vs > div{min-width:0}
+.vs h4{font-family:var(--f-label);font-weight:700;font-size:13px;letter-spacing:.05em;margin:0 0 4px}
+.meterline{font-family:var(--f-label);font-size:12px;color:var(--ink-2);display:flex;justify-content:space-between;font-variant-numeric:tabular-nums}
+.gauge{height:7px;background:rgba(42,31,20,.18);border-radius:2px;margin:2px 0 5px;overflow:hidden}
+.gauge i{display:block;height:100%;background:var(--ink)}
+.gauge.h i{background:var(--good)}
+.rangebar{display:flex;align-items:center;gap:8px;font-family:var(--f-label);font-size:13px;letter-spacing:.05em}
+.rangebar span.dots{display:flex;gap:4px}
+.rangebar span.dots i{width:16px;height:6px;border-radius:2px;background:rgba(42,31,20,.2)}
+.rangebar span.dots i.on{background:var(--blood)}
+.blog{min-height:66px;font-size:15px;line-height:1.4;margin:8px 0;color:var(--ink)}
+.blog div:last-child{font-weight:600}
+.aim{position:relative;height:40px;border:1.5px solid var(--ink);border-radius:3px;background:repeating-linear-gradient(90deg,rgba(42,31,20,.08) 0 10%,transparent 10% 20%);margin:8px 0}
+.aim .sweet{position:absolute;top:0;bottom:0;background:rgba(77,122,58,.45);border-left:1.5px solid var(--good);border-right:1.5px solid var(--good)}
+.aim .needle{position:absolute;top:-4px;bottom:-4px;width:4px;margin-left:-2px;background:var(--blood);border-radius:2px}
+
+/* Duel */
+.call{font-family:var(--f-display);font-size:24px;text-align:center;min-height:30px;margin:8px 0 2px}
+.call.atk{color:var(--blood)} .call.grd{color:var(--guard)}
+.timer{height:6px;background:rgba(42,31,20,.15);border-radius:2px;overflow:hidden;margin-bottom:10px}
+.timer i{display:block;height:100%;background:var(--ink);width:0}
+.dbtns{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.dbtns button{font-family:var(--f-display);font-size:22px;min-height:64px;background:var(--ink);color:var(--parch);border:0;border-radius:4px;touch-action:manipulation;user-select:none;-webkit-user-select:none}
+.dbtns button:active{background:var(--blood)}
+@media (prefers-reduced-motion:reduce){.toast{transition:none}}
+
+/* v3 additions */
+.bar{display:grid;grid-template-columns:1.35fr 1fr 1fr 1fr 1.35fr}
+.bar .steer{font-size:22px;font-family:var(--f-display);touch-action:none;user-select:none;-webkit-user-select:none}
+.bar .steer:active,.bar .steer.on{background:var(--brass-d)}
+.arena{width:100%;height:min(48vh,400px);display:block;border-radius:3px;background:#1d4aa8;touch-action:none}
+.bstats{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:8px 0 2px}
+.bstats > div{min-width:0}
+.bstats h4{font-family:var(--f-label);font-weight:700;font-size:12px;letter-spacing:.05em;margin:0 0 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bmsg{min-height:22px;font-size:15px;font-weight:600;margin:4px 0 8px}
+.bctl{display:grid;grid-template-columns:1fr 1.3fr 1fr;gap:8px}
+.bctl button{font-family:var(--f-display);font-size:22px;min-height:62px;border:0;border-radius:4px;background:var(--ink);color:var(--parch);touch-action:none;user-select:none;-webkit-user-select:none;position:relative;overflow:hidden}
+.bctl button:active{background:var(--ink-2)}
+.bctl .fire{background:var(--blood)}
+.bctl .fire i{position:absolute;left:0;bottom:0;height:5px;background:var(--parch);width:100%}
+.sndbtn{position:absolute;top:10px;left:max(10px,env(safe-area-inset-left,0px));font-family:"Pixelify Sans",monospace;font-size:13px;color:#fff;background:rgba(10,20,40,.72);border:1px solid var(--brass);border-radius:2px;padding:6px 10px;min-height:36px;cursor:pointer}
+</style>
+<div id="app">
+  <header class="hud" id="hud"></header>
+  <div class="mapwrap" id="wrap">
+    <canvas id="map" aria-label="Chart of the Caribbean"></canvas>
+    <div class="toast" id="toast" style="opacity:0"></div>
+    <button class="sndbtn" id="snd" type="button"></button>
+    <div class="hint-tap" id="taphint">Hold ◀ ▶ to steer · drag to look around</div>
+  </div>
+  <nav class="bar">
+    <button class="cmd steer" id="b-left" type="button" aria-label="Steer to port">◀</button>
+    <button class="cmd" id="b-stop" type="button">Furl sails</button>
+    <button class="cmd" id="b-status" type="button">Captain</button>
+    <button class="cmd" id="b-log" type="button">Log</button>
+    <button class="cmd steer" id="b-right" type="button" aria-label="Steer to starboard">▶</button>
+  </nav>
+</div>
+<div class="veil" id="veil" hidden><div class="sheet" id="sheet" role="dialog" aria-modal="true"></div></div>
+
+<script>
+(()=>{
+const $=s=>document.querySelector(s);
+const rnd=(a,b)=>a+Math.random()*(b-a);
+const ri=(a,b)=>Math.floor(rnd(a,b+1));
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const wrapA=a=>{const t=Math.PI*2;return((a+Math.PI)%t+t)%t-Math.PI;};
+const fmt=n=>Math.round(n).toLocaleString('en-US');
+const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+const SAVE='brethren-coast-v3';
+
+const NAT={es:{n:'Spain',a:'Spanish',c:'#e3b94a'},en:{n:'England',a:'English',c:'#c4503e'},fr:{n:'France',a:'French',c:'#6f92d4'},nl:{n:'Holland',a:'Dutch',c:'#e58d3c'}};
+const NK=['es','en','fr','nl'];
+const SHIPS={
+  sloop:{n:'Sloop',guns:8,hull:60,crew:75,cargo:40,spd:1.15,cost:1400,len:38,turn:1.7},
+  brig:{n:'Brigantine',guns:14,hull:100,crew:130,cargo:70,spd:1.02,cost:3200,len:46,turn:1.45},
+  barque:{n:'Merchantman',guns:10,hull:85,crew:60,cargo:130,spd:.84,cost:2000,len:48,turn:1.15},
+  frigate:{n:'Frigate',guns:28,hull:170,crew:220,cargo:90,spd:.96,cost:7800,len:56,turn:1.25},
+  galleon:{n:'Galleon',guns:22,hull:210,crew:260,cargo:190,spd:.72,cost:6800,len:60,turn:.95}
+};
+const RANKS=['—','Captain','Major','Colonel','Baron','Count','Marquis'];
+const DNAMES={es:['Isabel','Catalina','Mercedes','Ana María','Inés','Beatriz'],en:['Elizabeth','Anne','Margaret','Charlotte','Mary','Jane'],fr:['Isabelle','Marguerite','Louise','Hélène','Madeleine','Claire'],nl:['Johanna','Margaretha','Catharina','Anna','Maria','Elisabeth']};
+const DTITLE={es:'Doña',en:'Miss',fr:'Mademoiselle',nl:'Juffrouw'};
+const BOYS={es:['Diego','Juan','Miguel','Rafael','Tomás','Pedro','Francisco'],en:['John','Thomas','William','Edward','Henry','James','Richard'],fr:['Jean','Louis','Pierre','Henri','Étienne','Jacques','François'],nl:['Jan','Pieter','Willem','Hendrik','Cornelis','Dirk','Joost']};
+const CHURCHES={havana:'the Church of San Cristóbal',santiago:'the Cathedral of Santiago',stodomingo:'the Cathedral of Santa María la Menor',sanjuan:'the Cathedral of San Juan Bautista',cartagena:'the Cathedral of Santa Catalina',portobelo:'the Church of San Felipe',maracaibo:'the Church of San Pedro',campeche:'the Church of the Immaculate Conception',tortuga:'the Chapel of Saint Nicholas',stpierre:'the Church of Notre-Dame du Bon Port',portroyal:'a small Catholic chapel near the docks',nassau:'a house chapel kept by a visiting priest',bridgetown:'a quiet Catholic chapel',willemstad:'a Catholic house church',steustatius:'a small Catholic chapel'};
+const churchName=p=>CHURCHES[p.id];const cap=t=>t.charAt(0).toUpperCase()+t.slice(1);
+const kidAge=k=>Math.floor((S.day-k.born)/360);
+const BEAUTY=['plain but kind-hearted','pleasant and quick-witted','lovely','the most beautiful woman in the Indies'];
+const PORTS=[
+ {id:'havana',n:'Havana',nat:'es',x:300,y:90,size:3},
+ {id:'santiago',n:'Santiago',nat:'es',x:482,y:194,size:2},
+ {id:'nassau',n:'Nassau',nat:'en',x:434,y:54,size:1},
+ {id:'tortuga',n:'Tortuga',nat:'fr',x:590,y:118,size:2,haven:true},
+ {id:'stodomingo',n:'Santo Domingo',nat:'es',x:630,y:218,size:2},
+ {id:'portroyal',n:'Port Royal',nat:'en',x:468,y:254,size:3},
+ {id:'sanjuan',n:'San Juan',nat:'es',x:740,y:176,size:2},
+ {id:'steustatius',n:'St. Eustatius',nat:'nl',x:828,y:257,size:1},
+ {id:'stpierre',n:'St. Pierre',nat:'fr',x:846,y:331,size:2},
+ {id:'bridgetown',n:'Bridgetown',nat:'en',x:912,y:414,size:2},
+ {id:'willemstad',n:'Willemstad',nat:'nl',x:676,y:462,size:2},
+ {id:'maracaibo',n:'Maracaibo',nat:'es',x:622,y:492,size:2},
+ {id:'cartagena',n:'Cartagena',nat:'es',x:520,y:538,size:3},
+ {id:'portobelo',n:'Portobelo',nat:'es',x:298,y:550,size:2},
+ {id:'campeche',n:'Campeche',nat:'es',x:120,y:194,size:1}
+];
+const PORT={}; PORTS.forEach(p=>PORT[p.id]=p);
+const LAND=[
+ [[180,0],[262,0],[262,30],[250,70],[232,90],[215,70],[200,30]],
+ [[205,105],[250,95],[310,100],[360,115],[420,135],[470,148],[520,165],[525,180],[480,185],[440,172],[400,160],[350,145],[300,135],[255,130],[215,125]],
+ [[545,150],[600,145],[650,155],[690,170],[685,195],[650,205],[620,210],[580,205],[555,195],[540,175]],
+ [[575,128],[600,126],[602,134],[577,136]],
+ [[425,215],[470,210],[505,220],[500,240],[460,245],[430,238]],
+ [[715,185],[765,185],[768,200],[718,203]],
+ [[420,30],[440,25],[448,40],[428,46]],[[470,60],[490,55],[495,70],[475,75]],[[380,55],[395,50],[398,62],[383,66]],
+ [[820,235],[832,233],[834,245],[822,247]],[[845,275],[868,273],[870,290],[847,292]],
+ [[855,320],[870,318],[874,340],[858,342]],[[905,385],[922,383],[925,402],[908,404]],
+ [[860,500],[900,495],[905,520],[862,525]],[[660,440],[690,436],[694,448],[662,452]],
+ [[300,600],[360,575],[420,580],[480,560],[540,545],[580,520],[620,505],[660,500],[700,490],[760,490],[820,500],[870,530],[920,550],[1000,560],[1000,700],[300,700]],
+ [[0,330],[60,330],[90,350],[110,400],[150,450],[200,500],[260,540],[310,580],[300,600],[300,700],[0,700]],
+ [[60,330],[60,250],[90,215],[150,200],[170,230],[160,280],[130,320],[90,350]]
+];
+const CAYS=[{x:360,y:330,n:'a nameless cay south of Cuba'},{x:560,y:380,n:'a reef in the open Caribbean'},{x:760,y:350,n:'a sandbar west of the Windward Isles'},{x:250,y:285,n:'a key off the Yucatán Channel'},{x:700,y:300,n:'a cay south of Puerto Rico'}];
+
+/* ---------- the big pixel world ---------- */
+const WS=5, WW=1000*WS, WH=700*WS, PX=5, MW=WW/PX, MH=WH/PX;
+LAND.forEach(p=>p.forEach(pt=>{pt[0]*=WS;pt[1]*=WS;}));
+PORTS.forEach(p=>{p.x*=WS;p.y*=WS;});CAYS.forEach(c=>{c.x*=WS;c.y*=WS;});
+let seed=1660;const srand=()=>(seed=(seed*16807)%2147483647)/2147483647;
+const mask=new Uint8Array(MW*MH); // 0 deep,1 shallow,2 surf,3 sand,4 grass
+const world=document.createElement('canvas');world.width=MW;world.height=MH;
+const WAVES=[];
+function landAt(x,y){const px=Math.floor(x/PX),py=Math.floor(y/PX);if(px<0||py<0||px>=MW||py>=MH)return true;return mask[py*MW+px]>=3;}
+const onLand=landAt;
+function buildWorld(){
+  const m=document.createElement('canvas');m.width=MW;m.height=MH;const c=m.getContext('2d');
+  c.scale(1/PX,1/PX);c.fillStyle='#000';
+  for(const p of LAND){c.beginPath();c.moveTo(p[0][0],p[0][1]);for(const q of p)c.lineTo(q[0],q[1]);c.closePath();c.fill();}
+  const a=c.getImageData(0,0,MW,MH).data;let L=new Uint8Array(MW*MH);
+  for(let i=0;i<L.length;i++)L[i]=a[i*4+3]>110?1:0;
+  const at=(A,x,y)=>x<0||y<0||x>=MW||y>=MH?1:A[y*MW+x];
+  for(let pass=0;pass<2;pass++){const N=L.slice();
+    for(let y=0;y<MH;y++)for(let x=0;x<MW;x++){let n=0;for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)n+=at(L,x+dx,y+dy);
+      if(n>0&&n<9){const r=srand();N[y*MW+x]=pass===0?(r<n/9+.08?1:0):(n>=5?1:0);}}
+    L=N;}
+  const carve=(wx,wy,r)=>{const cx=Math.floor(wx/PX),cy=Math.floor(wy/PX);for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++)if(dx*dx+dy*dy<=r*r){const x=cx+dx,y=cy+dy;if(x>=0&&y>=0&&x<MW&&y<MH)L[y*MW+x]=0;}};
+  PORTS.forEach(p=>carve(p.x,p.y,3));CAYS.forEach(q=>carve(q.x,q.y,3));
+  const near=(x,y,r)=>{const v=at(L,x,y);for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++)if(at(L,x+dx,y+dy)!==v)return true;return false;};
+  for(let y=0;y<MH;y++)for(let x=0;x<MW;x++){const i=y*MW+x;
+    if(L[i])mask[i]=near(x,y,1)?3:4;else mask[i]=near(x,y,1)?2:near(x,y,3)?1:0;}
+  const wc=world.getContext('2d'),img=wc.createImageData(MW,MH),d=img.data;
+  const put=(x,y,hex)=>{if(x<0||y<0||x>=MW||y>=MH)return;const i=(y*MW+x)*4;d[i]=parseInt(hex.slice(1,3),16);d[i+1]=parseInt(hex.slice(3,5),16);d[i+2]=parseInt(hex.slice(5,7),16);d[i+3]=255;};
+  for(let y=0;y<MH;y++)for(let x=0;x<MW;x++){const t=mask[y*MW+x],r=srand();
+    const hill=Math.sin(x*.07)*Math.cos(y*.085)+Math.sin(x*.025+y*.021);
+    put(x,y,t===0?(r<.06?'#2a5fc4':'#1d4aa8'):t===1?(r<.08?'#3e86dc':'#3274cf'):t===2?'#58a2ea':t===3?(r<.25?'#d9bd6a':'#ecd58e'):
+      hill>1.1?(r<.3?'#2f7d2b':'#357f2f'):(r<.22?'#3f9a32':'#4caf3c'));}
+  for(let y=4;y<MH;y++)for(let x=2;x<MW-2;x++){if(mask[y*MW+x]!==4||srand()>.07)continue;
+    let inland=true;for(let dy=-3;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)if(at(mask,x+dx,y+dy)!==4)inland=false;if(!inland)continue;
+    if(near(x,y,4)){put(x,y,'#7a4b22');put(x,y-1,'#7a4b22');put(x-1,y-2,'#1f6b25');put(x+1,y-2,'#1f6b25');put(x,y-2,'#2d8a2e');put(x-2,y-1,'#1f6b25');put(x+2,y-1,'#1f6b25');put(x,y-3,'#1f6b25');}
+    else{put(x,y,'#5a3a1c');put(x-1,y-1,'#1c5e22');put(x,y-1,'#237027');put(x+1,y-1,'#1c5e22');put(x-1,y-2,'#237027');put(x,y-2,'#3a9a3a');put(x+1,y-2,'#237027');put(x,y-3,'#1c5e22');}}
+  wc.putImageData(img,0,0);
+  for(let i=0;i<4500;i++){const x=Math.floor(srand()*MW),y=Math.floor(srand()*MH);if(mask[y*MW+x]===0)WAVES.push({x,y,ph:srand()*6.28,len:srand()<.5?2:3});}
+  PORTS.forEach(p=>{let sx=0,sy=0;for(const rad of [40,60,80,110])if(!sx&&!sy)for(let k=0;k<32;k++){const an=k/32*6.283;if(landAt(p.x+Math.cos(an)*rad,p.y+Math.sin(an)*rad)){sx+=Math.cos(an);sy+=Math.sin(an);}}
+    const l=Math.hypot(sx,sy)||1,ux=sx/l,uy=sy/l;let dd=8;while(dd<120&&!landAt(p.x+ux*dd,p.y+uy*dd))dd+=3;p.tx=p.x+ux*(dd+12);p.ty=p.y+uy*(dd+12);});
+}
+buildWorld();
+
+let churchOpen=false;
+let S=null, paused=true, E=null, B=null, D=null, DN=null, curPort=null, portTab='gov', steer=0;
+const DIFF=[{n:'Apprentice',w:1.3,e:.8},{n:'Journeyman',w:1.1,e:.95},{n:'Adventurer',w:.95,e:1.1},{n:'Swashbuckler',w:.8,e:1.3}];
+const SKILLS={fence:{n:'Fencing',d:'More time to parry in a duel'},gun:{n:'Gunnery',d:'Faster reloads, harder hits'},nav:{n:'Navigation',d:'Faster ship, sharper turns'},wit:{n:'Wit',d:'Better prices, steadier crew, charm'}};
+
+/* ---------- 8-bit sound ---------- */
+const SND={ac:null,mode:0,mg:null,sg:null,nb:null,next:0,step:0,last:{}};
+try{SND.mode=+(localStorage.getItem('brethren-sound')||0)}catch(_){}
+const SMODES=['♪ Music & sound','♪ Sound only','♪ Muted'];
+function audioInit(){
+  if(SND.ac){if(SND.ac.state==='suspended')SND.ac.resume();return;}
+  try{const ac=new(window.AudioContext||window.webkitAudioContext)();SND.ac=ac;
+    const m=ac.createGain();m.gain.value=.55;m.connect(ac.destination);
+    SND.mg=ac.createGain();SND.mg.gain.value=.16;SND.mg.connect(m);
+    SND.sg=ac.createGain();SND.sg.gain.value=.5;SND.sg.connect(m);
+    const nb=ac.createBuffer(1,ac.sampleRate,ac.sampleRate),d=nb.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;SND.nb=nb;
+    SND.next=ac.currentTime+.1;
+    const wb=ac.createBuffer(1,ac.sampleRate*4,ac.sampleRate),wd=wb.getChannelData(0);let lb=0;for(let i=0;i<wd.length;i++){lb=(lb+.02*(Math.random()*2-1))/1.02;wd[i]=lb*3.5;}
+    const ws=ac.createBufferSource();ws.buffer=wb;ws.loop=true;SND.wf=ac.createBiquadFilter();SND.wf.type='lowpass';SND.wf.frequency.value=450;SND.wg=ac.createGain();SND.wg.gain.value=0;
+    ws.connect(SND.wf);SND.wf.connect(SND.wg);SND.wg.connect(m);ws.start();}catch(_){}
+}
+function tone(f,dur,type,vol,t0,slide,dest){const ac=SND.ac;const o=ac.createOscillator(),g=ac.createGain();o.type=type||'square';
+  o.frequency.setValueAtTime(f,t0);if(slide)o.frequency.linearRampToValueAtTime(Math.max(20,f+slide),t0+dur);
+  g.gain.setValueAtTime(vol,t0);g.gain.exponentialRampToValueAtTime(.001,t0+dur);o.connect(g);g.connect(dest||SND.sg);o.start(t0);o.stop(t0+dur+.02);}
+function noise(dur,vol,freq,t0,dest){const ac=SND.ac;const s=ac.createBufferSource(),f=ac.createBiquadFilter(),g=ac.createGain();s.buffer=SND.nb;f.type='lowpass';f.frequency.value=freq;
+  g.gain.setValueAtTime(vol,t0);g.gain.exponentialRampToValueAtTime(.001,t0+dur);s.connect(f);f.connect(g);g.connect(dest||SND.sg);s.start(t0,Math.random()*.5);s.stop(t0+dur+.02);}
+function sfx(n){
+  if(!SND.ac||SND.mode===2)return;const t=SND.ac.currentTime,now=performance.now();
+  if((n==='hit'||n==='splash')&&now-(SND.last[n]||0)<70)return;SND.last[n]=now;
+  switch(n){
+    case 'cannon':noise(.6,.7,900,t);tone(90,.35,'triangle',.7,t,-55);break;
+    case 'cannonFar':noise(.45,.35,650,t);tone(70,.3,'triangle',.35,t,-40);break;
+    case 'hit':noise(.25,.45,2600,t);tone(170,.14,'square',.18,t,-110);break;
+    case 'splash':noise(.3,.12,4500,t);break;
+    case 'clang':tone(1320,.07,'square',.18,t);tone(1760,.12,'square',.13,t+.03);break;
+    case 'ouch':tone(440,.22,'square',.22,t,-300);break;
+    case 'tick':tone(880,.035,'square',.1,t);break;
+    case 'step':tone(784,.07,'square',.16,t);tone(1047,.09,'square',.16,t+.07);break;
+    case 'bad':tone(196,.2,'sawtooth',.18,t,-60);break;
+    case 'coin':tone(988,.07,'square',.18,t);tone(1319,.2,'square',.18,t+.07);break;
+    case 'bell':[0,.3].forEach(d=>{tone(659,.7,'triangle',.3,t+d);tone(1318,.5,'sine',.08,t+d);});break;
+    case 'alarm':[523,659,784,659,784].forEach((f,i)=>tone(f,.11,'square',.18,t+i*.11));break;
+    case 'win':[523,659,784,1047].forEach((f,i)=>tone(f,i===3?.45:.13,'square',.2,t+i*.13));break;
+    case 'lose':[392,349,311,262].forEach((f,i)=>tone(f,i===3?.6:.2,'square',.2,t+i*.2));break;
+    case 'thud':tone(90,.18,'triangle',.4,t,-30);break;
+    case 'blip':tone(660,.03,'square',.07,t);break;
+  }
+}
+// An original jig in D minor, 6/8 — eight bars of melody (eighth notes, -1 = hold) with bass roots on each dotted-quarter beat
+const MEL=[62,65,69,69,67,65, 64,67,70,69,67,64, 62,65,69,74,-1,72, 69,67,64,62,-1,-1,
+           69,69,72,74,72,69, 67,69,70,69,67,64, 65,67,69,64,65,62, 61,64,69,62,-1,-1,
+           74,-1,72,70,69,67, 69,-1,67,65,64,62, 70,69,67,65,67,69, 64,-1,61,62,-1,-1];
+const BAS=[38,45, 36,43, 38,45, 33,38, 41,48, 43,38, 38,45, 33,38, 46,41, 45,40, 43,38, 45,38];
+const mid=n=>440*Math.pow(2,(n-69)/12);
+// Battle: a driving D-minor gallop. Dance: a stately sarabande in F. Church: a simple hymn of chords in G.
+const BMEL=[74,-1,-1,72,70,-1,69,-1, 72,-1,-1,70,69,-1,67,-1, 70,-1,-1,69,67,-1,65,-1, 69,-1,67,-1,64,-1,61,-1];
+const BARP=[50,57,62,57,50,57,62,57, 48,55,60,55,48,55,60,55, 46,53,58,53,46,53,58,53, 45,52,57,52,49,52,57,52];
+const BBAS=[38,38,50,38, 36,36,48,36, 34,34,46,34, 33,33,45,37];
+const DMEL=[65,-1,67, 69,-1,70, 72,-1,70, 69,-1,-1, 67,-1,69, 70,-1,69, 67,65,64, 65,-1,-1, 72,-1,74, 72,-1,70, 69,-1,67, 69,-1,-1, 70,-1,69, 67,-1,65, 64,-1,67, 65,-1,-1];
+const DBAS=[41,46,41,48, 46,43,48,41, 45,46,41,45, 46,48,48,41];
+const CHORDS=[[55,59,62,67],[60,64,67,72],[62,66,69,74],[55,59,62,71],[52,55,59,64],[60,64,67,72],[62,66,69,72],[55,59,62,67]];
+const TR={sea:{e:.17,mel:MEL,bas:BAS,per:3,oct:12,lv:.22,dr:.18},
+  battle:{e:.12,mel:BMEL,bas:BBAS,per:2,oct:0,lv:.2,dr:.32,arp:BARP},
+  dance:{e:.27,mel:DMEL,bas:DBAS,per:3,oct:12,lv:.4,dr:0,tri:true},
+  church:{e:.45,ch:CHORDS}};
+let curTrack='sea';
+function musicTick(){
+  const ac=SND.ac;if(!ac||ac.state!=='running')return;
+  const tk=(B||D)?'battle':DN?'dance':churchOpen?'church':'sea';
+  if(tk!==curTrack){curTrack=tk;SND.step=0;SND.next=ac.currentTime+.08;}
+  const T=TR[tk];
+  if(SND.next<ac.currentTime-.3)SND.next=ac.currentTime+.05;
+  while(SND.next<ac.currentTime+.25){const t=SND.next,st=SND.step;
+    if(SND.mode===0){
+      if(T.ch){if(st%4===0){const c=T.ch[(st/4)%T.ch.length];c.forEach((n,j)=>tone(mid(n),T.e*4*.98,j===0?'triangle':'sine',j===0?.45:.15,t,0,SND.mg));}}
+      else{const i=st%T.mel.length,n=T.mel[i];
+        if(n>0){let len=1;while(T.mel[(i+len)%T.mel.length]===-1)len++;tone(mid(n+T.oct),T.e*len*.92,T.tri?'triangle':'square',T.lv,t,0,SND.mg);}
+        if(T.arp)tone(mid(T.arp[i%T.arp.length]+12),T.e*.8,'square',.07,t,0,SND.mg);
+        if(i%T.per===0){tone(mid(T.bas[Math.floor(i/T.per)%T.bas.length]),T.e*T.per*.9,'triangle',.5,t,0,SND.mg);if(T.dr)noise(.05,T.dr,Math.floor(i/T.per)%2===0?1800:6000,t,SND.mg);}
+        else if(T.dr>.25)noise(.03,.1,7000,t,SND.mg);}}
+    SND.step++;SND.next+=T.e;}
+}
+function waterTick(){
+  const ac=SND.ac;if(!ac||!SND.wg)return;const t=ac.currentTime,T=performance.now()/1000;
+  let v=0,f=450;
+  if(SND.mode<2&&S){if(B){v=.55;f=900;}else if(D||DN||churchOpen)v=.04;else if(paused)v=.14;else{const sp=S.anchored?0:S.speed/100;v=.2+.5*sp;f=380+sp*800;}}
+  v*=.8+.2*Math.sin(T*.7)+.08*Math.sin(T*2.3);
+  SND.wg.gain.setTargetAtTime(Math.max(0,v),t,.4);SND.wf.frequency.setTargetAtTime(f,t,.4);
+}
+document.addEventListener('pointerdown',audioInit,{capture:true});
+document.addEventListener('keydown',audioInit,{capture:true});
+document.addEventListener('visibilitychange',()=>{if(!SND.ac)return;if(document.hidden)SND.ac.suspend();else SND.ac.resume();});
+
+/* ---------- state ---------- */
+const atWar=(a,b)=>a!==b&&!!S.wars[[a,b].sort().join('-')];
+const month=()=>Math.floor(S.day/30);
+const dateStr=()=>MONTHS[month()%12]+' '+(1660+Math.floor(month()/12));
+const age=()=>24+Math.floor(S.day/360);
+const ship=()=>SHIPS[S.ship];
+const relWord=r=>r<=-25?'Hostile':r<0?'Wary':r<25?'Neutral':r<60?'Friendly':'Allied';
+const hostile=p=>!p.haven&&S.rel[p.nat]<=-25;
+const garrison=p=>p.size*70+30;
+function save(){try{if(S)localStorage.setItem(SAVE,JSON.stringify(S))}catch(e){}}
+function load(){try{const t=localStorage.getItem(SAVE);return t?JSON.parse(t):null}catch(e){return null}}
+function wipe(){try{localStorage.removeItem(SAVE)}catch(e){}}
+function log(t){S.log.unshift({d:dateStr(),t});S.log.length=Math.min(S.log.length,60)}
+function adjRel(n,d){S.rel[n]=clamp(S.rel[n]+d,-100,100)}
+const awayHeading=p=>Math.atan2(p.y-p.ty,p.x-p.tx);
+
+function newGame(name,nat,skill,diff){
+  const home={es:'havana',en:'portroyal',fr:'tortuga',nl:'willemstad'}[nat], p=PORT[home];
+  S={name,nat,skill,diff,ship:'sloop',guns:8,hull:60,crew:40,rations:40*45,cargo:0,gold:600,personal:0,morale:80,fame:0,day:0,
+     x:p.x,y:p.y,heading:awayHeading(p),anchored:false,speed:0,lastPort:home,wind:Math.PI,calm:2,
+     rel:{es:-10,en:0,fr:0,nl:0},deeds:{es:0,en:0,fr:0,nl:0},rank:{es:0,en:0,fr:0,nl:0},
+     wars:{'en-es':true,'es-fr':true,'es-nl':true,'en-nl':true,'en-fr':false,'fr-nl':false},
+     pieces:0,treasure:null,log:[],ps:{},dau:{},wife:null,wifeGift:-999,kids:[],expect:null,engaged:null,lastMass:-99,lastConf:-99,lastAnoint:-999,lastNews:-999,wins:0,prizes:0,raids:0,acc:0};
+  if(nat==='es'){S.rel.en=-10;S.rel.fr=-10;S.rel.nl=-10;}
+  S.rel[nat]=40; S.rank[nat]=1;
+  for(const q of PORTS)if(q.size>=2&&Math.random()<.85)S.dau[q.id]={name:pick(DNAMES[q.nat]),beauty:clamp(ri(0,2)+(q.size===3?1:0),0,3),aff:0,met:false,scorn:false,danced:-99};
+  refreshPorts();
+  log(`${name} receives a letter of marque from ${NAT[nat].n} and takes command of a sloop at ${p.n}.`);
+  save();
+}
+function refreshPorts(){
+  for(const p of PORTS){const o=S.ps[p.id]||(S.ps[p.id]={raid:-99});
+    o.rec=p.size*12+ri(0,18); o.price=ri(18,52); o.food=+rnd(.06,.11).toFixed(3);
+    o.piece=S.pieces<4&&Math.random()<.28; o.pieceCost=ri(200,480);}
+}
+
+/* ---------- wind ---------- */
+function windF(h){const d=Math.acos(clamp(Math.cos(h-S.wind),-1,1));
+  if(d<Math.PI/2)return .8+.2*Math.sin(d);const t=(d-Math.PI/2)/(Math.PI/2);return Math.max(.04,1-.96*Math.pow(t,1.25));}
+function windFrom(){const a=wrapA(S.wind+Math.PI);const dirs=['east','southeast','south','southwest','west','northwest','north','northeast'];return dirs[((Math.round(a/(Math.PI/4))%8)+8)%8];}
+
+/* ---------- map ---------- */
+const cv=$('#map'), ctx=cv.getContext('2d'), wrap=$('#wrap');
+let W=0,H=0,dpr=1; const view={s:1,cx:0,cy:0,follow:true};
+function resize(){const r=wrap.getBoundingClientRect();dpr=Math.min(2,window.devicePixelRatio||1);W=r.width;H=r.height;cv.width=W*dpr;cv.height=H*dpr;view.s=Math.max(1.15,W/WW,H/WH);clampView();}
+function clampView(){view.cx=clamp(view.cx,0,Math.max(0,WW-W/view.s));view.cy=clamp(view.cy,0,Math.max(0,WH-H/view.s));}
+function centerOn(x,y){view.cx=x-W/view.s/2;view.cy=y-H/view.s/2;clampView();}
+window.addEventListener('resize',resize);
+
+const TOWN=['....ff.','....|..','.rr.|rr','rwwr|ww','gwdgggd','ggggggg'];
+const CHURCHART=['...c..','..ccc.','...c..','..wbw.','..www.','.rrrrr','rrrrrr','wwwwww','wwddww'];
+function sprite(c,art,x,y,u,pal){const h=art.length,w=art[0].length;
+  for(let r=0;r<h;r++)for(let col=0;col<w;col++){const ch=art[r][col];if(ch==='.')continue;c.fillStyle=pal[ch];c.fillRect(x+(col-w/2)*u,y+(r-h)*u,u+.4,u+.4);}}
+function topShip(c,x,y,h,L,flag,dead){
+  c.save();c.translate(x,y);c.rotate(h);const u=L/12;
+  if(dead)c.globalAlpha=Math.max(0,dead);
+  c.fillStyle='rgba(0,0,0,.25)';c.fillRect(-6*u,-1.6*u+u*.6,12*u,3.2*u);
+  c.fillStyle='#5b3418';c.beginPath();c.moveTo(6.2*u,0);c.lineTo(3*u,-2*u);c.lineTo(-5.4*u,-2*u);c.lineTo(-6*u,-1.3*u);c.lineTo(-6*u,1.3*u);c.lineTo(-5.4*u,2*u);c.lineTo(3*u,2*u);c.closePath();c.fill();
+  c.fillStyle='#93622f';c.fillRect(-5*u,-1.2*u,8*u,2.4*u);
+  c.fillStyle='#3b2412';c.fillRect(1.6*u,-3.2*u,.4*u,6.4*u);c.fillRect(-2.4*u,-3.5*u,.4*u,7*u);
+  c.fillStyle='#fbf6e8';c.fillRect(1.9*u,-3*u,1*u,6*u);c.fillRect(-2*u,-3.3*u,1.1*u,6.6*u);
+  c.fillStyle=flag;c.fillRect(-6.8*u,-.6*u,1.2*u,1.2*u);
+  c.restore();
+}
+const MM={x:0,y:0,w:0,h:0};
+function draw(){
+  const s=view.s,k=1/s,T=performance.now()/1000;
+  ctx.setTransform(dpr,0,0,dpr,0,0);ctx.imageSmoothingEnabled=false;
+  ctx.fillStyle='#1d4aa8';ctx.fillRect(0,0,W,H);
+  ctx.save();ctx.translate(-view.cx*s,-view.cy*s);ctx.scale(s,s);
+  ctx.drawImage(world,0,0,WW,WH);
+  const x0=view.cx/PX-3,x1=(view.cx+W*k)/PX+3,y0=view.cy/PX-3,y1=(view.cy+H*k)/PX+3;
+  ctx.fillStyle='#8cc4ff';
+  for(const w of WAVES){if(w.x<x0||w.x>x1||w.y<y0||w.y>y1)continue;if(Math.sin(T*1.6+w.ph)<.5)continue;
+    const off=Math.floor((T*.8+w.ph)%3);ctx.fillRect((w.x+off)*PX,w.y*PX,w.len*PX,PX);}
+  ctx.textAlign='center';ctx.fillStyle='rgba(220,236,255,.4)';ctx.font=`700 ${20*k}px "Pixelify Sans",monospace`;
+  [['CARIBBEAN SEA',600,380],['GULF OF MEXICO',90,110],['ATLANTIC OCEAN',720,60],['CARIBBEAN SEA',380,420],['CARIBBEAN SEA',800,440]].forEach(([t,x,y])=>ctx.fillText(t,x*WS,y*WS));
+  if(S.treasure){const t=S.treasure;ctx.fillStyle='#d8261b';const u=4;for(let i=-3;i<=3;i++){ctx.fillRect(t.x+i*u,t.y+i*u,u,u);ctx.fillRect(t.x-i*u,t.y+i*u,u,u);}}
+  const pal={r:'#c4452f',w:'#f1e7cf',d:'#6b4423',g:'#9a948a','|':'#4a3a2a'};
+  for(const p of PORTS){
+    pal.f=NAT[p.nat].c;sprite(ctx,TOWN,p.tx,p.ty+12,4,pal);
+    sprite(ctx,CHURCHART,p.tx+30,p.ty+12,4,{c:'#f0c93c',w:'#f4efe2',b:'#c9a14a',r:'#8a3d2c',d:'#5a3a1c'});
+    if(hostile(p)||p.haven){ctx.beginPath();ctx.arc(p.tx,p.ty,22*k+16,0,7);ctx.lineWidth=2*k;ctx.strokeStyle=p.haven?'#ffffff':'#ff5a3c';ctx.setLineDash([3*k,3*k]);ctx.stroke();ctx.setLineDash([]);}
+    const raided=S.ps[p.id].raid>month()-12;
+    ctx.font=`600 ${12*k}px "Pixelify Sans",monospace`;const label=p.n.toUpperCase()+(S.wife&&S.wife.pid===p.id?' ♥':''),tw=ctx.measureText(label).width;
+    const ly=p.ty-16-4*k;
+    ctx.fillStyle='rgba(10,20,40,.7)';ctx.fillRect(p.tx-tw/2-3*k,ly-11*k,tw+6*k,14*k);
+    ctx.fillStyle=raided?'#b8b0a0':'#ffffff';ctx.fillText(label,p.tx,ly);
+  }
+  if(S.speed>4&&!paused){ctx.fillStyle='rgba(255,255,255,.75)';const cx=Math.cos(S.heading),cy=Math.sin(S.heading);
+    for(let i=1;i<=5;i++){if(Math.sin(T*8-i)>-.3){const d=14+i*8,w=2+i*.8;ctx.fillRect(S.x-cx*d-cy*w-2,S.y-cy*d+cx*w-2,4,4);ctx.fillRect(S.x-cx*d+cy*w-2,S.y-cy*d-cx*w-2,4,4);}}}
+  topShip(ctx,S.x,S.y,S.heading,34,NAT[S.nat].c);
+  ctx.restore();
+  // mini-map
+  const mw=Math.round(Math.min(150,W*.34)),mh=Math.round(mw*WH/WW),mx=W-mw-10,my=10;Object.assign(MM,{x:mx,y:my,w:mw,h:mh});
+  ctx.fillStyle='#16110c';ctx.fillRect(mx-3,my-3,mw+6,mh+6);
+  ctx.drawImage(world,mx,my,mw,mh);
+  const f=mw/WW;
+  for(const p of PORTS){ctx.fillStyle=NAT[p.nat].c;ctx.fillRect(mx+p.x*f-1.5,my+p.y*f-1.5,3,3);}
+  if(S.treasure){ctx.fillStyle='#d8261b';ctx.fillRect(mx+S.treasure.x*f-2,my+S.treasure.y*f-2,4,4);}
+  ctx.strokeStyle='#ffffff';ctx.lineWidth=1;ctx.strokeRect(mx+view.cx*f+.5,my+view.cy*f+.5,W*k*f,H*k*f);
+  if(Math.floor(T*3)%2){ctx.fillStyle='#ff3b2f';ctx.fillRect(mx+S.x*f-2.5,my+S.y*f-2.5,5,5);}
+  ctx.strokeStyle='#d3a64f';ctx.lineWidth=1.5;ctx.strokeRect(mx-1.5,my-1.5,mw+3,mh+3);
+  drawWind(ctx,34,H-38);
+}
+function drawWind(c,wx,wy){
+  c.save();c.translate(wx,wy);
+  c.fillStyle='rgba(10,20,40,.65)';c.beginPath();c.arc(0,0,24,0,7);c.fill();
+  c.strokeStyle='#d3a64f';c.lineWidth=1;c.beginPath();c.arc(0,0,24,0,7);c.stroke();
+  c.rotate(S.wind);c.fillStyle='#ffffff';c.beginPath();c.moveTo(15,0);c.lineTo(-10,-6);c.lineTo(-5,0);c.lineTo(-10,6);c.fill();
+  c.restore();c.fillStyle='#ffffff';c.font='600 11px "Pixelify Sans",monospace';c.textAlign='center';c.fillText('WIND',wx,wy-29);c.textAlign='left';
+}
+
+/* ---------- input ---------- */
+let pd=null;
+cv.addEventListener('pointerdown',e=>{const r0=cv.getBoundingClientRect(),qx=e.clientX-r0.left,qy=e.clientY-r0.top;
+  pd={x:e.clientX,y:e.clientY,cx:view.cx,cy:view.cy,drag:false,mini:qx>=MM.x&&qx<=MM.x+MM.w&&qy>=MM.y&&qy<=MM.y+MM.h};cv.setPointerCapture(e.pointerId);});
+cv.addEventListener('pointermove',e=>{if(!pd||pd.mini)return;const dx=e.clientX-pd.x,dy=e.clientY-pd.y;if(!pd.drag&&Math.hypot(dx,dy)>8){pd.drag=true;view.follow=false;}
+  if(pd.drag){view.cx=pd.cx-dx/view.s;view.cy=pd.cy-dy/view.s;clampView();}});
+cv.addEventListener('pointerup',e=>{if(!pd)return;const wasDrag=pd.drag,mini=pd.mini;pd=null;
+  if(mini){const r=cv.getBoundingClientRect();view.follow=false;centerOn((e.clientX-r.left-MM.x)/MM.w*WW,(e.clientY-r.top-MM.y)/MM.h*WH);toast('Tap the sea to return to your ship.');return;}
+  if(!wasDrag&&!view.follow){view.follow=true;}});
+cv.addEventListener('pointercancel',()=>pd=null);
+function holdBtn(el,on,off){
+  el.addEventListener('pointerdown',ev=>{ev.preventDefault();try{el.setPointerCapture(ev.pointerId)}catch(_){}el.classList.add('on');on();});
+  ['pointerup','pointercancel','lostpointercapture'].forEach(t=>el.addEventListener(t,()=>{el.classList.remove('on');off();}));
+  el.addEventListener('contextmenu',ev=>ev.preventDefault());
+}
+holdBtn($('#b-left'),()=>{steer=-1;$('#taphint').hidden=true;},()=>{if(steer<0)steer=0;});
+holdBtn($('#b-right'),()=>{steer=1;$('#taphint').hidden=true;},()=>{if(steer>0)steer=0;});
+const keys={};
+window.addEventListener('keydown',e=>{
+  if(e.key==='ArrowLeft'||e.key==='a'){keys.l=1;e.preventDefault();}
+  if(e.key==='ArrowRight'||e.key==='d'){keys.r=1;e.preventDefault();}
+  if(e.key===' '&&B&&!B.over){e.preventDefault();battleFire();}
+  if(D&&!D.over){const m={'ArrowUp':0,'w':0,'ArrowDown':2,'s':2,'q':0,'e':1,'Enter':1};if(e.key in m){}}
+  syncKeys();});
+window.addEventListener('keyup',e=>{if(e.key==='ArrowLeft'||e.key==='a')keys.l=0;if(e.key==='ArrowRight'||e.key==='d')keys.r=0;syncKeys();});
+function syncKeys(){const v=(keys.r?1:0)-(keys.l?1:0);if(B)B.steer=v;else steer=v;}
+
+/* ---------- sailing ---------- */
+function update(dt){
+  S.heading=wrapA(S.heading+steer*ship().turn*(S.skill==='nav'?1.1:1)*.85*dt);
+  if(S.lastPort){const lp=PORT[S.lastPort];if(Math.hypot(lp.x-S.x,lp.y-S.y)>110)S.lastPort=null;}
+  if(S.anchored){S.speed=0;return;}
+  const sp=100*windF(S.heading)*ship().spd*(S.skill==='nav'?1.12:1)*(.55+.45*S.hull/ship().hull);
+  const nx=S.x+Math.cos(S.heading)*sp*dt,ny=S.y+Math.sin(S.heading)*sp*dt;
+  if(onLand(nx,ny)){S.speed=0;if(!S.aground){S.aground=true;sfx('thud');toast('Breakers ahead! Steer away from the coast.');}return;}
+  S.aground=false;S.speed=sp;S.x=nx;S.y=ny;
+  for(const p of PORTS){if(p.id!==S.lastPort&&Math.hypot(p.x-S.x,p.y-S.y)<40){openPort(p);return;}}
+  if(S.treasure&&Math.hypot(S.treasure.x-S.x,S.treasure.y-S.y)<40){dig();return;}
+  S.acc+=sp*dt/(24*WS);
+  while(S.acc>=1&&!paused){S.acc-=1;newDay();}
+}
+function newDay(){
+  S.day++;
+  S.rations-=S.crew;
+  if(S.rations<0){S.rations=0;S.morale=clamp(S.morale-2,0,100);const lost=Math.max(1,Math.floor(S.crew*.02));S.crew=Math.max(6,S.crew-lost);if(S.day%5===0)toast('The stores are empty. Men are going hungry.');}
+  if(S.day%30===0)newMonth();
+  if(S.calm>0){S.calm--;return;}
+  if(!paused&&Math.random()<.036+S.fame*.0002)encounter();
+}
+function newMonth(){
+  S.wind=Math.PI+rnd(-.7,.7);
+  S.morale=clamp(S.morale-(S.skill==='wit'?1:2)+(S.gold/Math.max(1,S.crew)>40?2:0)-(S.gold/Math.max(1,S.crew)<4?2:0),0,100);
+  refreshPorts();
+  if(S.expect&&S.day>=S.expect)birth();
+  if(month()%12===0){
+    const k=pick(['en-fr','fr-nl','en-nl']);S.wars[k]=!S.wars[k];
+    const[a,b]=k.split('-');const news=S.wars[k]?`War! ${NAT[a].n} and ${NAT[b].n} have declared war on one another.`:`${NAT[a].n} and ${NAT[b].n} have signed a peace.`;
+    log(`New year's news: ${news}`);toast(news);
+  }
+  if(S.morale<=8&&S.crew>10){const lost=Math.floor(S.crew*.35);S.crew-=lost;S.morale=35;log(`Mutiny! ${lost} men seized a longboat and deserted.`);toast(`Mutiny! ${lost} men have deserted.`);}
+  else if(S.morale<25&&Math.random()<.5)toast('The crew grumbles about their share of the plunder.');
+  else toast(`The wind backs round. It now blows from the ${windFrom()}.`);
+  if(age()>=60&&!S.oldWarn){S.oldWarn=true;toast('Your old bones ache. Perhaps it is time to retire.');}
+  save();
+}
+
+/* ---------- HUD ---------- */
+let hudCache='';
+function hud(){
+  if(!S)return;
+  const food=Math.floor(S.rations/Math.max(1,S.crew)), hp=Math.round(S.hull/ship().hull*100);
+  const kn=S.anchored?0:Math.round(S.speed/9),wf=windF(S.heading),ww=S.anchored?'sails furled':wf>.75?'fair wind':wf>.4?'beating':'in irons';
+  const h=`<div class="date"><span>${dateStr()}</span><small>${S.name.toUpperCase()} · AGE ${age()} · ${ship().n.toUpperCase()}</small></div>
+  <span class="chip">GOLD<b>${fmt(S.gold)}</b></span><span class="chip">CREW<b>${S.crew}</b></span>
+  <span class="chip ${food<10?'warn':''}">FOOD<b>${food}d</b></span><span class="chip ${hp<40?'warn':''}">HULL<b>${hp}%</b></span>
+  <span class="chip ${S.morale<30?'warn':''}">MORALE<b>${Math.round(S.morale)}</b></span><span class="chip ${!S.anchored&&wf<.4?'warn':''}">SPEED<b>${kn} kn</b> · ${ww}</span>`;
+  if(h!==hudCache){$('#hud').innerHTML=h;hudCache=h;}
+  $('#b-stop').textContent=S.anchored?'Make sail':'Furl sails';
+}
+let toastT=0;
+function toast(t){const el=$('#toast');el.textContent=t;el.style.opacity=1;clearTimeout(toastT);toastT=setTimeout(()=>el.style.opacity=0,2800);}
+
+/* ---------- sheets ---------- */
+function sheet(html){$('#sheet').innerHTML=html;$('#veil').hidden=false;$('#sheet').scrollTop=0;paused=true;steer=0;}
+function closeSheet(){churchOpen=false;$('#veil').hidden=true;paused=false;B=null;D=null;DN=null;E=null;view.follow=true;hud();save();}
+const A={};
+$('#sheet').addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b||b.disabled)return;sfx('blip');const f=A[b.dataset.a];if(f)f(b.dataset.v,b);});
+$('#b-stop').onclick=()=>{if(!S||paused)return;S.anchored=!S.anchored;toast(S.anchored?'Sails furled. You drift at anchor.':'Make sail!');hud();};
+$('#b-status').onclick=()=>{if(S&&!B&&!D&&!DN)status();};
+$('#b-log').onclick=()=>{if(S&&!B&&!D&&!DN)showLog();};
+A.close=()=>closeSheet();
+
+function status(){
+  const rows=NK.map(n=>`<tr><td><span class="flag" style="background:${NAT[n].c}"></span>${NAT[n].n}</td><td>${relWord(S.rel[n])}</td><td>${RANKS[S.rank[n]]}</td></tr>`).join('');
+  const wars=[];['en-es','es-fr','es-nl','en-fr','en-nl','fr-nl'].forEach(k=>{if(S.wars[k]){const[a,b]=k.split('-');wars.push(`${NAT[a].n}–${NAT[b].n}`);}});
+  const sweet=Object.entries(S.dau).filter(([,d])=>d.met&&!d.scorn&&d.aff>=3).map(([id,d])=>`${DTITLE[PORT[id].nat]} ${d.name} of ${PORT[id].n}`);
+  sheet(`<p class="eyebrow">Captain's papers</p><h2>${S.name}</h2>
+  <p class="sub">Aged ${age()}, sailing under ${NAT[S.nat].a} colors · ${fameTitle()}</p>
+  <dl class="stats"><dt>Ship</dt><dd>${ship().n} — ${S.guns} guns, hull ${Math.round(S.hull)}/${ship().hull}</dd>
+  <dt>Crew</dt><dd>${S.crew} of ${ship().crew} berths</dd><dt>Cargo</dt><dd>${S.cargo} of ${ship().cargo} tons</dd>
+  <dt>Ship's purse</dt><dd>${fmt(S.gold)} pieces of eight</dd><dt>Your fortune</dt><dd>${fmt(S.personal)} pieces of eight</dd>
+  <dt>Fame</dt><dd>${S.fame} · ${S.wins} victories, ${S.prizes} prizes, ${S.raids} towns sacked</dd>
+  <dt>Map pieces</dt><dd>${S.pieces} of 4${S.treasure?' — the X is marked on your chart':''}</dd>
+  <dt>Heart</dt><dd>${S.wife?`Married to ${DTITLE[PORT[S.wife.pid].nat]} ${S.wife.name} of ${PORT[S.wife.pid].n}`:sweet.length?`Courting ${sweet.join(', ')}`:'Unattached'}</dd>
+  ${S.kids.length?`<dt>Children</dt><dd>${S.kids.map(k=>`${k.name} (${kidAge(k)})`).join(', ')}</dd>`:''}${S.expect?'<dt>Expecting</dt><dd>A child is on the way</dd>':''}
+  <dt>Skill</dt><dd>${SKILLS[S.skill].n}</dd><dt>Wind</dt><dd>From the ${windFrom()}</dd></dl>
+  <h3>Standing with the crowns</h3>
+  <table class="t"><thead><tr><th>Nation</th><th>Attitude</th><th>Your rank</th></tr></thead><tbody>${rows}</tbody></table>
+  <p class="note" style="margin-top:10px">At war: ${wars.join(', ')||'none — an uneasy peace'}.</p>
+  <div class="row"><button class="btn pri" data-a="close">Back to the chart</button></div>`);
+}
+function fameTitle(){const f=S.fame;return f<5?'an unknown captain':f<20?'a captain of some repute':f<45?'a feared rover':f<80?'a famous buccaneer':'a legend of the Main';}
+function showLog(){
+  sheet(`<p class="eyebrow">Ship's log</p><h2>The ${ship().n}'s log</h2>
+  <ul class="loglist">${S.log.map(l=>`<li><i>${l.d.toUpperCase()}</i>${l.t}</li>`).join('')}</ul>
+  <div class="row"><button class="btn pri" data-a="close">Back to the chart</button></div>`);
+}
+
+/* ---------- encounters ---------- */
+function genEnemy(){
+  const r=Math.random(),hp=S.fame>20?Math.min(.18,.05+S.fame*.0015):0;
+  const kind=r<hp?'hunter':r<hp+.48?'merchant':r<hp+.72?'warship':'pirate';
+  let nat=null;
+  if(kind==='hunter'){nat=NK.slice().sort((a,b)=>S.rel[a]-S.rel[b])[0];}
+  else if(kind!=='pirate'){const q=Math.random();nat=q<.4?'es':q<.6?'en':q<.8?'fr':'nl';}
+  let sh;
+  if(kind==='merchant')sh=Math.random()<(nat==='es'?.3:.1)?'galleon':'barque';
+  else if(kind==='warship')sh=Math.random()<.55?'brig':'frigate';
+  else if(kind==='pirate')sh=Math.random()<.55?'sloop':'brig';
+  else sh='frigate';
+  const b=SHIPS[sh],ef=DIFF[S.diff].e;
+  const gm={merchant:.55,warship:1,pirate:.9,hunter:1.1}[kind], cm={merchant:.4,warship:.85,pirate:1,hunter:.9}[kind];
+  const gold=kind==='merchant'?(sh==='galleon'?ri(1800,4200):ri(300,900)):kind==='pirate'?ri(300,1100):ri(150,500);
+  return {kind,nat,ship:sh,guns:Math.max(4,Math.round(b.guns*gm*(.8+ef*.2))),hull:b.hull,maxHull:b.hull,crew:Math.round(b.crew*cm*ef*rnd(.85,1.1)),
+    gold,cargo:kind==='merchant'?Math.round(b.cargo*rnd(.4,.85)):ri(0,15),spd:b.spd,skill:{merchant:1.05,warship:.88,pirate:.92,hunter:.78}[kind],
+    label:kind==='pirate'?`pirate ${b.n.toLowerCase()}`:kind==='hunter'?`${NAT[nat].a} pirate hunter`:kind==='merchant'&&sh==='galleon'?`${NAT[nat].a} treasure galleon`:`${NAT[nat].a} ${kind==='warship'?'man-of-war ':''}${b.n.toLowerCase()}`};
+}
+function aggressive(e){return e.kind==='pirate'&&Math.random()<.7||e.kind==='hunter'||(e.kind==='warship'&&S.rel[e.nat]<=-25);}
+function encounter(){
+  const e=genEnemy();e.aggr=aggressive(e);E=e;sfx('alarm');
+  const flag=e.nat?`<span class="flag" style="background:${NAT[e.nat].c}"></span>${NAT[e.nat].n}`:'The black flag';
+  const warn=e.nat&&S.rel[e.nat]>=0&&!atWar(S.nat,e.nat)?`<p class="note">Attacking her will sour ${NAT[e.nat].n}'s view of you${NK.some(n=>atWar(n,e.nat))?', but her enemies will thank you':''}.</p>`:
+    e.nat?`<p class="note">${NK.filter(n=>atWar(n,e.nat)).map(n=>NAT[n].n).join(' and ')||'No one'} would reward you for taking her.</p>`:'<p class="note">Every crown pays well for a pirate taken.</p>';
+  const say={merchant:'Her decks ride low. She is heavy with cargo.',warship:'Her gunports are open and her decks are crowded with marines.',pirate:'She flies no honest colors.',hunter:'Her captain carries a commission to bring you in, dead or in chains.'}[e.kind];
+  sheet(`<p class="eyebrow">Sail ho!</p><h2>A ${e.label}</h2><p>${say} ${e.aggr?'<b>She is bearing down on you.</b>':''}</p>
+  <dl class="stats"><dt>Colors</dt><dd>${flag}</dd><dt>Guns</dt><dd>${e.guns}</dd><dt>Crew</dt><dd>about ${Math.max(10,Math.round(e.crew/10)*10)}</dd><dt>Your ship</dt><dd>${S.crew} men, ${S.guns} guns, hull ${Math.round(S.hull/ship().hull*100)}%</dd></dl>
+  ${warn}
+  <div class="row"><button class="btn pri" data-a="engage">Engage</button>
+  <button class="btn" data-a="${e.aggr?'evade':'pass'}">${e.aggr?'Try to outrun her':'Let her pass'}</button></div>`);
+}
+A.pass=()=>{closeSheet();S.calm=2;};
+A.evade=()=>{const p=clamp(.45*ship().spd/E.spd*(S.skill==='nav'?1.2:1),.12,.85);
+  if(Math.random()<p){closeSheet();S.calm=3;toast('You slip away on the wind.');}
+  else startBattle(true);};
+A.engage=()=>startBattle(false);
+
+/* ---------- sea battle (steer & fire) ---------- */
+function reloadTime(guns,crew,mine){let t=4.4/clamp(crew/(guns*2.2),.35,1);if(mine&&S.skill==='gun')t*=.78;if(!mine)t/=DIFF[S.diff].e;return t;}
+function startBattle(enemyFirst){
+  const e=E,a=Math.random()*6.283,d=enemyFirst?200:340;
+  B={e,t:0,steer:0,balls:[],fx:[],over:false,msgT:3,dead:1,
+    msg:enemyFirst?`The ${e.label} runs out her guns!`:(e.kind==='merchant'?'She spots your colors and crowds on sail!':'Both ships beat to quarters!'),
+    p:{x:0,y:0,h:S.heading,rl:0,rlMax:1,v:0},
+    q:{x:Math.cos(a)*d,y:Math.sin(a)*d,h:enemyFirst?a+Math.PI+rnd(-.6,.6):rnd(0,6.28),rl:enemyFirst?.6:2.6,v:0}};
+  if(e.nat&&e.kind!=='hunter')adjRel(e.nat,-4);
+  const my=ship();
+  sheet(`<p class="eyebrow">Engagement · wind from the ${windFrom()}</p><h2 style="font-size:22px">Your ${my.n.toLowerCase()} vs. the ${e.label}</h2>
+  <canvas class="arena" id="bc"></canvas>
+  <div class="bstats"><div><h4>YOU · ${S.guns} GUNS</h4><div class="meterline"><span>Hull</span><span id="ph"></span></div><div class="gauge h"><i id="phg"></i></div><div class="meterline"><span>Crew</span><span id="pc"></span></div></div>
+  <div><h4>THEM · ${e.guns} GUNS</h4><div class="meterline"><span>Hull</span><span id="qh"></span></div><div class="gauge h"><i id="qhg"></i></div><div class="meterline"><span>Crew</span><span id="qc"></span></div></div></div>
+  <div class="bmsg" id="bmsg"></div>
+  <div class="bctl"><button type="button" id="bl" aria-label="Steer to port">◀</button><button type="button" id="bf" class="fire">FIRE<i id="brl"></i></button><button type="button" id="br" aria-label="Steer to starboard">▶</button></div>
+  <p class="note" style="margin-top:8px">Your guns fire out of both sides. Turn until she lies off your beam and the guide line turns green, then fire. Ram her to board. Sail out of sight to escape.</p>`);
+  holdBtn($('#bl'),()=>{if(B)B.steer=-1;},()=>{if(B&&B.steer<0)B.steer=0;});
+  holdBtn($('#br'),()=>{if(B)B.steer=1;},()=>{if(B&&B.steer>0)B.steer=0;});
+  $('#bf').addEventListener('pointerdown',ev=>{ev.preventDefault();battleFire();});
+}
+function volley(sh,guns,mine,sides,L){
+  const n=Math.ceil(guns/2);
+  for(const sd of sides){const ang=sh.h+sd*Math.PI/2;
+    for(let i=0;i<n;i++){const off=(n>1?i/(n-1)-.5:0)*L*.7,a=ang+rnd(-.07,.07),sp=270;
+      const bx=sh.x+Math.cos(sh.h)*off+Math.cos(ang)*L*.2,by=sh.y+Math.sin(sh.h)*off+Math.sin(ang)*L*.2;
+      B.balls.push({x:bx,y:by,vx:Math.cos(a)*sp+Math.cos(sh.h)*sh.v,vy:Math.sin(a)*sp+Math.sin(sh.h)*sh.v,life:1.1+rnd(-.12,.12),mine});
+      B.fx.push({x:bx,y:by,r:5,life:.7,t:'smoke'});}}
+  sfx(mine?'cannon':'cannonFar');
+}
+function battleFire(){
+  if(!B||B.over)return;const P=B.p;
+  if(P.rl>0){B.msg='The guns are still reloading!';B.msgT=1;return;}
+  volley(P,S.guns,true,[-1,1],ship().len);P.rlMax=P.rl=reloadTime(S.guns,S.crew,true);B.msg='Fire!';B.msgT=.8;
+}
+function hitShip(b,s,L){const dx=b.x-s.x,dy=b.y-s.y,c=Math.cos(-s.h),sn=Math.sin(-s.h),lx=dx*c-dy*sn,ly=dx*sn+dy*c;return (lx/(L/2))**2+(ly/(L*.19))**2<1;}
+function updBattle(dt){
+  const P=B.p,Q=B.q,e=B.e,my=ship(),es=SHIPS[e.ship];
+  B.t+=dt;B.msgT-=dt;
+  if(!B.over)P.h=wrapA(P.h+B.steer*my.turn*(S.skill==='nav'?1.15:1)*.9*dt);
+  P.v=B.over?P.v*.97:72*windF(P.h)*my.spd*(S.skill==='nav'?1.1:1)*(.45+.55*S.hull/my.hull);
+  P.x+=Math.cos(P.h)*P.v*dt;P.y+=Math.sin(P.h)*P.v*dt;
+  const dx=P.x-Q.x,dy=P.y-Q.y,dist=Math.hypot(dx,dy),brg=Math.atan2(dy,dx),hf=e.hull/e.maxHull;
+  const fleeing=e.kind==='merchant'||(hf<.2&&e.kind!=='hunter');
+  let want;
+  if(fleeing){const away=brg+Math.PI;let bs=-1;want=away;for(const a of[-1.2,-.6,0,.6,1.2]){const h=away+a,sc=windF(h)*Math.cos(a*.8);if(sc>bs){bs=sc;want=h;}}}
+  else if(e.kind==='pirate'&&e.crew>=S.crew*.8)want=brg;
+  else{const side=wrapA(Q.h-brg)>0?1:-1;want=dist>330?brg+side*.35:dist<120?brg+side*2.1:brg+side*Math.PI/2;}
+  if(!B.over&&e.hull>0)Q.h=wrapA(Q.h+clamp(wrapA(want-Q.h),-es.turn*.85*dt,es.turn*.85*dt));
+  Q.v=e.hull<=0||B.over?Q.v*.96:72*windF(Q.h)*es.spd*(.45+.55*hf);
+  Q.x+=Math.cos(Q.h)*Q.v*dt;Q.y+=Math.sin(Q.h)*Q.v*dt;
+  P.rl=Math.max(0,P.rl-dt);Q.rl=Math.max(0,Q.rl-dt);
+  if(!B.over&&e.hull>0){const rel=wrapA(-brg+Math.PI-Q.h+Math.PI);// bearing from Q to P relative to Q heading
+    const r2=wrapA(brg-Q.h);
+    if(Q.rl<=0&&dist<310&&Math.abs(Math.abs(r2)-Math.PI/2)<.3){volley(Q,e.guns,false,[r2>0?1:-1],es.len);Q.rl=reloadTime(e.guns,e.crew,false);}}
+  const gm=S.skill==='gun'?1.2:1,em=DIFF[S.diff].e;
+  for(const b of B.balls){b.x+=b.vx*dt;b.y+=b.vy*dt;b.life-=dt;
+    const tgt=b.mine?Q:P,L=b.mine?es.len:my.len;
+    if(b.life>0&&!(b.mine&&e.hull<=0)&&hitShip(b,tgt,L)){b.life=-9;B.fx.push({x:b.x,y:b.y,r:7,life:.5,t:'boom'});sfx('hit');
+      const cd=Math.random()<.65?ri(1,2):0;
+      if(b.mine){e.hull=Math.max(0,e.hull-3.2*gm);e.crew=Math.max(0,e.crew-cd);}
+      else{S.hull=Math.max(0,S.hull-3.2*em);S.crew=Math.max(0,S.crew-cd);}}
+    else if(b.life<=0&&b.life>-5){B.fx.push({x:b.x,y:b.y,r:4,life:.6,t:'splash'});sfx('splash');b.life=-9;}}
+  B.balls=B.balls.filter(b=>b.life>0);
+  B.fx=B.fx.filter(f=>(f.life-=dt)>0);
+  if(!B.over){
+    const end=(how,msg,delay)=>{B.over=true;B.msg=msg;B.msgT=9;setTimeout(()=>{if(B)how();},delay||1100);};
+    if(S.hull<=0||S.crew<=0)end(()=>endBattle('lost'),'Your ship is shattered!');
+    else if(e.hull<=0)end(()=>endBattle('sunk'),'She is going down!',1600);
+    else if(e.crew<=0||(e.kind==='merchant'&&hf<.4&&dist<230&&Math.random()<dt*.35))end(()=>endBattle('struck'),'She strikes her colors!');
+    else if(dist<(my.len+es.len)*.45)end(()=>board(),'Grapnels away! Prepare to board!',800);
+    else if(dist>950)end(()=>endBattle(fleeing?'escaped':'fled'),fleeing?'She has escaped!':'You have slipped away.');
+  }
+  // DOM
+  const set=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
+  set('ph',Math.round(S.hull));set('pc',S.crew);set('qh',Math.round(e.hull));set('qc',e.crew);
+  const g1=document.getElementById('phg'),g2=document.getElementById('qhg'),rl=document.getElementById('brl'),bm=document.getElementById('bmsg');
+  if(g1)g1.style.width=(S.hull/my.hull*100)+'%';if(g2)g2.style.width=(e.hull/e.maxHull*100)+'%';
+  if(rl)rl.style.width=((1-P.rl/P.rlMax)*100)+'%';
+  if(bm)bm.textContent=B.msgT>0?B.msg:(P.rl>0?'Reloading…':dist<310&&Math.abs(Math.abs(wrapA(brg+Math.PI-P.h))-Math.PI/2)<.3?'She is in your sights — fire!':dist>500?'She is far off.':'Bring her onto your beam.');
+}
+function drawBattle(){
+  const el=document.getElementById('bc');if(!el||!B)return;
+  const w=el.clientWidth,h=el.clientHeight;if(el.width!==Math.round(w*dpr)){el.width=Math.round(w*dpr);el.height=Math.round(h*dpr);}
+  const c=el.getContext('2d');c.setTransform(dpr,0,0,dpr,0,0);c.imageSmoothingEnabled=false;
+  const P=B.p,Q=B.q,e=B.e,my=ship(),es=SHIPS[e.ship];
+  const mx=(P.x+Q.x)/2,my2=(P.y+Q.y)/2,dist=Math.hypot(P.x-Q.x,P.y-Q.y);
+  const sc=clamp(Math.min(w,h)/(dist+240),.3,1.35);
+  c.fillStyle='#1d4aa8';c.fillRect(0,0,w,h);
+  const g=64,vx0=mx-w/2/sc,vy0=my2-h/2/sc,vx1=mx+w/2/sc,vy1=my2+h/2/sc;
+  for(let gx=Math.floor(vx0/g);gx<=vx1/g;gx++)for(let gy=Math.floor(vy0/g);gy<=vy1/g;gy++){
+    const hs=Math.sin(gx*12.9898+gy*78.233)*43758.5453,fr=hs-Math.floor(hs);
+    if(Math.sin(B.t*1.5+fr*6.28)>.35){c.fillStyle=fr>.5?'#5e9cf0':'#3e7fdc';c.fillRect((gx*g+fr*40-mx)*sc+w/2,(gy*g+fr*30-my2)*sc+h/2,Math.max(4,12*sc),Math.max(3,4*sc));}}
+  c.save();c.translate(w/2,h/2);c.scale(sc,sc);c.translate(-mx,-my2);
+  const brg=Math.atan2(Q.y-P.y,Q.x-P.x),rel=wrapA(brg-P.h),aligned=dist<310&&Math.abs(Math.abs(rel)-Math.PI/2)<.3&&e.hull>0;
+  for(const sd of[-1,1]){const a=P.h+sd*Math.PI/2,on=aligned&&Math.sign(rel)===sd;
+    c.strokeStyle=on?'rgba(120,255,140,.95)':'rgba(255,255,255,.28)';c.lineWidth=(on?3:2)/sc;c.setLineDash([8/sc,8/sc]);
+    c.beginPath();c.moveTo(P.x+Math.cos(a)*my.len*.3,P.y+Math.sin(a)*my.len*.3);c.lineTo(P.x+Math.cos(a)*300,P.y+Math.sin(a)*300);c.stroke();}
+  c.setLineDash([]);
+  topShip(c,Q.x,Q.y,Q.h,Math.max(es.len,26/sc),e.nat?NAT[e.nat].c:'#111111',e.hull<=0?(B.dead=Math.max(0,B.dead-.008)):0);
+  topShip(c,P.x,P.y,P.h,Math.max(my.len,26/sc),NAT[S.nat].c,0);
+  c.fillStyle='#0d0d0d';for(const b of B.balls)c.fillRect(b.x-3,b.y-3,6,6);
+  for(const f of B.fx){
+    if(f.t==='smoke'){c.fillStyle=`rgba(235,235,230,${f.life*.8})`;c.beginPath();c.arc(f.x,f.y,f.r*(2.2-f.life*1.5),0,7);c.fill();}
+    else if(f.t==='boom'){c.fillStyle=`rgba(255,${120+Math.round(f.life*200)},40,${f.life*1.6})`;c.fillRect(f.x-f.r,f.y-f.r,f.r*2,f.r*2);}
+    else{c.strokeStyle=`rgba(255,255,255,${f.life*1.4})`;c.lineWidth=2;c.beginPath();c.arc(f.x,f.y,f.r*(2-f.life*1.5),0,7);c.stroke();}}
+  c.restore();
+  drawWind(c,34,h-34);
+  if(dist>360){const a=Math.atan2(Q.y-P.y,Q.x-P.x);c.fillStyle='#ffd34d';c.save();c.translate(w/2+Math.cos(a)*(Math.min(w,h)/2-18),h/2+Math.sin(a)*(Math.min(w,h)/2-18));c.rotate(a);c.beginPath();c.moveTo(9,0);c.lineTo(-6,-6);c.lineTo(-6,6);c.fill();c.restore();}
+}
+function board(){
+  const e=B.e;
+  startDuel({foe:`the captain of the ${e.label}`,skill:e.skill,mine:S.crew,theirs:e.crew,
+    cb:win=>{if(win){S.crew=Math.max(5,S.crew-Math.round(e.crew*rnd(.1,.25)));capture(e);}else defeated('Your boarders are thrown back and you are taken in irons.');}});
+}
+function endBattle(how){
+  const e=B.e;S.hull=Math.round(S.hull);
+  if(how==='sunk'){sfx('win');S.wins++;S.fame+=e.kind==='merchant'?1:3;credit(e,.6);const salv=Math.round(e.gold*.15);S.gold+=salv;
+    log(`Sank a ${e.label}. Salvaged ${salv} pieces of eight from the wreckage.`);
+    return result('She goes down',`The ${e.label} rolls over and sinks beneath the waves. Your men fish ${fmt(salv)} pieces of eight from the floating wreckage.`);}
+  if(how==='struck')return capture(e);
+  if(how==='escaped'){log(`A ${e.label} escaped us.`);return result('She got away',`The ${e.label} disappears over the horizon.`);}
+  if(how==='fled'){log(`Broke off from a ${e.label}.`);return result('You broke away','You leave the enemy in your wake and set your course again.');}
+  if(how==='lost')return defeated('Your ship is shattered and your crew can fight no more. You strike your colors.');
+}
+function credit(e,mult){
+  const pts=({merchant:1,warship:2,pirate:1.5,hunter:2.5}[e.kind]+(e.ship==='galleon'?1:0))*mult;
+  if(!e.nat){NK.forEach(n=>{S.deeds[n]+=pts*.5;adjRel(n,2);});return;}
+  adjRel(e.nat,-Math.round(8*pts));
+  NK.forEach(n=>{if(atWar(n,e.nat)){S.deeds[n]+=pts;adjRel(n,Math.round(3*pts));}});
+}
+function capture(e){
+  sfx('win');S.wins++;S.prizes++;S.hull=Math.max(1,Math.round(S.hull));e.hull=Math.round(e.hull);
+  const room=ship().cargo-S.cargo,cg=Math.min(room,e.cargo),joined=Math.max(0,Math.min(ship().crew-S.crew,Math.round(e.crew*rnd(.15,.35))));
+  S.gold+=e.gold;S.cargo+=cg;S.crew+=joined;
+  S.fame+={merchant:e.ship==='galleon'?5:2,warship:5,pirate:4,hunter:7}[e.kind];
+  credit(e,1);
+  log(`Took the ${e.label} as a prize: ${fmt(e.gold)} pieces of eight and ${cg} tons of cargo.`);
+  const swap=e.ship!==S.ship;
+  B=null;D=null;E=e;
+  sheet(`<p class="eyebrow">Prize taken</p><h2>The ${e.label} is yours</h2>
+  <dl class="stats"><dt>Plunder</dt><dd>${fmt(e.gold)} pieces of eight</dd><dt>Cargo</dt><dd>${cg} tons${cg<e.cargo?' (your hold is full)':''}</dd>
+  <dt>Recruits</dt><dd>${joined} of her sailors sign your articles</dd><dt>Fame</dt><dd>${fameTitle()}</dd></dl>
+  ${swap?`<p>Her ${SHIPS[e.ship].n.toLowerCase()} could be your new flagship: ${SHIPS[e.ship].guns} gun ports, ${SHIPS[e.ship].crew} berths, ${SHIPS[e.ship].cargo} tons of hold, hull ${Math.max(10,e.hull)}/${SHIPS[e.ship].hull}.</p>`:''}
+  <div class="row">${swap?`<button class="btn" data-a="swap">Take her as flagship</button>`:''}<button class="btn pri" data-a="close">Back to the chart</button></div>`);
+}
+A.swap=()=>{const e=E,nb=SHIPS[e.ship];S.ship=e.ship;S.hull=Math.max(10,e.hull);S.guns=Math.min(nb.guns,Math.max(S.guns,e.guns));S.crew=Math.min(S.crew,nb.crew);S.cargo=Math.min(S.cargo,nb.cargo);
+  log(`Transferred our flag to the captured ${nb.n.toLowerCase()}.`);closeSheet();toast(`You now command a ${nb.n.toLowerCase()}.`);};
+function result(title,text){B=null;D=null;sheet(`<p class="eyebrow">After the fight</p><h2>${title}</h2><p>${text}</p><div class="row"><button class="btn pri" data-a="close">Back to the chart</button></div>`);}
+function defeated(text){
+  sfx('lose');const lostGold=Math.round(S.gold*.6);S.gold-=lostGold;S.cargo=0;S.crew=Math.max(12,Math.round(S.crew*.45));S.hull=Math.round(ship().hull*.35);S.morale=45;S.day+=120;S.fame=Math.max(0,S.fame-3);
+  const safe=PORTS.filter(p=>!hostile(p)&&p.nat===S.nat)[0]||PORT.tortuga;
+  S.x=safe.x;S.y=safe.y;S.lastPort=safe.id;S.heading=awayHeading(safe);centerOn(S.x,S.y);
+  log(`Captured and held for four months. Ransomed, we limped into ${safe.n} with ${fmt(lostGold)} lost.`);
+  B=null;D=null;
+  sheet(`<p class="eyebrow">Defeat</p><h2>Struck colors</h2><p>${text}</p><p>Four months in a damp cell end when your friends pay the ransom. You lose ${fmt(lostGold)} pieces of eight and all your cargo, and your battered ship is returned to you at ${safe.n}.</p>
+  <div class="row"><button class="btn pri" data-a="close">Begin again</button></div>`);
+}
+
+/* ---------- duel ---------- */
+const HN=['HIGH','MIDDLE','LOW'];
+const ageF=()=>age()>40?Math.max(.6,1-(age()-40)*.025):1;
+function startDuel(o){
+  const ratio=o.mine/Math.max(1,o.theirs);
+  const start=ratio>=2.5?1:ratio<=.4?-1:0;
+  const win=clamp((S.kids&&S.kids.some(k=>k.mid)?1.08:1)*.8*DIFF[S.diff].w*(S.skill==='fence'?1.25:1)*ageF()*o.skill*(ratio<.6?.9:1),.33,1.4);
+  D={...o,pos:start,phase:'gap',t:0,next:1.1,act:null,h:1,win,over:false,lock:0,msg:'En garde!',fx:null,fxT:0,feinted:false};
+  B=null;
+  sheet(`<p class="eyebrow">Swords drawn</p><h2>You face ${o.foe}</h2>
+  <p class="sub">Your ${o.mine} men against their ${o.theirs}. ${start>0?'Your numbers press them back.':start<0?'You are badly outnumbered.':''}</p>
+  <canvas class="stage" id="dc" style="height:170px"></canvas>
+  <div class="call" id="dcall">En garde!</div><div class="timer"><i id="dbar"></i></div>
+  <div class="dbtns"><button type="button" data-h="0">High</button><button type="button" data-h="1">Middle</button><button type="button" data-h="2">Low</button></div>
+  <p class="note" style="margin-top:10px"><b style="color:var(--blood)">Red:</b> he lunges — parry at the same height. Watch for feints! <b style="color:var(--guard)">Blue:</b> he guards — strike at a different height, or he may counter. Drive him to the rail to win.</p>`);
+  document.querySelectorAll('.dbtns button').forEach(b=>b.addEventListener('pointerdown',ev=>{ev.preventDefault();duelPress(+b.dataset.h);}));
+}
+function duelPress(h){
+  if(!D||D.over||D.lock>0)return;
+  if(D.phase!=='tele'){D.lock=.45;D.msg='Too hasty!';if(Math.random()<.3)hitMe('Too hasty — he punishes you!');return;}
+  if(D.act==='atk'){if(h===D.h)hitFoe('Parried — and riposte!');else hitMe('His blade finds you!');}
+  else{if(h!==D.h)hitFoe('A clean hit!');else if(Math.random()<.4)hitMe('Blocked — and he counters!');else{D.msg='Blocked.';sfx('clang');}}
+  D.phase='gap';D.t=0;D.next=rnd(.3,.7);
+}
+function hitFoe(m){sfx('clang');D.pos++;D.msg=m;D.fx='me';D.fxT=.3;if(D.pos>=4)endDuel(true);}
+function hitMe(m){sfx('ouch');D.pos--;D.msg=m;D.fx='him';D.fxT=.3;if(D.pos<=-4)endDuel(false);}
+function endDuel(w){D.over=true;D.msg=w?'He throws down his sword!':'You are driven back and disarmed!';const cb=D.cb;setTimeout(()=>{D=null;cb(w);},1400);}
+function updDuel(dt){
+  D.t+=dt;D.lock=Math.max(0,D.lock-dt);D.fxT=Math.max(0,D.fxT-dt);
+  if(!D.over){
+    if(D.phase==='gap'&&D.t>=D.next){D.phase='tele';D.t=0;D.act=Math.random()<.62?'atk':'grd';D.h=ri(0,2);D.feinted=false;D.cur=D.win*(D.act==='grd'?1.25:1)*rnd(.85,1.05);
+      D.msg=D.act==='atk'?`He lunges ${HN[D.h]}!`:`He guards ${HN[D.h]}`;sfx('tick');}
+    else if(D.phase==='tele'&&D.act==='atk'&&!D.feinted&&S.diff>=1&&D.t>D.cur*.35&&Math.random()<dt*(.5+S.diff*.25)){
+      D.feinted=true;D.h=(D.h+ri(1,2))%3;D.t=D.cur*.3;D.msg=`Feint! He cuts ${HN[D.h]}!`;}
+    else if(D.phase==='tele'&&D.t>=D.cur){if(D.act==='atk')hitMe('Too slow!');else D.msg='He recovers.';D.phase='gap';D.t=0;D.next=rnd(.3,.7);}
+  }
+  const call=$('#dcall'),bar=$('#dbar');
+  if(call){call.textContent=D.msg;call.className='call'+(D.phase==='tele'&&!D.over?(D.act==='atk'?' atk':' grd'):'');}
+  if(bar)bar.style.width=(D.phase==='tele'&&!D.over?(1-D.t/D.cur)*100:0)+'%';
+  drawDuel();
+}
+function fencer(c,x,gy,dir,col,swordH,lunge,glow){
+  const hy=[gy-62,gy-46,gy-26][swordH];
+  c.strokeStyle=col;c.lineWidth=4;c.lineCap='round';
+  c.beginPath();c.moveTo(x,gy-58);c.lineTo(x,gy-28);c.moveTo(x,gy-28);c.lineTo(x-10*dir,gy);c.moveTo(x,gy-28);c.lineTo(x+12*dir,gy);
+  c.moveTo(x,gy-52);c.lineTo(x+16*dir+lunge*dir,hy);c.moveTo(x,gy-52);c.lineTo(x-12*dir,gy-62);c.stroke();
+  c.fillStyle=col;c.beginPath();c.arc(x,gy-68,7,0,7);c.fill();
+  c.fillRect(x-11,gy-77,22,4);c.beginPath();c.moveTo(x-7,gy-77);c.lineTo(x,gy-85);c.lineTo(x+7,gy-77);c.fill();
+  c.strokeStyle=glow||'#d9dcdf';c.lineWidth=glow?3:2;c.beginPath();c.moveTo(x+16*dir+lunge*dir,hy);c.lineTo(x+46*dir+lunge*dir,hy-(swordH===0?6:swordH===2?-4:0));c.stroke();
+}
+function drawDuel(){
+  const el=document.getElementById('dc');if(!el||!D)return;
+  const w=el.clientWidth,h=el.clientHeight;if(el.width!==Math.round(w*dpr)){el.width=Math.round(w*dpr);el.height=Math.round(h*dpr);}
+  const c=el.getContext('2d');c.setTransform(dpr,0,0,dpr,0,0);
+  c.fillStyle='#9fbab6';c.fillRect(0,0,w,h);
+  for(let i=0;i<8;i++){c.fillStyle=i%2?'#6f5030':'#7a5934';c.fillRect(0,h*.42+i*(h*.58/8),w,h*.58/8);}
+  c.fillStyle='#3b2817';c.fillRect(0,h*.36,14,h*.64);c.fillRect(w-14,h*.36,14,h*.64);
+  const gy=h-14,cx=w/2+D.pos*(w*.085);
+  for(let i=-4;i<=4;i++){c.fillStyle=i===D.pos?'#d3a64f':'rgba(236,223,191,.45)';c.beginPath();c.arc(w/2+i*(w*.085),10,i===0?4:3,0,7);c.fill();}
+  const meH=D.fx==='me'&&D.fxT>0?D.h:1,meL=D.fx==='me'&&D.fxT>0?18:0,tele=D.phase==='tele'&&!D.over;
+  const himH=tele?D.h:1,himL=(D.fx==='him'&&D.fxT>0)?18:tele&&D.act==='atk'?-8:0;
+  fencer(c,cx-48,gy,1,'#1e1a16',meH,meL,null);
+  fencer(c,cx+48,gy,-1,'#7a1f14',himH,himL,tele?(D.act==='atk'?'#e0553a':'#5b8fe0'):null);
+}
+
+/* ---------- the governor's ball ---------- */
+const STEPS=['Step left','Turn','Step right'];
+function startDance(pid){
+  const p=PORT[pid],d=S.dau[pid];d.danced=S.day;
+  DN={pid,i:0,n:8,hits:0,phase:'gap',t:0,next:1,cue:0,win:clamp(1.05*DIFF[S.diff].w*ageF()*(S.skill==='wit'?1.15:1),.45,1.5),msg:'The musicians strike up a sarabande…',over:false};
+  sheet(`<p class="eyebrow">The governor's ball · ${p.n}</p><h2>A dance with ${DTITLE[p.nat]} ${d.name}</h2>
+  <p class="sub">Follow the steps in time with the music. Eight measures.</p>
+  <div class="call" id="dncall"></div><div class="timer"><i id="dnbar"></i></div>
+  <div class="dbtns"><button type="button" data-s="0">Left</button><button type="button" data-s="1">Turn</button><button type="button" data-s="2">Right</button></div>
+  <p class="note" id="dnscore" style="margin-top:10px"></p>`);
+  document.querySelectorAll('.dbtns button').forEach(b=>b.addEventListener('pointerdown',ev=>{ev.preventDefault();dancePress(+b.dataset.s);}));
+}
+function dancePress(s){if(!DN||DN.over||DN.phase!=='tele')return;
+  if(s===DN.cue){sfx('step');DN.hits++;DN.msg=pick(['Graceful!','She smiles.','Perfectly in time.']);}else{DN.msg='You tread on her toes!';sfx('bad');}
+  nextStep();}
+function nextStep(){DN.i++;DN.phase='gap';DN.t=0;DN.next=rnd(.35,.6);if(DN.i>=DN.n)endDance();}
+function updDance(dt){
+  DN.t+=dt;
+  if(!DN.over){
+    if(DN.phase==='gap'&&DN.t>=DN.next){DN.phase='tele';DN.t=0;DN.cue=ri(0,2);DN.msg=STEPS[DN.cue]+'!';sfx('tick');}
+    else if(DN.phase==='tele'&&DN.t>=DN.win){DN.msg='You lose the beat.';nextStep();}
+  }
+  const c=$('#dncall'),b=$('#dnbar'),sc=$('#dnscore');
+  if(c){c.textContent=DN.msg;c.className='call'+(DN.phase==='tele'&&!DN.over?' grd':'');}
+  if(b)b.style.width=(DN.phase==='tele'&&!DN.over?(1-DN.t/DN.win)*100:0)+'%';
+  if(sc)sc.textContent=`Measure ${Math.min(DN.i+1,DN.n)} of ${DN.n} · ${DN.hits} graceful steps`;
+}
+function endDance(){
+  DN.over=true;const p=PORT[DN.pid],d=S.dau[DN.pid],h=DN.hits;
+  let gain=h>=7?3:h>=5?2:h>=3?1:0;if(gain&&S.rank[p.nat]<2)gain=Math.max(1,gain-1);if(gain&&S.fame>=30)gain++;
+  d.aff+=gain;
+  const words=gain>=3?'She laughs and squeezes your hand as the music ends. She cannot take her eyes off you.':gain===2?'She curtsies warmly and asks whether you will call again soon.':gain===1?'She thanks you politely. Perhaps next time.':'She limps away to sit with her aunt. That did not go well.';
+  log(`Danced with ${DTITLE[p.nat]} ${d.name} at ${p.n}.`);
+  setTimeout(()=>{DN=null;sheet(`<p class="eyebrow">The governor's ball · ${p.n}</p><h2>The music ends</h2><p>${words}</p><p class="note">${h} of 8 steps in time.</p>
+    <div class="row"><button class="btn pri" data-a="tab" data-v="gov">Return to the governor's house</button></div>`);},900);
+}
+function daughterHTML(p){
+  const d=S.dau[p.id];if(!d)return '';
+  const nm=`${DTITLE[p.nat]} ${d.name}`;
+  if(S.wife&&S.wife.pid===p.id){
+    let g='';
+    if(S.day-S.wifeGift>=180){S.wifeGift=S.day;S.morale=clamp(S.morale+10,0,100);
+      if(S.pieces<4){S.pieces++;g='She presses a scrap of an old treasure map into your hand. "I found it among Father\'s papers."';if(S.pieces>=4)completeMap();}
+      else{const gold=ri(300,800);S.gold+=gold;g=`She has saved ${fmt(gold)} pieces of eight from the household for your voyages.`;}
+      log(`Home to ${d.name} at ${p.n}.`);}
+    let news='';
+    if(!S.expect&&S.kids.length<8&&(!S.kids.length||S.day-S.kids[S.kids.length-1].born>=300)&&S.day-S.lastNews>=45&&Math.random()<.5){S.expect=S.day+ri(250,280);S.lastNews=S.day;news=` She takes your hands and whispers that you are to be a father${S.kids.length?' again':''}.`;log(`${d.name} is with child.`);sfx('step');}
+    else if(S.expect)news=` She is expecting your ${S.kids.length?'next ':''}child.`;
+    const kids=S.kids.length?` ${S.kids.map(k=>k.name).join(', ').replace(/, ([^,]*)$/,' and $1')} ${S.kids.length>1?'come running':'comes running'} behind her.`:'';
+    return `<h3>Your wife</h3><p>${d.name} runs to meet you at the door of the governor's house.${kids}${news} ${g}</p>${S.kids.some(k=>!k.bapt)?'<p class="note">A child of yours awaits Baptism. Visit the Church tab.</p>':''}`;}
+  if(d.scorn)return `<h3>${nm}</h3><p>${d.name} will not see the man who sacked her father's town.</p>`;
+  if(S.rel[p.nat]<10)return '';
+  if(!d.met){
+    if(S.rank[p.nat]<1)return `<p class="note">The governor mentions a daughter, but she does not receive common sea captains. Earn a rank with ${NAT[p.nat].n} first.</p>`;
+    d.met=true;log(`Introduced to ${nm}, daughter of the governor of ${p.n}.`);
+    return `<h3>The governor's daughter</h3><p>The governor introduces his daughter, ${nm}. She is ${BEAUTY[d.beauty]}.</p>${danceBtn(d)}`;}
+  const feel=d.aff<3?'polite but reserved':d.aff<6?'clearly fond of you':d.aff<9?'quite smitten':'deeply in love with you';
+  let prop='';
+  if(S.engaged===p.id)return `<h3>${nm}</h3><p>Your betrothed. The banns have been read, and she waits for you at ${churchName(p)}.</p><div class="row"><button class="btn red" data-a="tab" data-v="church">Go to the church</button></div>`;
+  if(d.aff>=9&&!S.wife&&!S.engaged)prop=S.rank[p.nat]>=3&&S.rel[p.nat]>=30?`<div class="row"><button class="btn red" data-a="propose">Ask for her hand</button></div>`:`<p class="note">She would say yes, but her father will only give her hand to a Colonel or better of ${NAT[p.nat].n}.</p>`;
+  return `<h3>${nm}</h3><p>She is ${BEAUTY[d.beauty]}, and ${feel}.${S.wife?' But you are a married man now.':''}</p>${prop}${S.wife?'':danceBtn(d)}`;
+}
+function danceBtn(d){const ok=S.day-d.danced>=20;return `<div class="row"><button class="btn" data-a="dance" ${ok?'':'disabled'}>Ask her to dance</button></div>${ok?'':'<p class="note">You danced with her only recently. Call again after your next voyage.</p>'}`;}
+A.dance=()=>startDance(curPort.id);
+A.propose=()=>{const p=curPort,d=S.dau[p.id];S.engaged=p.id;sfx('win');log(`Betrothed to ${DTITLE[p.nat]} ${d.name} of ${p.n}.`);
+  sheet(`<p class="eyebrow">${p.n} · ${dateStr()}</p><h2>She said yes!</h2><p>${d.name} accepts, and the governor gives his blessing. The banns will be read, and you will be married at ${churchName(p)}.</p>
+  <div class="row"><button class="btn pri" data-a="tab" data-v="church">Go to the church</button></div>`);};
+A.wed=()=>{const p=curPort,d=S.dau[p.id],dowry=1000*(d.beauty+1);
+  sfx('bell');S.engaged=null;S.wife={pid:p.id,name:d.name};S.personal+=dowry;S.fame+=5;S.morale=clamp(S.morale+20,0,100);S.wifeGift=S.day;
+  log(`Married ${DTITLE[p.nat]} ${d.name} at ${churchName(p)}. Dowry: ${fmt(dowry)}.`);
+  sheet(`<p class="eyebrow">Holy Matrimony · ${dateStr()}</p><h2>Wedding bells</h2>
+  <p>Before the altar of ${churchName(p)}, you and ${d.name} exchange your vows, and the priest blesses your marriage. The whole town turns out to see the bride, and your crew drink your health until dawn.</p>
+  <dl class="stats"><dt>Dowry</dt><dd>${fmt(dowry)} pieces of eight, added to your fortune</dd><dt>Home port</dt><dd>${p.n} — visit the governor's house when you are in port</dd></dl>
+  <div class="row"><button class="btn pri" data-a="tab" data-v="church">Return to the church</button></div>`);};
+
+function birth(){const w=S.wife,nat=PORT[w.pid].nat,boy=Math.random()<.5;
+  const used=S.kids.map(k=>k.name).concat([w.name]),pool=(boy?BOYS[nat]:DNAMES[nat]).filter(n=>!used.includes(n));const name=pool.length?pick(pool):pick(boy?BOYS[nat]:DNAMES[nat]);
+  S.kids.push({name,boy,born:S.day,bapt:false,conf:false,called:boy&&Math.random()<.35,priest:false,mid:false,wed:false});S.expect=null;
+  sfx('win');log(`A letter from ${w.name}: our ${boy?'son':'daughter'} ${name} is born at ${PORT[w.pid].n}.`);toast(`A letter from ${w.name}: a ${boy?'son':'daughter'}, ${name}, is born!`);}
+/* ---------- ports ---------- */
+function openPort(p,tab){
+  sfx('bell');curPort=p;S.lastPort=p.id;S.x=p.x;S.y=p.y;S.speed=0;centerOn(p.x,p.y);
+  portTab=tab||(p.nat===S.nat||S.wife&&S.wife.pid===p.id?'gov':'tavern');
+  const o=S.ps[p.id],raidable=o.raid<=month()-12;
+  if(hostile(p)){
+    sheet(`<p class="eyebrow"><span class="flag" style="background:${NAT[p.nat].c}"></span>${NAT[p.nat].n} · closed to you</p><h2>${p.n}</h2>
+    <p>The fort's guns are trained on your ship and the harbor chain is up. ${NAT[p.nat].n} will not let you land.</p>
+    <p class="note">Garrison: about ${garrison(p)} soldiers. Your crew: ${S.crew}.${raidable?'':' The town was sacked recently and has little left to take.'}</p>
+    <div class="row"><button class="btn red" data-a="raid" ${S.crew<25||!raidable?'disabled':''}>Attack the town</button><button class="btn pri" data-a="sail">Sail away</button></div>
+    ${S.crew<25?'<p class="note">You need at least 25 men to attack a town.</p>':''}`);return;}
+  renderPort();
+}
+A.sail=()=>{const p=curPort;S.heading=awayHeading(p);S.anchored=false;S.calm=2;closeSheet();};
+A.tab=v=>{portTab=v;renderPort();};
+function renderPort(){
+  const p=curPort,o=S.ps[p.id],wit=S.skill==='wit';
+  const tabs=[['gov','Governor'],['tavern','Tavern'],['market','Market'],['yard','Shipwright'],['church','Church'],['plunder','Divide plunder'],['attack','Attack']];
+  let body='';churchOpen=false;
+  if(portTab==='gov'){
+    const rel=S.rel[p.nat],rk=S.rank[p.nat],need=(rk+1)*2,foes=NK.filter(n=>atWar(n,p.nat)).map(n=>NAT[n].n);
+    if(rel<0)body=`<p>The governor's secretary says His Excellency is indisposed. ${NAT[p.nat].n} regards you as <b>${relWord(rel).toLowerCase()}</b>.</p>`;
+    else if(rk>=6)body=`<p>The governor bows low. There is no higher honor ${NAT[p.nat].n} can give you, Marquis.</p>`;
+    else if(S.deeds[p.nat]>=need&&rel>=10){const reward=400*(rk+1);S.rank[p.nat]++;S.deeds[p.nat]-=need;S.gold+=reward;S.fame+=3;
+      log(`Promoted to ${RANKS[S.rank[p.nat]]} by the governor of ${p.n}, with a purse of ${fmt(reward)}.`);
+      body=`<p>"Your services to the Crown have not gone unnoticed." The governor names you <b>${RANKS[S.rank[p.nat]]}</b> and presents a purse of <b>${fmt(reward)}</b> pieces of eight.${S.rank[p.nat]>=4?' A grant of land comes with the title.':''}</p>`;}
+    else body=`<p>The governor receives you ${rel>=60?'warmly':'politely'}. Your rank with ${NAT[p.nat].n}: <b>${RANKS[rk]}</b>.</p>
+      <p>${foes.length?`"We are at war with ${foes.join(' and ')}. Strike at their ships and towns, and you will be rewarded."`:'"We are at peace with all nations, though pirates still trouble our waters."'}</p>
+      <p class="note">Service toward your next promotion: ${Math.floor(S.deeds[p.nat]*10)/10} of ${need}.</p>`;
+    body+=daughterHTML(p);
+  }
+  if(portTab==='tavern'){
+    const cost=wit?6:8,space=ship().crew-S.crew,avail=Math.min(o.rec,space);
+    body=`<p>${o.rec} sailors loiter by the bar, ready to sign articles for ${cost} pieces of eight a head.</p>
+    <div class="row"><button class="btn" data-a="hire" data-v="10" ${avail<1||S.gold<cost?'disabled':''}>Sign on 10</button><button class="btn pri" data-a="hire" data-v="all" ${avail<1||S.gold<cost?'disabled':''}>Sign on ${Math.max(0,Math.min(avail,Math.floor(S.gold/cost)))}</button></div>
+    ${space<1?'<p class="note">Every berth aboard is filled.</p>':''}
+    <h3>Talk in the tavern</h3><p><i>${rumor(p)}</i></p>
+    ${o.piece&&S.pieces<4?`<h3>A torn map</h3><p>A one-eyed sailor leans close and offers you a scrap of an old treasure map for ${o.pieceCost} pieces of eight.</p>
+     <div class="row"><button class="btn pri" data-a="piece" ${S.gold<o.pieceCost?'disabled':''}>Buy the scrap</button></div>`:''}`;
+  }
+  if(portTab==='market'){
+    const buy=Math.round(o.price*(wit?.85:1)),sell=Math.round(o.price*(wit?1.12:1)*.92),fc=Math.round(S.crew*30*o.food*(wit?.85:1)),room=ship().cargo-S.cargo;
+    body=`<dl class="stats"><dt>Goods here</dt><dd>buy ${buy}, sell ${sell} per ton</dd><dt>Your hold</dt><dd>${S.cargo} of ${ship().cargo} tons</dd><dt>Provisions</dt><dd>${Math.floor(S.rations/Math.max(1,S.crew))} days for ${S.crew} men</dd></dl>
+    <div class="row"><button class="btn" data-a="sellc" data-v="10" ${S.cargo<1?'disabled':''}>Sell 10 tons</button><button class="btn pri" data-a="sellc" data-v="all" ${S.cargo<1?'disabled':''}>Sell all (${fmt(S.cargo*sell)})</button></div>
+    <div class="row"><button class="btn" data-a="buyc" ${room<10||S.gold<buy*10?'disabled':''}>Buy 10 tons (${buy*10})</button><button class="btn" data-a="food" ${S.gold<fc?'disabled':''}>Buy 30 days' food (${fc})</button></div>
+    <p class="note">Prices change every month and differ from port to port. The voyages are long now, so keep your stores full.</p>`;
+  }
+  if(portTab==='yard'){
+    const missing=Math.round(ship().hull-S.hull),rc=Math.round(missing*3*(wit?.85:1)),gc=110;
+    const forSale=['sloop','barque','brig','galleon','frigate'].filter(k=>k!==S.ship&&(k==='frigate'?p.size>=3:k==='brig'||k==='galleon'?p.size>=2:true));
+    const tradeIn=Math.round(ship().cost*.5*S.hull/ship().hull);
+    body=`<dl class="stats"><dt>Hull</dt><dd>${Math.round(S.hull)} of ${ship().hull}</dd><dt>Guns</dt><dd>${S.guns} of ${ship().guns} ports</dd></dl>
+    <div class="row"><button class="btn pri" data-a="repair" ${missing<1||S.gold<rc?'disabled':''}>${missing<1?'Hull is sound':`Repair all (${fmt(rc)})`}</button><button class="btn" data-a="gun" ${S.guns>=ship().guns||S.gold<gc?'disabled':''}>Buy a cannon (${gc})</button></div>
+    <h3>Ships for sale</h3><p class="note">Your ${ship().n.toLowerCase()} is worth ${fmt(tradeIn)} in trade.</p>
+    <div style="overflow-x:auto"><table class="t"><thead><tr><th>Ship</th><th>Guns</th><th>Berths</th><th>Hold</th><th>Cost</th><th></th></tr></thead><tbody>
+    ${forSale.map(k=>{const s=SHIPS[k],net=Math.max(0,s.cost-tradeIn);return`<tr><td>${s.n}</td><td>${s.guns}</td><td>${s.crew}</td><td>${s.cargo}</td><td>${fmt(net)}</td><td><button class="btn" style="min-height:36px;padding:4px 8px" data-a="buyship" data-v="${k}" ${S.gold<net?'disabled':''}>Buy</button></td></tr>`}).join('')}
+    </tbody></table></div>`;
+  }
+  if(portTab==='plunder'){
+    const share=Math.round(S.gold*.4),crewPay=S.gold-share,stay=Math.max(8,Math.round(S.crew*.3));
+    body=`<p>Divide the ship's purse according to the articles. Most of the crew will take their pay and go ashore. A few loyal hands stay aboard.</p>
+    <dl class="stats"><dt>Ship's purse</dt><dd>${fmt(S.gold)}</dd><dt>Crew's shares</dt><dd>${fmt(crewPay)} among ${S.crew} men (${fmt(crewPay/Math.max(1,S.crew))} each)</dd>
+    <dt>Captain's share</dt><dd>${fmt(share)}</dd><dt>Stay aboard</dt><dd>${stay} men, in high spirits</dd><dt>Your fortune</dt><dd>${fmt(S.personal)} → ${fmt(S.personal+share)}</dd></dl>
+    <div class="row"><button class="btn pri" data-a="divide" ${S.gold<100?'disabled':''}>Divide the plunder</button></div>
+    <h3>Retire from the sea</h3><p>Take your fortune and your titles ashore for good. This ends your career.</p>
+    <div class="row"><button class="btn" data-a="retire_ask">Retire…</button></div>`;
+  }
+  if(portTab==='church'){
+    churchOpen=true;const prot=p.nat==='en'||p.nat==='nl',cn=churchName(p),home=S.wife&&S.wife.pid===p.id,d=S.dau[p.id];let fam='';
+    if(S.engaged===p.id)fam+=`<h3>Holy Matrimony</h3><p>The banns have been read. ${DTITLE[p.nat]} ${d.name} waits for you at the altar.</p><div class="row"><button class="btn red" data-a="wed">Celebrate the wedding</button></div>`;
+    if(home&&S.kids.length){fam+='<h3>Your family</h3>'+S.kids.map((k,i)=>{const a=kidAge(k);let act='';
+      if(!k.bapt)act=`<button class="btn" data-a="bapt" data-v="${i}">Have ${k.name} baptized</button>`;
+      else if(a>=12&&!k.conf)act=`<button class="btn" data-a="conf" data-v="${i}">Confirmation for ${k.name}</button>`;
+      else if(k.boy&&a>=18&&k.called&&!k.priest)act=`<button class="btn" data-a="orders" data-v="${i}">Bless his call to the priesthood</button>`;
+      else if(k.boy&&a>=16&&!k.called&&!k.mid)act=`<button class="btn" data-a="mid" data-v="${i}">Take ${k.name} to sea as midshipman</button>`;
+      else if(!k.boy&&a>=18&&!k.wed)act=`<button class="btn" data-a="kwed" data-v="${i}" ${S.gold<500?'disabled':''}>Give ${k.name} away in marriage (500 dowry)</button>`;
+      return `<p><b>${k.name}</b>, your ${k.boy?'son':'daughter'}, ${a<1?'an infant':`aged ${a}`}${k.priest?', a priest':''}${k.mid?', midshipman aboard your ship':''}${k.wed?', married':''}.${k.called&&!k.priest&&a>=18?` ${k.name} tells you he feels called to the priesthood.`:''}</p>${act?`<div class="row">${act}</div>`:''}`;}).join('');}
+    else if(S.wife&&S.kids.some(k=>!k.bapt))fam+=`<p class="note">Your children are baptized at your wife's parish in ${PORT[S.wife.pid].n}.</p>`;
+    const anoint=age()>=50?`<h3>Anointing of the Sick</h3><p>Old wounds ache and the sea air grows cold. Ask the priest to anoint you and pray for your strength.</p><div class="row"><button class="btn" data-a="anoint" ${S.day-S.lastAnoint<360?'disabled':''}>Receive the Anointing</button></div>`:'';
+    body=`<h3>${cap(cn)}</h3><p>${prot?`Catholic worship is only quietly tolerated in this ${NAT[p.nat].a} colony. A priest says Mass behind closed doors for sailors and the faithful.`:`The bells of ${cn} ring out over the harbor.`}</p>
+    ${fam}
+    <h3>Holy Mass</h3><p>Hear Mass with your crew and receive Holy Communion.</p><div class="row"><button class="btn pri" data-a="mass" ${S.day-S.lastMass<7?'disabled':''}>Hear Mass</button></div>${S.day-S.lastMass<7?'<p class="note">You heard Mass this week.</p>':''}
+    <h3>Confession</h3><p>Kneel in the confessional and unburden your conscience.</p><div class="row"><button class="btn" data-a="confess" ${S.day-S.lastConf<30?'disabled':''}>Go to confession</button></div>${S.day-S.lastConf<30?'<p class="note">You went to confession within the month.</p>':''}
+    ${anoint}
+    <h3>Alms for the poor</h3><p>The poor of ${p.n} gather at the church door.</p><div class="row"><button class="btn" data-a="alms" data-v="100" ${S.gold<100?'disabled':''}>Give 100</button><button class="btn" data-a="alms" data-v="500" ${S.gold<500?'disabled':''}>Give 500</button></div>`;
+  }
+  if(portTab==='attack'){
+    const raidable=o.raid<=month()-12,own=p.nat===S.nat,friendly=S.rel[p.nat]>-25,home=S.wife&&S.wife.pid===p.id;
+    body=`<p>Storm ${p.n} by land. About ${garrison(p)} soldiers hold the fort against your ${S.crew} men, and its guns will rake your boats as you row ashore.</p>
+    <p class="note">${own?`This is a town of your own nation. ${NAT[p.nat].n} will strip you of every title and brand you an outlaw.`:friendly?`${NAT[p.nat].n} will become your sworn enemy and take away any rank you hold.`:'Her enemies will reward you.'}${home?' <b>Your wife lives here.</b>':''}${S.dau[p.id]&&!home&&S.dau[p.id].met?` ${DTITLE[p.nat]} ${S.dau[p.id].name} will never forgive you.`:''}</p>
+    <div class="row"><button class="btn red" data-a="raid" ${S.crew<25||!raidable?'disabled':''}>Attack the town</button></div>
+    ${S.crew<25?'<p class="note">You need at least 25 men to attack a town.</p>':''}${raidable?'':'<p class="note">The town was sacked recently and has little left to take.</p>'}`;
+  }
+  sheet(`<p class="eyebrow"><span class="flag" style="background:${NAT[p.nat].c}"></span>${NAT[p.nat].n}${p.haven?' · pirate haven':''} · ${['','small','busy','great'][p.size]} port</p>
+  <h2>${p.n}${S.wife&&S.wife.pid===p.id?' ♥':''}</h2><p class="sub">${dateStr()}. ${NAT[p.nat].n} regards you as ${relWord(S.rel[p.nat]).toLowerCase()}.</p>
+  <div class="tabs">${tabs.map(([k,l])=>`<button type="button" data-a="tab" data-v="${k}" aria-pressed="${portTab===k}">${l}</button>`).join('')}</div>
+  ${body}
+  <div class="row" style="margin-top:16px"><button class="btn pri" data-a="sail">Set sail</button></div>`);
+  hud();
+}
+function rumor(p){
+  const opts=[];
+  const best=PORTS.filter(q=>q!==p).sort((a,b)=>S.ps[b.id].price-S.ps[a.id].price)[0];
+  opts.push(`Merchants in ${best.n} are paying ${S.ps[best.id].price} a ton for goods this month.`);
+  const wars=Object.keys(S.wars).filter(k=>S.wars[k]).map(k=>k.split('-').map(n=>NAT[n].n).join(' and '));
+  opts.push(`They say ${pick(wars)} are at war. Rich pickings for a captain with the right letter of marque.`);
+  if(S.fame>20)opts.push('A man in a fine coat was asking about you by name. A pirate hunter, they say.');
+  if(S.pieces>0&&S.pieces<4)opts.push('Old salts swear the rest of that map you carry is scattered among the taverns of the Main.');
+  const ds=Object.entries(S.dau).filter(([id,d])=>!d.met&&id!==p.id);
+  if(ds.length){const[id,d]=pick(ds);opts.push(`The governor of ${PORT[id].n} has a daughter, ${d.name}. They say she is ${BEAUTY[d.beauty]}.`);}
+  opts.push(`The wind blows from the ${windFrom()} this month. Sailing into it, you'll hardly make headway.`);
+  if(S.morale<30)opts.push('Your own crew are muttering over their cups. They want their share of the plunder.');
+  return pick(opts);
+}
+function completeMap(){S.treasure=pick(CAYS);log(`The four scraps fit together. The X marks ${S.treasure.n}.`);toast('The map is complete! The X is marked on your chart.');}
+A.hire=v=>{const p=curPort,o=S.ps[p.id],cost=S.skill==='wit'?6:8;let n=Math.min(o.rec,ship().crew-S.crew,Math.floor(S.gold/cost));if(v!=='all')n=Math.min(n,10);
+  if(n<1)return;o.rec-=n;S.crew+=n;S.gold-=n*cost;S.morale=clamp(S.morale+2,0,100);renderPort();};
+A.piece=()=>{const o=S.ps[curPort.id];if(S.gold<o.pieceCost)return;S.gold-=o.pieceCost;o.piece=false;S.pieces++;
+  if(S.pieces>=4)completeMap();else log(`Bought a scrap of treasure map in ${curPort.n} (${S.pieces} of 4).`);renderPort();};
+A.sellc=v=>{const o=S.ps[curPort.id],sell=Math.round(o.price*(S.skill==='wit'?1.12:1)*.92),n=v==='all'?S.cargo:Math.min(10,S.cargo);S.cargo-=n;S.gold+=n*sell;sfx('coin');renderPort();};
+A.buyc=()=>{const o=S.ps[curPort.id],buy=Math.round(o.price*(S.skill==='wit'?.85:1));if(S.gold<buy*10)return;S.gold-=buy*10;S.cargo+=10;renderPort();};
+A.food=()=>{const o=S.ps[curPort.id],fc=Math.round(S.crew*30*o.food*(S.skill==='wit'?.85:1));if(S.gold<fc)return;S.gold-=fc;S.rations+=S.crew*30;renderPort();};
+A.repair=()=>{const rc=Math.round((ship().hull-S.hull)*3*(S.skill==='wit'?.85:1));if(S.gold<rc)return;S.gold-=rc;S.hull=ship().hull;renderPort();};
+A.gun=()=>{if(S.gold<110||S.guns>=ship().guns)return;S.gold-=110;S.guns++;renderPort();};
+A.buyship=k=>{const tradeIn=Math.round(ship().cost*.5*S.hull/ship().hull),s=SHIPS[k],net=Math.max(0,s.cost-tradeIn);if(S.gold<net)return;
+  S.gold-=net;S.ship=k;S.hull=s.hull;S.guns=Math.min(s.guns,Math.max(S.guns,Math.round(s.guns*.6)));S.crew=Math.min(S.crew,s.crew);S.cargo=Math.min(S.cargo,s.cargo);
+  log(`Bought a ${s.n.toLowerCase()} in ${curPort.n}.`);renderPort();};
+A.divide=()=>{const share=Math.round(S.gold*.4);S.personal+=share;S.gold=0;S.crew=Math.max(8,Math.round(S.crew*.3));S.morale=95;sfx('coin');
+  log(`Divided the plunder at ${curPort.n}. Captain's share: ${fmt(share)}.`);renderPort();toast(`Your share: ${fmt(share)} pieces of eight.`);};
+A.mass=()=>{S.lastMass=S.day;S.morale=clamp(S.morale+8,0,100);sfx('bell');toast('Your crew leave Mass in better spirits.');renderPort();};
+A.confess=()=>{S.lastConf=S.day;S.morale=clamp(S.morale+3,0,100);sfx('step');toast('You receive absolution and leave lighter of heart.');renderPort();};
+A.anoint=()=>{S.lastAnoint=S.day;S.morale=clamp(S.morale+5,0,100);sfx('bell');log(`Received the Anointing of the Sick at ${churchName(curPort)}.`);toast('The priest anoints you and prays for your strength.');renderPort();};
+A.alms=v=>{v=+v;if(S.gold<v)return;S.gold-=v;S.fame+=v>=500?2:0;adjRel(curPort.nat,v>=500?4:1);sfx('coin');toast(`The poor of ${curPort.n} bless your name.`);renderPort();};
+A.bapt=i=>{const k=S.kids[+i];k.bapt=true;S.fame+=1;sfx('bell');log(`${k.name} baptized at ${churchName(curPort)}, with the governor standing as godfather.`);toast(`${k.name} is baptized. The governor stands as godfather.`);renderPort();};
+A.conf=i=>{const k=S.kids[+i];k.conf=true;sfx('bell');log(`${k.name} confirmed at ${churchName(curPort)}.`);toast(`${k.name} receives the sacrament of Confirmation.`);renderPort();};
+A.orders=i=>{const k=S.kids[+i];k.priest=true;S.fame+=3;sfx('bell');log(`Our son ${k.name} is ordained a priest.`);toast(`${k.name} is ordained a priest. Your wife weeps for joy.`);renderPort();};
+A.mid=i=>{const k=S.kids[+i];k.mid=true;S.morale=clamp(S.morale+5,0,100);sfx('win');log(`Our son ${k.name} joins the ship as midshipman.`);toast(`${k.name} signs aboard as your midshipman. He fences well.`);renderPort();};
+A.kwed=i=>{const k=S.kids[+i];if(S.gold<500)return;S.gold-=500;k.wed=true;S.fame+=1;sfx('bell');log(`Gave our daughter ${k.name} away in marriage.`);toast(`${k.name} is married. You give her away with a proud heart.`);renderPort();};
+A.retire_ask=()=>{sheet(`<p class="eyebrow">Retire</p><h2>Leave the sea for good?</h2><p>Your career ends here, and your fortune, titles, family and fame decide how you live out your days.</p>
+  <div class="row"><button class="btn red" data-a="retire">Retire</button><button class="btn pri" data-a="tab" data-v="plunder">Not yet</button></div>`);};
+A.retire=()=>retire();
+A.raid=()=>{const p=curPort,g=garrison(p)+ri(-10,30),wasFriendly=S.rel[p.nat]>-25;
+  const lostC=Math.round(S.crew*rnd(.06,.16)),lostH=ri(5,18);S.crew=Math.max(6,S.crew-lostC);S.hull=Math.max(5,S.hull-lostH);
+  toast(`The fort's guns rake your boats. ${lostC} men lost.`);
+  startDuel({foe:`the commander of ${p.n}`,skill:.8,mine:S.crew,theirs:g,cb:win=>{
+    adjRel(p.nat,wasFriendly?-75:-30);
+    if(wasFriendly){S.rank[p.nat]=0;S.deeds[p.nat]=0;log(`${NAT[p.nat].n} brands you an outlaw and strips you of your titles.`);}
+    const d=S.dau[p.id],home=S.wife&&S.wife.pid===p.id;
+    if(d&&!home){d.scorn=true;d.aff=0;}
+    if(home){S.fame=Math.max(0,S.fame-5);log(`${S.wife.name} is mortified that you attacked her own town.`);}
+    sfx(win?'win':'lose');if(win){const loot=p.size*ri(800,1500);S.gold+=loot;S.fame+=8;S.raids++;S.ps[p.id].raid=month();S.crew=Math.max(8,S.crew-ri(3,12));
+      NK.forEach(n=>{if(atWar(n,p.nat)){S.deeds[n]+=3;adjRel(n,6);}});
+      log(`Sacked ${p.n} and carried off ${fmt(loot)} pieces of eight.`);
+      result(`${p.n} has fallen`,`The commander surrenders his sword. Your men strip the treasury and the merchants' strongboxes: <b>${fmt(loot)}</b> pieces of eight.${wasFriendly?` ${NAT[p.nat].n} will not forget this.`:''}`);}
+    else{const lost=Math.round(S.crew*.45);S.crew=Math.max(6,S.crew-lost);S.morale=clamp(S.morale-20,0,100);
+      log(`Repulsed at ${p.n}. Lost ${lost} men.`);result('Beaten back',`The garrison holds. You fall back to the boats with ${lost} more men lost.`);}
+  }});};
+function dig(){
+  sfx('win');const g=ri(3500,7000);S.gold+=g;S.fame+=6;log(`Dug up a buried treasure on ${S.treasure.n}: ${fmt(g)} pieces of eight!`);
+  const where=S.treasure.n;S.treasure=null;S.pieces=0;
+  sheet(`<p class="eyebrow">Treasure</p><h2>X marks the spot</h2><p>On ${where}, your shovels strike the lid of an iron-bound chest. Inside lies <b>${fmt(g)}</b> pieces of eight in old Spanish coin.</p><div class="row"><button class="btn pri" data-a="close">Back to the chart</button></div>`);
+}
+
+/* ---------- retire / title ---------- */
+function retire(){
+  const ranks=NK.reduce((a,n)=>a+S.rank[n],0),bestN=NK.slice().sort((a,b)=>S.rank[b]-S.rank[a])[0];
+  const wifeD=S.wife&&S.dau[S.wife.pid];
+  const score=Math.round(S.personal+S.gold*.25+S.fame*120+ranks*700+(wifeD?(wifeD.beauty+1)*2000:0)+S.kids.length*900);
+  const end=score<3000?'You end your days mending nets in a fishing village. The children laugh at your stories of galleons and gold.':
+    score<9000?'You buy a tavern near the docks, where the drinks are watered and your tales grow taller every year.':
+    score<20000?'You settle on a modest plantation and become a respected figure in the colony.':
+    score<40000?`${NAT[bestN].n} names you governor of a colony. You hang pirates now, with a twinkle in your eye.`:
+    'Your fortune and titles are the envy of the courts of Europe. Ballads of your exploits are sung for a hundred years.';
+  const pr=S.kids.filter(k=>k.priest);
+  const fam=wifeD?` ${S.wife.name} is at your side${S.kids.length?`, and ${S.kids.length} children fill your table on Sundays${pr.length?`, while ${pr[0].name} says the Mass`:''}. Your grandchildren grow up on tales of the Spanish Main.`:'.'}`:' You never married, and the house is quiet in the evenings.';
+  wipe();
+  sheet(`<p class="eyebrow">The end of a career · ${dateStr()}</p><h2>${S.name} retires at ${age()}</h2>
+  <p>${end}${fam}</p>
+  <dl class="stats"><dt>Fortune</dt><dd>${fmt(S.personal+S.gold*.25)} pieces of eight</dd><dt>Fame</dt><dd>${S.fame} · ${fameTitle()}</dd>
+  <dt>Titles</dt><dd>${NK.filter(n=>S.rank[n]>0).map(n=>`${RANKS[S.rank[n]]} of ${NAT[n].n}`).join(', ')||'none'}</dd>
+  <dt>Family</dt><dd>${wifeD?`Married to ${S.wife.name} of ${PORT[S.wife.pid].n}${S.kids.length?`, ${S.kids.length} children`:''}`:'Unmarried'}</dd>
+  <dt>Record</dt><dd>${S.wins} victories, ${S.prizes} prizes, ${S.raids} towns sacked</dd><dt>Score</dt><dd>${fmt(score)}</dd></dl>
+  <div class="row"><button class="btn pri" data-a="title">A new career</button></div>`);
+  S=null;
+}
+let pickN='en',pickS='fence',pickD=1;
+A.title=()=>titleScreen();
+function titleScreen(){
+  const saved=load();
+  sheet(`<p class="eyebrow">The Caribbean · 1660</p><div class="title-art">Brethren of the Coast</div>
+  <p class="sub">Sail the Spanish Main as a privateer. Take prizes, cross swords, sack towns, court a governor's daughter, and retire rich — if you live that long.</p>
+  ${saved?`<div class="row"><button class="btn pri" data-a="cont">Continue: ${saved.name}, ${MONTHS[Math.floor(saved.day/30)%12]} ${1660+Math.floor(saved.day/360)}</button></div><h3>Or begin anew</h3>`:''}
+  <label class="lbl" for="nm">YOUR NAME</label><input class="txt" id="nm" maxlength="24" value="Captain Hawkes" autocomplete="off">
+  <label class="lbl">SAIL UNDER THE FLAG OF</label><div class="pick">${NK.map(n=>`<button type="button" data-a="pn" data-v="${n}" aria-pressed="${pickN===n}"><span class="flag" style="background:${NAT[n].c}"></span>${NAT[n].n}<small>Start at ${PORT[{es:'havana',en:'portroyal',fr:'tortuga',nl:'willemstad'}[n]].n}${n==='es'?' · at war with everyone':''}</small></button>`).join('')}</div>
+  <label class="lbl">YOUR SPECIAL SKILL</label><div class="pick">${Object.entries(SKILLS).map(([k,s])=>`<button type="button" data-a="ps" data-v="${k}" aria-pressed="${pickS===k}">${s.n}<small>${s.d}</small></button>`).join('')}</div>
+  <label class="lbl">DIFFICULTY</label><div class="pick">${DIFF.map((d,i)=>`<button type="button" data-a="pd" data-v="${i}" aria-pressed="${pickD===i}">${d.n}</button>`).join('')}</div>
+  <div class="row"><button class="btn pri" data-a="start" style="min-height:52px;font-size:17px">Weigh anchor</button></div>`);
+}
+const keepName=()=>{const el=$('#nm');return el?el.value:''};
+A.pn=v=>{const n=keepName();pickN=v;titleScreen();$('#nm').value=n;};
+A.ps=v=>{const n=keepName();pickS=v;titleScreen();$('#nm').value=n;};
+A.pd=v=>{const n=keepName();pickD=+v;titleScreen();$('#nm').value=n;};
+A.start=()=>{const n=(keepName()||'').trim()||'Captain Hawkes';newGame(n,pickN,pickS,pickD);begin();
+  sheet(`<p class="eyebrow">${dateStr()}</p><h2>Your orders</h2><p>${NAT[S.nat].n} has granted you a letter of marque. You command a sloop of 8 guns and 40 men, with 600 pieces of eight in the ship's purse.</p>
+  <p>Hold <b>◀</b> and <b>▶</b> to steer. Your ship always runs before the wind, which now blows from the <b>${windFrom()}</b>. Sail with it or across it and you fly; turn into it and you'll hardly move. Sail into a harbor to enter port.</p>
+  <p>Take prizes from your nation's enemies, then visit a governor to be rewarded. Win a rank and you may be introduced to a governor's daughter. When the crew grows restless, divide the plunder.</p>
+  <div class="row"><button class="btn pri" data-a="close">To sea!</button></div>`);};
+A.cont=()=>{S=load();if(!S)return titleScreen();begin();closeSheet();};
+function begin(){resize();centerOn(S.x,S.y);view.follow=true;hud();}
+
+/* ---------- loop ---------- */
+let last=performance.now();
+function loop(now){const dt=Math.min(.05,(now-last)/1000);last=now;
+  if(S){if(!paused)update(dt);if(view.follow)centerOn(S.x,S.y);draw();hud();}
+  else{ctx.setTransform(dpr,0,0,dpr,0,0);ctx.imageSmoothingEnabled=false;ctx.fillStyle='#1d4aa8';ctx.fillRect(0,0,W,H);}
+  if(B){updBattle(dt);drawBattle();}
+  if(D)updDuel(dt);
+  if(DN)updDance(dt);
+  musicTick();waterTick();
+  requestAnimationFrame(loop);}
+const sndBtn=$('#snd');const sndLabel=()=>sndBtn.textContent=SMODES[SND.mode];sndLabel();
+sndBtn.addEventListener('click',()=>{SND.mode=(SND.mode+1)%3;try{localStorage.setItem('brethren-sound',SND.mode)}catch(_){}sndLabel();sfx('blip');});
+resize();titleScreen();requestAnimationFrame(loop);
+document.addEventListener('visibilitychange',()=>{if(document.hidden)save();});
+})();
+</script>
+
+</body></html>
