@@ -104,7 +104,7 @@ input.txt{font:inherit;font-size:17px;width:100%;box-sizing:border-box;backgroun
 @media (prefers-reduced-motion:reduce){.toast{transition:none}}
 
 /* v3 additions */
-.bar{display:grid;grid-template-columns:1.35fr 1fr 1fr 1fr 1.35fr}
+.bar{display:grid;grid-template-columns:1fr 1.3fr 1fr}
 .bar .steer{font-size:22px;font-family:var(--f-display);touch-action:none;user-select:none;-webkit-user-select:none}
 .bar .steer:active,.bar .steer.on{background:var(--brass-d)}
 .arena{width:100%;height:min(48vh,400px);display:block;border-radius:3px;background:#1d4aa8;touch-action:none}
@@ -117,21 +117,29 @@ input.txt{font:inherit;font-size:17px;width:100%;box-sizing:border-box;backgroun
 .bctl button:active{background:var(--ink-2)}
 .bctl .fire{background:var(--blood)}
 .bctl .fire i{position:absolute;left:0;bottom:0;height:5px;background:var(--parch);width:100%}
-.sndbtn{position:absolute;top:10px;left:max(10px,env(safe-area-inset-left,0px));font-family:"Pixelify Sans",monospace;font-size:13px;color:#fff;background:rgba(10,20,40,.72);border:1px solid var(--brass);border-radius:2px;padding:6px 10px;min-height:36px;cursor:pointer}
+.scene{display:block;width:100%;height:auto;aspect-ratio:16/9;image-rendering:pixelated;image-rendering:crisp-edges;border:2px solid var(--ink);border-radius:2px;margin:8px 0 10px;background:#000}
+.arena{image-rendering:pixelated;image-rendering:crisp-edges;border:2px solid var(--ink)}
+.chart{display:block;width:100%;height:auto;border-radius:2px;box-shadow:0 2px 10px rgba(0,0,0,.25);margin:6px 0}
+.frag{display:block;width:min(72%,360px);height:auto;margin:6px auto;image-rendering:pixelated;image-rendering:crisp-edges}
+.mgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:6px 0}
+.mgrid .btn{min-height:52px}
+.fgrid{display:grid;grid-template-columns:auto repeat(3,minmax(0,1fr));gap:6px 8px;align-items:center}
+.fgrid span{font-family:var(--f-label);font-size:12px;letter-spacing:.08em;color:var(--ink-2);text-transform:uppercase}
+.fgrid button{font-family:var(--f-label);font-size:16px;min-height:56px;border:0;border-radius:4px;background:var(--ink);color:var(--parch);touch-action:none;user-select:none;-webkit-user-select:none}
+.fgrid button[data-f^="a"]{background:var(--blood)}
+.fgrid button[aria-pressed="true"]{box-shadow:inset 0 0 0 3px var(--brass)}
+.fgrid button:active{filter:brightness(1.3)}
 </style>
 <div id="app">
   <header class="hud" id="hud"></header>
   <div class="mapwrap" id="wrap">
     <canvas id="map" aria-label="Chart of the Caribbean"></canvas>
     <div class="toast" id="toast" style="opacity:0"></div>
-    <button class="sndbtn" id="snd" type="button"></button>
-    <div class="hint-tap" id="taphint">Hold ◀ ▶ to steer · drag to look around</div>
+    <div class="hint-tap" id="taphint">Hold ◀ ▶ to steer · ☰ Menu pauses the game</div>
   </div>
   <nav class="bar">
     <button class="cmd steer" id="b-left" type="button" aria-label="Steer to port">◀</button>
-    <button class="cmd" id="b-stop" type="button">Furl sails</button>
-    <button class="cmd" id="b-status" type="button">Captain</button>
-    <button class="cmd" id="b-log" type="button">Log</button>
+    <button class="cmd" id="b-menu" type="button">☰ Menu</button>
     <button class="cmd steer" id="b-right" type="button" aria-label="Steer to starboard">▶</button>
   </nav>
 </div>
@@ -147,7 +155,7 @@ const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const wrapA=a=>{const t=Math.PI*2;return((a+Math.PI)%t+t)%t-Math.PI;};
 const fmt=n=>Math.round(n).toLocaleString('en-US');
 const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
-const SAVE='brethren-coast-v3';
+const SAVE='brethren-coast-v5';
 
 const NAT={es:{n:'Spain',a:'Spanish',c:'#e3b94a'},en:{n:'England',a:'English',c:'#c4503e'},fr:{n:'France',a:'French',c:'#6f92d4'},nl:{n:'Holland',a:'Dutch',c:'#e58d3c'}};
 const NK=['es','en','fr','nl'];
@@ -201,6 +209,7 @@ const LAND=[
 ];
 const CAYS=[{x:360,y:330,n:'a nameless cay south of Cuba'},{x:560,y:380,n:'a reef in the open Caribbean'},{x:760,y:350,n:'a sandbar west of the Windward Isles'},{x:250,y:285,n:'a key off the Yucatán Channel'},{x:700,y:300,n:'a cay south of Puerto Rico'}];
 
+CAYS.forEach(c=>LAND.push([[c.x+5,c.y-9],[c.x+12,c.y-13],[c.x+18,c.y-8],[c.x+16,c.y-2],[c.x+8,c.y-1]]));
 /* ---------- the big pixel world ---------- */
 const WS=5, WW=1000*WS, WH=700*WS, PX=5, MW=WW/PX, MH=WH/PX;
 LAND.forEach(p=>p.forEach(pt=>{pt[0]*=WS;pt[1]*=WS;}));
@@ -237,6 +246,9 @@ function buildWorld(){
     let inland=true;for(let dy=-3;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)if(at(mask,x+dx,y+dy)!==4)inland=false;if(!inland)continue;
     if(near(x,y,4)){put(x,y,'#7a4b22');put(x,y-1,'#7a4b22');put(x-1,y-2,'#1f6b25');put(x+1,y-2,'#1f6b25');put(x,y-2,'#2d8a2e');put(x-2,y-1,'#1f6b25');put(x+2,y-1,'#1f6b25');put(x,y-3,'#1f6b25');}
     else{put(x,y,'#5a3a1c');put(x-1,y-1,'#1c5e22');put(x,y-1,'#237027');put(x+1,y-1,'#1c5e22');put(x-1,y-2,'#237027');put(x,y-2,'#3a9a3a');put(x+1,y-2,'#237027');put(x,y-3,'#1c5e22');}}
+  for(let y=12;y<MH-4;y+=3)for(let x=10;x<MW-10;x+=3){if(srand()>.05)continue;let ok=true;
+    for(let dy=-10;dy<=4&&ok;dy++)for(let dx=-10;dx<=10;dx++)if(at(mask,x+dx,y+dy)!==4){ok=false;break;}if(!ok)continue;
+    for(let r=0;r<6;r++)for(let k=-r;k<=r;k++)put(x+k,y-6+r,k<0?'#8a7442':k===0?'#6e5c30':'#5a4a26');put(x,y-6,'#c2ae78');put(x-1,y-5,'#a8945e');}
   wc.putImageData(img,0,0);
   for(let i=0;i<4500;i++){const x=Math.floor(srand()*MW),y=Math.floor(srand()*MH);if(mask[y*MW+x]===0)WAVES.push({x,y,ph:srand()*6.28,len:srand()<.5?2:3});}
   PORTS.forEach(p=>{let sx=0,sy=0;for(const rad of [40,60,80,110])if(!sx&&!sy)for(let k=0;k<32;k++){const an=k/32*6.283;if(landAt(p.x+Math.cos(an)*rad,p.y+Math.sin(an)*rad)){sx+=Math.cos(an);sy+=Math.sin(an);}}
@@ -244,7 +256,305 @@ function buildWorld(){
 }
 buildWorld();
 
-let churchOpen=false;
+/* ---------- pixel art ---------- */
+const SW=160,SH=90;let g=null;
+const C={ink:'#14101a',sea:'#2456b8',sea2:'#3474d0',sea3:'#5a9be6',foam:'#d6eeff',sky:'#6cbcef',sky2:'#a4daf6',sky3:'#d9f0f8',
+ red:'#a8322a',red2:'#d8503c',wood:'#5e3418',wood2:'#87532a',wood3:'#b37a3c',wood4:'#d8a560',dark:'#2e1b10',
+ stone:'#8a8580',stone2:'#b5afa4',stone3:'#5c5854',sand:'#ecd391',sand2:'#c9a35a',grass:'#4caf3c',grass2:'#2f7d2b',leaf:'#1d6a24',leaf2:'#3d9a36',
+ white:'#f7f2e4',cream:'#e6d8b8',skin:'#eab38a',gold:'#f2c840',gold2:'#a87c18',black:'#16141a',grey:'#5a5d66',
+ candle:'#fff0a8',glow:'#ffcf6a',blue:'#3d5fb8',green:'#3a7d44',plaster:'#e9dcc2'};
+const hs=i=>{const s=Math.sin(i*127.1+311.7)*43758.5453;return s-Math.floor(s);};
+const R=(x,y,w,h,c)=>{g.fillStyle=c;g.fillRect(Math.round(x),Math.round(y),Math.round(w),Math.round(h));};
+const Pt=(x,y,c)=>R(x,y,1,1,c);
+function Ln(x0,y0,x1,y1,c,w){x0=Math.round(x0);y0=Math.round(y0);x1=Math.round(x1);y1=Math.round(y1);w=w||1;
+  const dx=Math.abs(x1-x0),dy=-Math.abs(y1-y0),sx=x0<x1?1:-1,sy=y0<y1?1:-1;let e=dx+dy;g.fillStyle=c;
+  for(let i=0;i<600;i++){g.fillRect(x0,y0,w,w);if(x0===x1&&y0===y1)break;const e2=2*e;if(e2>=dy){e+=dy;x0+=sx;}if(e2<=dx){e+=dx;y0+=sy;}}}
+function Dith(x,y,w,h,a,b){x=Math.round(x);y=Math.round(y);w=Math.round(w);h=Math.round(h);if(a)R(x,y,w,h,a);g.fillStyle=b;
+  for(let j=0;j<h;j++)for(let i=(j+x+y)&1;i<w;i+=2)g.fillRect(x+i,y+j,1,1);}
+function Circ(cx,cy,r,c){g.fillStyle=c;cx=Math.round(cx);cy=Math.round(cy);r=Math.round(r);for(let y=-r;y<=r;y++){const w=Math.round(Math.sqrt(Math.max(0,r*r-y*y)));g.fillRect(cx-w,cy+y,w*2+1,1);}}
+function Poly(pts,c){let y0=1e9,y1=-1e9;for(const p of pts){y0=Math.min(y0,p[1]);y1=Math.max(y1,p[1]);}g.fillStyle=c;
+  for(let y=Math.floor(y0);y<=Math.ceil(y1);y++){const yy=y+.5,xs=[];
+    for(let i=0,j=pts.length-1;i<pts.length;j=i++){const[xi,yi]=pts[i],[xj,yj]=pts[j];if((yi<=yy&&yj>yy)||(yj<=yy&&yi>yy))xs.push(xi+(yy-yi)*(xj-xi)/(yj-yi));}
+    xs.sort((a,b)=>a-b);for(let k=0;k+1<xs.length;k+=2){const a=Math.round(xs[k]),b=Math.round(xs[k+1]);if(b>a)g.fillRect(a,y,b-a,1);}}}
+function Bands(y0,y1,cols){const n=cols.length,h=(y1-y0)/n;for(let i=0;i<n;i++){R(0,y0+i*h,SW+200,h+1,cols[i]);if(i<n-1)Dith(0,Math.round(y0+(i+1)*h)-1,SW+200,2,null,cols[i+1]);}}
+function SeaBand(y0,y1,t){Bands(y0,y1,[C.sea3,C.sea2,C.sea]);
+  for(let i=0;i<46;i++){const y=y0+2+Math.floor(hs(i)*(y1-y0-3)),d=(y-y0+4)/10,x=((hs(i+50)*SW+t*(3+hs(i+9)*5)*d)%(SW+10))-5,len=1+Math.floor(hs(i+3)*2+d);
+    if(Math.sin(t*2+i)>-.3)R(x,y,len,1,y-y0<6?C.white:C.foam);}}
+function Cloud(x,y,w){for(let i=0;i<=w;i+=5)Circ(x+i,y-((i/5)%2?2:0),3+((i/5)%2),C.white);R(x-3,y,w+6,3,C.white);R(x-2,y+3,w+4,1,C.sky3);}
+function Palm(x,y,h,t,dark){const tr=dark||C.wood2,lf=dark||C.leaf,lf2=dark||C.leaf2;
+  for(let i=0;i<h;i++){const xx=x+Math.round(Math.sin(i/h*1.4)*3);R(xx,y-i,2,1,i%3?tr:(dark||C.wood));}
+  const tx=x+Math.round(Math.sin(1.4)*3),ty=y-h,sw=Math.round(Math.sin((t||0)*1.5));
+  [[-9,3],[-7,-3],[0,-5],[7,-3],[9,4],[4,6],[-4,6]].forEach(([dx,dy],k)=>{Ln(tx,ty,tx+dx+sw,ty+dy,k%2?lf:lf2);Ln(tx,ty+1,tx+dx+sw,ty+dy+1,lf);});
+  if(!dark){Pt(tx,ty+1,C.wood);Pt(tx+1,ty+2,C.wood);}}
+function Tiny(x,y,c){R(x-1,y-6,3,5,c);R(x-1,y-9,3,3,C.skin);Pt(x,y-10,'#4a2a14');Pt(x-1,y-1,C.black);Pt(x+1,y-1,C.black);}
+function Fig(x,y,o){o=o||{};const sk=o.skin||C.skin,coat=o.coat||C.blue,f=o.face||1;
+  if(o.dress){Poly([[x-2,y-10],[x+3,y-10],[x+6,y],[x-5,y]],coat);R(x-5,y-1,11,1,o.trim||C.white);R(x-2,y-15,5,6,o.bodice||coat);R(x-1,y-14,3,1,o.trim||C.white);}
+  else{const lg=o.legs||C.cream;R(x-2,y-6,2,5,lg);R(x+1,y-6,2,5,lg);R(x-2,y-2,2,2,C.black);R(x+1,y-2,2,2,C.black);
+    R(x-3,y-14,7,8,coat);R(x-3,y-9,7,1,o.belt||C.dark);if(o.buttons){Pt(x,y-13,C.gold);Pt(x,y-11,C.gold);}if(o.apron)R(x-2,y-10,5,6,C.white);}
+  const arm=o.arm||'down',ac=o.dress?(o.bodice||coat):coat,L=x-4,Rr=x+4;
+  if(arm==='up'){R(L,y-20,1,6,ac);R(Rr,y-20,1,6,ac);Pt(L,y-21,sk);Pt(Rr,y-21,sk);}
+  else if(arm==='out'){R(f>0?Rr:L-3,y-13,4,1,ac);Pt(f>0?Rr+4:L-4,y-13,sk);R(f>0?L:Rr,y-13,1,6,ac);}
+  else if(arm==='mug'){R(f>0?Rr:L,y-13,1,3,ac);R(f>0?Rr:L-2,y-11,3,1,ac);R(f>0?Rr+2:L-4,y-14,2,3,C.wood3);Pt(f>0?Rr+2:L-4,y-15,C.white);R(f>0?L:Rr,y-13,1,6,ac);}
+  else{R(L,y-13,1,6,ac);R(Rr,y-13,1,6,ac);Pt(L,y-7,sk);Pt(Rr,y-7,sk);}
+  R(x-2,y-19,5,5,sk);Pt(f>0?x+1:x-1,y-17,C.ink);
+  if(o.hair&&!o.longhair)R(x-2,y-20,5,2,o.hair);
+  if(o.longhair){R(x-3,y-20,7,2,o.hair);R(x-3,y-18,1,6,o.hair);R(x+3,y-18,1,6,o.hair);}
+  if(o.beard)R(x-2,y-16,5,2,o.beard);
+  if(o.patch){R(x-2,y-18,5,1,C.black);Pt(f>0?x+1:x-1,y-17,C.black);}
+  const h=o.hat;
+  if(h==='tri'){R(x-4,y-21,9,2,C.black);R(x-2,y-23,5,2,C.black);if(o.plume)R(x+2,y-25,2,3,o.plume);}
+  else if(h==='wig'){R(x-3,y-21,7,3,'#ece6da');R(x-4,y-19,2,5,'#ece6da');R(x+3,y-19,2,5,'#ece6da');}
+  else if(h==='cap')R(x-2,y-21,5,2,o.capc||C.red);
+  else if(h==='band'){R(x-2,y-20,5,2,o.capc||C.red);Pt(f>0?x-3:x+3,y-19,o.capc||C.red);}
+  else if(h==='veil'){R(x-3,y-21,7,2,C.white);R(x-4,y-19,2,10,C.white);R(x+3,y-19,2,10,C.white);}
+  else if(h==='mantilla'){R(x-3,y-22,7,3,C.black);R(x-4,y-19,1,8,C.black);R(x+4,y-19,1,8,C.black);}}
+const SIDE={sloop:{L:28,m:[2],h:4,g:3},brig:{L:36,m:[-7,8],h:5,g:5},barque:{L:40,m:[-11,1,12],h:6,g:3},frigate:{L:48,m:[-14,1,15],h:6,g:8},galleon:{L:50,m:[-13,1,14],h:7,g:6,castle:1}};
+function ShipSide(x,y,type,flag,t,o){o=o||{};const s=SIDE[type]||SIDE.brig,L=s.L,h=s.h,dk=o.dark;
+  const hull=dk||C.wood,trim=dk||C.gold2,sail=dk||C.white,sail2=dk||C.cream,mast=dk||C.dark,bow=x+L/2,st=x-L/2,mh=Math.round(14+h*2.4);
+  s.m.forEach((m,i)=>{const mx=Math.round(x+m),top=y-h-mh+(s.m.length>1&&i===0?3:0);Ln(mx,y-h,mx,top,mast);
+    if(type==='sloop'){Poly([[mx-1,top+2],[mx-1,y-h-2],[st+1,y-h-2]],sail);Ln(mx-1,top+2,st+1,y-h-2,sail2);Poly([[mx+1,top+3],[bow+8,y-h-3],[mx+1,y-h-3]],sail);}
+    else{const sw=Math.round(8+h*(i===1?1.1:.95)),b=Math.round(Math.sin((t||0)*1.2+i)*.6),a1=Math.round(mh*.3),a2=Math.round(mh*.38),y2=top+3+Math.round(mh*.33);
+      R(mx-sw/2,top+2,sw,a1,sail);R(mx+sw/2-2+b,top+2,2,a1,sail2);R(mx-sw/2-1,y2,sw+2,a2,sail);R(mx+sw/2-1+b,y2,2,a2,sail2);Ln(mx-sw/2-1,top+2,mx+sw/2,top+2,mast);}});
+  const fm=Math.round(x+s.m[Math.floor(s.m.length/2)]),ft=y-h-mh;Ln(fm,ft,fm,ft-3,mast);
+  for(let i=0;i<6;i++)R(fm+1+i,ft-3+Math.round(Math.sin((t||0)*5-i*.7)*.6),1,3,dk||flag);
+  if(!dk){Ln(x+s.m[0],y-h-mh+3,st,y-h-1,'#5b4a3a');Ln(x+s.m[s.m.length-1],y-h-mh+3,bow+8,y-h-3,'#5b4a3a');}
+  Ln(bow-1,y-h-1,bow+9,y-h-4,hull);
+  const ch=s.castle?6:1,cw=s.castle?12:4;
+  Poly([[st,y-h-ch],[st+cw,y-h-ch],[st+cw,y-h],[bow,y-h-1],[bow+2,y-h-2],[bow-3,y+2],[st+3,y+2]],hull);
+  R(st+1,y-h+1,L-3,1,trim);
+  if(!dk){for(let i=0;i<s.g;i++)R(st+6+i*((L-12)/Math.max(1,s.g-1)),y-h+3,2,2,C.black);if(s.castle){R(st+2,y-h-4,2,2,C.candle);R(st+6,y-h-4,2,2,C.candle);}}
+  if(!o.nofoam){R(st+2,y+2,L-2,1,C.foam);Pt(bow,y+1,C.foam);}}
+function priest(x,y){Fig(x,y,{coat:C.white,face:-1});R(x-3,y-14,7,10,'#2f8a3a');Ln(x,y-13,x,y-6,C.gold);Ln(x-2,y-11,x+2,y-11,C.gold);R(x-2,y-20,5,2,'#5a3a2a');}
+
+const SCN={
+title(t){Bands(0,58,['#22164a','#3b2266','#64296e','#9c3560','#d2524a','#ee8a40','#f9c25e']);
+  for(let i=0;i<14;i++)Pt(hs(i)*SW,hs(i+20)*18,'#e8d8ff');
+  Circ(112,57,12,'#ffb347');Circ(112,57,9,'#ffe08a');R(0,58,SW,32,'#2a1f4a');
+  for(let i=0;i<28;i++){const w=Math.max(2,26-i*.85)+Math.sin(t*2+i)*2;R(112-w/2+Math.sin(t*1.3+i)*2,59+i,w,1,i%3?'#ee8a40':'#f9c25e');}
+  for(let i=0;i<30;i++)R((hs(i)*SW+t*5*(1+hs(i+4)))%SW,61+hs(i+7)*28,2+hs(i+3)*4,1,'#4a3270');
+  Poly([[122,61],[132,53],[146,50],[160,53],[160,61]],'#160f2a');Palm(136,53,15,t,'#160f2a');Palm(150,51,11,t+1,'#160f2a');
+  ShipSide(46,64+Math.round(Math.sin(t*1.3)),'galleon','#160f2a',t,{dark:'#160f2a',nofoam:1});
+  for(let k=0;k<3;k++){const bx=(20+k*14+t*6)%180-10,by=22+k*5+Math.sin(t*2+k)*2,f=Math.sin(t*7+k)>0?-1:1;Pt(bx,by,'#160f2a');Pt(bx-1,by+f,'#160f2a');Pt(bx+1,by+f,'#160f2a');Pt(bx-2,by+f*2,'#160f2a');Pt(bx+2,by+f*2,'#160f2a');}},
+governor(t,pid){const p=PORT[pid],nc=NAT[p.nat].c;
+  R(0,0,SW,52,'#6a1e2a');for(let y=3;y<50;y+=8)for(let x=((y-3)/8%2)*6;x<SW;x+=12){Pt(x,y,'#86303c');Pt(x-1,y+1,'#86303c');Pt(x+1,y+1,'#86303c');Pt(x,y+2,'#86303c');}
+  R(0,50,SW,14,C.wood);for(let x=4;x<SW;x+=20)R(x,53,14,8,C.wood2);R(0,50,SW,1,C.wood3);
+  for(let y=64;y<SH;y+=5)for(let x=0;x<SW;x+=5)R(x,y,5,5,((x/5+(y-64)/5)%2)?'#e8e0cc':'#2a2430');
+  R(8,6,32,40,C.wood3);R(10,8,28,36,C.sky);Cloud(14,14,8);R(10,30,28,14,C.sea2);R(10,30,28,1,C.sea3);
+  const sx=Math.floor(t*2)%24;R(12+sx,26,3,4,C.white);Pt(13+sx,30,C.wood);
+  R(23,8,2,36,C.wood3);R(10,24,28,2,C.wood3);R(4,4,6,46,C.red);R(38,4,6,46,C.red);R(4,4,40,3,C.gold2);
+  R(110,6,26,32,C.gold2);R(112,8,22,28,C.gold);R(113,9,20,26,'#2b2420');R(118,24,10,11,C.red);Circ(123,19,4,C.skin);R(119,13,9,3,'#d9d0c0');R(118,15,2,7,'#d9d0c0');R(127,15,2,7,'#d9d0c0');Pt(123,10,C.gold);
+  Ln(148,6,148,62,C.gold2);Circ(148,5,1,C.gold);for(let i=0;i<11;i++)R(149+i,8+Math.round(Math.sin(t*4-i*.6)),1,8,nc);
+  Fig(84,70,{coat:'#2e3f7a',hat:'wig',buttons:1,arm:'out'});
+  const d=S&&S.dau[pid];
+  if(S&&S.wife&&S.wife.pid===pid){Fig(124,86,{dress:1,coat:'#3d5fb8',longhair:1,hair:'#4a2a14',face:-1});S.kids.slice(0,4).forEach((k,i)=>Tiny(134+i*6,86,k.boy?'#2e3f7a':'#c25a8a'));}
+  else if(d&&d.met&&!d.scorn)Fig(126,86,{dress:1,coat:'#c25a8a',longhair:1,hair:'#4a2a14',face:-1});
+  R(56,62,58,4,C.wood3);R(58,66,54,18,C.wood2);R(61,68,22,14,C.wood);R(87,68,22,14,C.wood);Pt(72,75,C.gold);Pt(98,75,C.gold);
+  R(64,59,16,3,C.white);R(66,58,12,1,C.cream);Ln(82,55,86,61,C.white);R(86,60,3,2,C.black);
+  R(100,55,2,7,C.white);Pt(100,53+(Math.sin(t*17)>0?0:1),C.candle);Pt(101,54,C.glow);},
+tavern(t,pid){R(0,0,SW,SH,'#2a170c');for(let x=0;x<SW;x+=10)R(x,0,1,62,'#3a2210');
+  R(8,14,76,2,C.wood2);R(8,30,76,2,C.wood2);const bc=['#3a7d44','#6e1f2c','#a87c18','#2d5a8a','#5a3a7a'];
+  for(let i=0;i<12;i++){const c=bc[i%5];R(10+i*6,8,3,6,c);Pt(11+i*6,7,c);Pt(10+i*6,9,'#c8c0b0');}
+  for(let i=0;i<9;i++){const c=bc[(i+2)%5];R(12+i*8,24,4,6,c);Pt(13+i*8,23,c);}
+  const sw=Math.round(Math.sin(t*1.4)*3),fl=Math.sin(t*13)>0;
+  Dith(36+sw,0,48,40,null,'rgba(255,190,90,.10)');Dith(46+sw,4,28,26,null,'rgba(255,200,100,.16)');
+  Ln(60,0,60+sw,9,C.black);R(57+sw,9,7,8,C.dark);R(58+sw,10,5,6,fl?C.candle:C.glow);R(57+sw,17,7,1,C.dark);
+  for(const[bx,by] of [[124,62],[140,62],[132,49]]){R(bx-7,by-13,15,13,C.wood2);R(bx-7,by-13,2,13,C.wood);R(bx+6,by-13,2,13,C.wood);R(bx-7,by-10,15,1,C.dark);R(bx-7,by-4,15,1,C.dark);Circ(bx,by-7,2,C.wood);Pt(bx,by-7,C.dark);}
+  Fig(44,69,{coat:'#7a5a3a',apron:1,hair:'#3a2210',beard:'#3a2210',arm:'out'});
+  R(0,62,104,3,C.wood3);R(0,65,104,15,C.wood2);for(let x=4;x<100;x+=16)R(x,67,12,11,C.wood);
+  R(18,58,3,4,C.cream);R(18,57,3,1,C.white);R(74,58,3,4,C.cream);R(74,57,3,1,C.white);
+  R(0,80,SW,10,'#1e1009');for(let x=0;x<SW;x+=14)R(x+((x/14)%2)*4,84,10,1,'#2e1b10');
+  R(108,74,36,3,C.wood3);R(112,77,3,9,C.wood);R(137,77,3,9,C.wood);R(124,70,2,4,C.white);Pt(124,69,fl?C.candle:C.glow);
+  Fig(104,88,{coat:'#3d5fb8',hat:'band',capc:C.red,arm:'mug'});
+  Fig(150,88,{coat:'#5a5d66',hat:'tri',face:-1,patch:!!(S&&S.ps[pid]&&S.ps[pid].piece&&S.pieces<4)});},
+market(t){Bands(0,32,[C.sky,C.sky2,C.sky3]);Cloud(18,8,12);Cloud(112,12,10);
+  R(0,20,SW,42,C.plaster);R(0,18,SW,3,C.red);Dith(0,21,SW,1,null,C.red2);
+  for(let i=0;i<5;i++){const x=8+i*32;R(x,30,16,20,'#3a2a20');Circ(x+8,30,8,'#3a2a20');R(x+1,30,14,20,'#4a3628');Circ(x+8,30,7,'#4a3628');}
+  Fig(22,70,{coat:'#c9a35a',hat:'cap',capc:'#5a3a7a'});Fig(80,70,{coat:'#3a7d44',hat:'tri'});Fig(138,70,{dress:1,coat:'#a8322a',hat:'mantilla'});
+  const stall=(x,c1,goods)=>{for(let i=0;i<32;i+=4){R(x+i,38,4,7,(i/4)%2?c1:C.white);Circ(x+i+2,45,2,(i/4)%2?c1:C.white);}
+    R(x+1,46,2,24,C.wood);R(x+29,46,2,24,C.wood);R(x,62,32,8,C.wood2);R(x,61,32,1,C.wood3);
+    goods.forEach((gc,j)=>{for(let k=0;k<5;k++)Circ(x+4+k*6,58-j*3,2,gc);});};
+  stall(6,C.red,['#f08a24','#f2c840']);stall(64,C.blue,['#5ab04a','#d8503c']);stall(122,C.green,['#c9a35a','#9a4ab0']);
+  R(0,70,SW,20,C.sand2);Dith(0,70,SW,20,null,C.sand);
+  Circ(46,80,4,C.cream);Circ(53,82,4,C.cream);Pt(46,76,C.wood);
+  Fig(34,89,{coat:'#a8322a',hat:'tri'});Fig(110,89,{dress:1,coat:'#2d7d7a',hat:'mantilla',face:-1});
+  const cx=((t*10)%200)-20;R(cx,85,3,2,C.white);Pt(cx+3,84,C.white);Pt(cx+4,84,C.red);Pt(cx+4,85,C.gold);Pt(cx+1,87,C.gold);},
+shipyard(t){Bands(0,46,[C.sky,C.sky2,C.sky3]);Cloud(96,8,14);Cloud(20,14,8);SeaBand(46,90,t);
+  Poly([[0,48],[86,48],[118,90],[0,90]],C.sand2);Dith(0,52,80,38,null,C.sand);
+  Poly([[14,76],[112,62],[114,66],[16,80]],C.wood);
+  for(let i=0;i<10;i++){const x=28+i*7,y=73-i*1.2;Ln(x,y,x-4,y-16,C.wood2);Ln(x,y,x+4,y-16,C.wood2);}
+  Poly([[26,74],[62,69],[62,63],[54,59],[28,64]],C.wood2);for(let k=0;k<3;k++)Ln(28,66+k*3,62,62+k*3,C.wood);Ln(26,73,96,63,C.dark);
+  Ln(88,80,96,22,C.wood);Ln(104,80,96,22,C.wood);Ln(96,22,72,28,C.wood);const ry=Math.round(42+Math.sin(t)*5);Ln(72,28,72,ry,C.black);R(67,ry,10,3,C.wood3);
+  for(let i=0;i<4;i++)R(2,84-i*3,24,3,i%2?C.wood3:C.wood2);
+  Fig(48,89,{coat:'#c9a35a',hat:'cap',capc:'#5a5d66',arm:Math.sin(t*6)>0?'up':'out'});
+  ShipSide(140,72,'brig',S?NAT[S.nat].c:C.red,t,{});},
+church(t,a){const[pid,ev]=String(a).split('|'),p=PORT[pid],prot=p.nat==='en'||p.nat==='nl',fl=k=>Math.sin(t*15+k*1.7)>0;
+  if(prot){R(0,0,SW,SH,'#3a2a1c');for(let x=0;x<SW;x+=8)R(x,0,1,66,'#4a3624');
+    R(12,12,24,28,C.wood);R(14,14,20,24,'#bcd0e0');R(23,14,2,24,C.wood);R(14,25,20,2,C.wood);
+    Poly([[14,38],[34,38],[78,90],[50,90]],'rgba(255,240,200,.10)');
+    R(64,44,32,3,C.white);R(66,47,28,17,C.wood2);R(66,47,28,1,C.wood3);
+    Ln(80,26,80,44,C.gold);Ln(76,31,84,31,C.gold);Pt(80,30,C.skin);
+    [70,90].forEach((x,k)=>{R(x,38,2,6,C.white);Pt(x,36+(fl(k)?0:1),C.candle);Pt(x+1,37,C.glow);});
+    R(0,66,SW,24,'#2a1c12');
+    for(let r=0;r<2;r++){R(8,72+r*9,50,3,C.wood3);R(8,75+r*9,50,3,C.wood);R(102,72+r*9,50,3,C.wood3);R(102,75+r*9,50,3,C.wood);}
+    priest(80,66);
+    [[20,72],[34,72],[118,72],[136,81]].forEach(([x,y],k)=>{R(x-2,y-7,5,5,k%2?C.black:'#5a3a2a');R(x-2,y-2,5,3,k%2?'#2e3f7a':'#6e1f2c');});}
+  else{R(0,0,SW,SH,'#cbbf9f');for(let y=0;y<64;y+=6)for(let x=((y/6)%2)*7;x<SW;x+=14)R(x,y,13,5,'#d6cbae');
+    const glass=['#c8322a','#3d5fb8','#f2c840','#3a8a4a','#7a3a9a','#3d5fb8'];
+    [22,138].forEach((wx,w)=>{R(wx-7,10,15,32,C.stone3);Circ(wx,10,7,C.stone3);
+      for(let y=4;y<40;y++)for(let x=-5;x<=5;x++){if(y<10&&x*x+(y-10)*(y-10)>30)continue;Pt(wx+x,y,(x%3===0||y%4===0)?'#2a2430':glass[Math.floor(hs(x*7+y*13+w)*6)]);}
+      Poly([[wx-6,40],[wx+6,40],[wx+(w?-20:30),90],[wx+(w?-46:4),90]],'rgba(255,236,170,.13)');});
+    [44,116].forEach(x=>{R(x-4,0,9,66,C.stone2);R(x-4,0,2,66,C.white);R(x+3,0,2,66,C.stone);R(x-6,62,13,4,C.stone);R(x-6,0,13,3,C.stone);});
+    R(54,0,52,66,'#b8a77f');R(60,6,40,44,C.gold2);R(62,8,36,40,C.gold);
+    [[66,12],[86,12],[66,30],[86,30]].forEach(([x,y],k)=>{const c=['#6e1f2c','#2d4a8a','#2d4a8a','#6e1f2c'][k];R(x,y,8,14,c);Circ(x+4,y,4,c);R(x+3,y+4,3,8,C.cream);Pt(x+4,y+3,C.skin);});
+    R(78,10,4,36,C.wood);R(72,18,16,3,C.wood);R(79,19,2,10,C.skin);Pt(80,18,C.skin);
+    R(58,50,44,3,C.white);R(60,53,40,12,C.white);R(60,53,40,1,C.gold);R(78,56,4,5,C.gold);
+    for(let i=0;i<6;i++){const x=61+i*7+(i>2?3:0);R(x,42,2,8,C.white);Pt(x,40+(fl(i)?0:1),C.candle);Pt(x+1,41,C.glow);}
+    Ln(112,0,112,28,C.gold2);R(110,28,5,5,C.red2);Pt(112,29,fl(9)?C.candle:C.glow);
+    R(0,66,SW,24,C.stone);for(let y=66;y<SH;y+=6)for(let x=((y/6)%2)*8;x<SW;x+=16)R(x,y,8,6,C.stone2);
+    for(let r=0;r<3;r++){const y=72+r*7;R(4,y,52,2,C.wood3);R(4,y+2,52,4,C.wood);R(104,y,52,2,C.wood3);R(104,y+2,52,4,C.wood);}
+    priest(80,64);
+    [[18,71],[38,71],[122,71],[30,78],[140,78]].forEach(([x,y],k)=>{R(x-2,y-6,5,5,k%2?C.black:'#4a2a14');R(x-2,y-1,5,2,k%3?'#2e3f7a':'#6e1f2c');});}
+  if(ev==='wed'){Fig(72,82,{coat:'#2e3f7a',hat:'tri',buttons:1});Fig(88,82,{dress:1,coat:C.white,trim:C.cream,hat:'veil',face:-1});
+    for(let i=0;i<14;i++){const y=(t*20+hs(i)*90)%90;Pt(10+hs(i+3)*140,y,['#f2c840','#ffffff','#e78aa8'][i%3]);}}},
+plunder(t){R(0,0,SW,SH,'#1c1220');for(let x=6;x<SW;x+=30)R(x,0,5,SH,'#2a1c14');R(0,6,SW,5,C.wood);R(0,6,SW,1,C.wood3);
+  Dith(40,10,80,70,null,'rgba(255,200,90,.08)');Ln(80,11,80,18,C.black);R(77,18,7,8,C.dark);R(78,19,5,6,C.candle);
+  Poly([[60,56],[100,56],[96,40],[64,40]],C.wood);R(64,40,32,2,C.gold2);Poly([[62,57],[98,57],[92,47],[80,43],[68,47]],C.gold);
+  for(let i=0;i<50;i++)Pt(64+hs(i)*32,45+hs(i+5)*11,hs(i+9)>.5?C.gold2:'#ffe680');
+  [[70,49,'#d8503c'],[86,47,'#3a8a4a'],[78,51,'#3d5fb8']].forEach(([x,y,c])=>R(x,y,2,2,c));
+  for(let i=0;i<4;i++){const k=Math.floor(t*3+i*7)%50,x=64+hs(k)*32,y=45+hs(k+5)*11;Pt(x,y-1,C.white);Pt(x-1,y,C.white);Pt(x+1,y,C.white);Pt(x,y+1,C.white);}
+  R(60,56,40,22,C.wood2);R(60,56,40,2,C.gold2);R(60,66,40,2,C.gold2);R(60,76,40,2,C.gold2);R(78,60,4,6,C.gold);Pt(79,63,C.black);
+  for(let i=0;i<14;i++)R(20+hs(i+30)*120,80+hs(i+40)*8,2,1,C.gold);
+  const up=k=>Math.sin(t*5+k)>0?'up':'down';
+  Fig(26,89,{coat:'#a8322a',hat:'band',capc:C.white,arm:up(0)});Fig(44,89,{coat:'#5a5d66',hat:'cap',arm:up(1)});
+  Fig(116,89,{coat:'#3d5fb8',hat:'band',capc:C.gold,arm:up(2),face:-1});Fig(134,89,{coat:'#7a5a3a',beard:'#3a2210',hair:'#3a2210',arm:up(3),face:-1});},
+fort(t,pid){const p=PORT[pid];Bands(0,42,[C.sky,C.sky2,C.sky3]);Cloud(26,10,12);SeaBand(42,90,t);
+  Poly([[52,44],[84,32],[160,28],[160,66],[44,66]],C.grass2);Poly([[58,44],[86,35],[160,31],[160,38]],C.grass);R(44,64,116,3,C.sand2);Palm(64,48,10,t);
+  R(116,12,6,12,C.white);R(118,7,2,6,C.gold);R(116,9,6,2,C.gold);R(100,16,12,8,C.red);R(126,14,14,10,C.red);R(100,20,12,6,C.white);R(126,20,14,6,C.white);
+  R(92,22,58,22,C.stone);R(92,22,58,2,C.stone2);for(let x=92;x<150;x+=5)R(x,18,3,4,C.stone);Poly([[84,44],[92,22],[100,44]],C.stone2);
+  for(let y=26;y<42;y+=4)for(let x=94+((y/4)%2)*4;x<148;x+=8)R(x,y,6,1,C.stone3);
+  for(let i=0;i<4;i++){R(98+i*12,31,6,4,C.black);R(93+i*12,32,6,2,'#2a2a2a');}
+  Ln(144,22,144,6,C.dark);for(let i=0;i<10;i++)R(145+i,7+Math.round(Math.sin(t*4-i*.6)),1,6,NAT[p.nat].c);
+  const ph=(t*.7)%3;if(ph<1.4){const a=1-ph/1.4;Circ(90-ph*12,33-ph*5,2+Math.round(ph*3),`rgba(240,240,235,${a*.85})`);Circ(80-ph*16,30-ph*7,1+Math.round(ph*2),`rgba(240,240,235,${a*.6})`);}
+  if(ph>1.1&&ph<1.7){const h=Math.round((ph-1.1)*18);R(54,72-h,2,h+2,C.foam);R(52,73,6,1,C.foam);}
+  ShipSide(32,80,'sloop',S?NAT[S.nat].c:C.red,t,{});},
+ball(t){R(0,0,SW,SH,'#c9dcc2');for(const x of [12,56,104,148]){R(x-3,0,7,64,C.white);R(x+3,0,1,64,'#a8b8a2');}
+  for(const x of [22,114]){R(x,10,24,32,C.gold2);R(x+2,12,20,28,'#a9c4d8');Dith(x+2,12,20,28,null,'#c8dcea');}
+  Ln(80,0,80,8,C.gold2);R(66,8,28,3,C.gold);Poly([[70,11],[90,11],[84,17],[76,17]],C.gold2);
+  for(let i=0;i<6;i++){R(67+i*5,4,1,4,C.white);Pt(67+i*5,2+(Math.sin(t*15+i)>0?0:1),C.candle);Pt(68+i*5,14+(i%2),C.white);}
+  for(let y=64;y<SH;y+=4)for(let x=(y%8?4:0)-8;x<SW;x+=8)R(x,y,8,4,((x+y)/4)%2?C.wood3:C.wood4);
+  Fig(14,78,{coat:'#3a3a5a',hat:'wig',arm:'out'});R(18,62,5,2,C.wood2);Ln(17,60,23,66,C.dark);
+  Fig(30,78,{coat:'#3a3a5a',hat:'wig'});R(27,68,6,9,C.wood2);
+  const st=DN&&DN.phase==='tele'?DN.cue:1,off=(DN?[-6,0,6][st]:0)+Math.round(Math.sin(t*3)*2),d=DN&&S?S.dau[DN.pid]:null;
+  Fig(74+off,87,{coat:'#2e3f7a',hat:'tri',buttons:1,arm:'out'});
+  Fig(86+off,87,{dress:1,coat:d?['#c25a8a','#3d8a8a','#b8324a','#8a3ab0'][d.beauty]:'#c25a8a',longhair:1,hair:'#4a2a14',face:-1,arm:st===1&&DN?'up':'down'});
+  Fig(126,80,{dress:1,coat:'#7a3a8a',hat:'mantilla',face:-1});Fig(140,80,{coat:'#5a2a2a',hat:'wig',face:-1});Fig(152,82,{dress:1,coat:'#2d7d7a',longhair:1,hair:'#d8a560',face:-1});},
+encounter(t,a){const[type,flag]=String(a).split('|');Bands(0,44,[C.sky,C.sky2,C.sky3]);Cloud(14,10,14);Cloud(118,6,10);SeaBand(44,90,t);
+  ShipSide(108,55+Math.round(Math.sin(t*1.2)),type||'brig',flag||'#111111',t,{});
+  Poly([[0,72],[40,68],[54,90],[0,90]],C.wood);R(0,71,42,2,C.wood3);for(let x=4;x<40;x+=6)R(x,75,2,2,C.black);
+  Ln(40,68,64,56,C.wood,2);Ln(64,56,26,24,'#5b4a3a');Ln(64,56,6,34,'#5b4a3a');},
+seascape(t,v){Bands(0,44,[C.sky,C.sky2,C.sky3]);Cloud(30,12,12);SeaBand(44,90,t);
+  if(v==='sunk'){const b=Math.round(Math.sin(t*1.5));Ln(84,36+b,92,62+b,C.wood,2);Poly([[80,40+b],[90,44+b],[88,54+b],[78,50+b]],C.cream);
+    for(let i=0;i<7;i++)R(40+hs(i)*90+Math.sin(t+i)*2,60+hs(i+3)*24,4+hs(i+8)*6,2,C.wood2);
+    for(let i=0;i<5;i++){const ph=(t*.5+i*.2)%1;Circ(90+i*2,40-ph*30,2+Math.round(ph*4),`rgba(90,90,95,${(1-ph)*.6})`);}}
+  else{const x=150-((t*3)%60);R(x,40,3,4,C.white);R(x+4,41,2,3,C.white);R(x-1,44,8,1,C.dark);}},
+cabin(t){R(0,0,SW,SH,'#3a2210');for(let x=0;x<SW;x+=12)R(x,0,1,SH,'#2a170c');R(0,44,SW,3,C.wood2);
+  const roll=Math.sin(t*.9)*3;
+  for(let i=0;i<4;i++){const x=12+i*36;R(x,6,28,32,C.wood3);R(x+2,8,24,28,C.sky);if(i===1)Cloud(x+6,14,8);
+    const yy=clamp(Math.round(24+roll+(i-1.5)*Math.sin(t*.9)*1.2),8,36);R(x+2,yy,24,36-yy,C.sea2);if(yy<36)R(x+2,yy,24,1,C.sea3);
+    R(x+13,8,2,28,C.wood3);R(x+2,21,24,2,C.wood3);}
+  Poly([[22,62],[138,62],[130,52],[30,52]],C.wood3);R(22,62,116,3,C.wood2);R(28,65,4,22,C.wood);R(128,65,4,22,C.wood);
+  Poly([[40,61],[96,61],[92,54],[44,54]],'#e8d6a8');Ln(48,58,60,59,'#7a5a2a');Ln(60,59,68,56,'#7a5a2a');Ln(72,58,86,57,'#7a5a2a');Pt(80,56,C.red);Pt(81,57,C.red);Pt(79,57,C.red);
+  Circ(112,57,4,C.gold2);Circ(112,57,3,C.cream);Ln(112,55,112,59,C.red);
+  R(102,51,2,6,C.white);Pt(102,49+(Math.sin(t*15)>0?0:1),C.candle);
+  const sw=Math.round(Math.sin(t*.9)*4);Ln(150,0,150+sw,12,C.black);R(147+sw,12,7,8,C.dark);R(148+sw,13,5,6,Math.sin(t*13)>0?C.candle:C.glow);
+  R(0,86,SW,4,'#2a170c');},
+treasure(t){Bands(0,36,[C.sky,C.sky2,C.sky3]);Cloud(22,8,12);SeaBand(36,56,t);R(0,54,SW,36,C.sand);R(0,54,SW,2,C.sand2);Dith(0,56,SW,3,null,C.sand2);
+  Palm(126,74,30,t);Palm(144,76,24,t+1.5);
+  Circ(76,74,10,C.sand2);Circ(76,75,8,'#a88848');
+  R(68,64,18,10,C.wood2);Poly([[68,64],[86,64],[84,56],[70,56]],C.wood);R(68,64,18,1,C.gold2);Poly([[69,64],[85,64],[80,60],[74,60]],C.gold);
+  for(let i=0;i<3;i++){const k=Math.floor(t*3+i*5)%9;Pt(70+k*2,61,C.white);}
+  Ln(98,80,104,86,C.red,2);Ln(104,80,98,86,C.red,2);Ln(50,66,56,84,C.wood);R(54,83,4,4,C.grey);
+  Fig(40,87,{coat:'#2e3f7a',hat:'tri',plume:C.red,arm:'up',buttons:1});},
+jail(t){R(0,0,SW,SH,'#2a2830');for(let y=0;y<80;y+=8)for(let x=-((y/8)%2)*8;x<SW;x+=16)R(x+1,y+1,14,6,hs(x*3+y)>.5?'#3a3840':'#34323a');
+  R(98,12,32,22,'#141a36');Circ(118,22,4,'#f0eecf');for(let i=0;i<5;i++)R(100+i*7,12,2,22,C.grey);
+  Poly([[100,34],[130,34],[96,90],[56,90]],'rgba(200,210,255,.08)');
+  R(0,80,SW,10,'#1e1c22');R(16,78,60,6,'#a8903a');Dith(16,78,60,6,null,'#c9b05a');
+  Fig(46,84,{coat:'#5a5d66',hair:'#3a2210',beard:'#3a2210'});
+  const rx=(t*14)%220-30;R(rx,86,4,2,'#6a6d76');Pt(rx+4,86,'#6a6d76');Ln(rx-3,87,rx,87,'#6a6d76');}
+};
+function scn(n,a){return `<canvas class="scene" width="${SW}" height="${SH}" data-scene="${n}" data-arg="${a==null?'':a}"></canvas>`;}
+let liveScenes=[],sceneTick=-1;
+function bindScenes(){liveScenes=[...document.querySelectorAll('#sheet canvas[data-scene]')].map(el=>({c:el.getContext('2d'),n:el.dataset.scene,a:el.dataset.arg}));sceneTick=-1;drawScenes(performance.now()/1000);}
+function drawScenes(t){const k=Math.floor(t*12);if(k===sceneTick)return;sceneTick=k;
+  for(const s of liveScenes){g=s.c;g.imageSmoothingEnabled=false;try{SCN[s.n](t,s.a);}catch(e){console.error(e);}}}
+
+/* ---------- top-down ship sprites ---------- */
+const TOPS={sloop:{L:8.5,B:2.5,m:[1]},brig:{L:9.5,B:3,m:[3,-2.5]},barque:{L:10,B:3.4,m:[4,0,-4]},frigate:{L:10.5,B:3.3,m:[4.5,0,-4.5]},galleon:{L:10.5,B:3.8,m:[4,-.5,-5]}};
+const SPR={};const hex=s=>[parseInt(s.slice(1,3),16),parseInt(s.slice(3,5),16),parseInt(s.slice(5,7),16)];
+function shipSprite(type,dir,flag){const key=type+'|'+dir+'|'+flag;if(SPR[key])return SPR[key];
+  const N=24,cs=document.createElement('canvas');cs.width=cs.height=N;const x=cs.getContext('2d'),img=x.createImageData(N,N),d=img.data;
+  const a=dir/16*Math.PI*2,ca=Math.cos(a),sa=Math.sin(a),s=TOPS[type]||TOPS.sloop,col=new Array(N*N).fill(null);
+  for(let py=0;py<N;py++)for(let px=0;px<N;px++){const dx=px+.5-N/2,dy=py+.5-N/2,u=dx*ca+dy*sa,v=-dx*sa+dy*ca;let c=null;
+    const half=u>=0?s.B*Math.max(0,1-Math.pow(u/s.L,2)):(u>-s.L*.9?s.B*(1-.2*Math.pow(-u/s.L,3)):-1);
+    if(Math.abs(v)<half)c=Math.abs(v)>half-1?'#4a2a12':(Math.floor(v+20)%2?'#b07a3e':'#98672f');
+    if(u>s.L-.6&&u<s.L+2.4&&Math.abs(v)<.55)c='#4a2a12';
+    for(const m of s.m)if(Math.abs(u-m)<1.1&&Math.abs(v)<s.B+2.2)c=Math.abs(v)>s.B+1.3||u-m>.5?'#d6cdb6':'#faf6ea';
+    for(const m of s.m)if(Math.abs(u-m)<.7&&Math.abs(v)<.7)c='#3b2412';
+    if(u<-s.L*.9+.2&&u>-s.L*.9-2.2&&v>-.3&&v<1.9)c=flag;
+    col[py*N+px]=c;}
+  for(let i=0;i<N*N;i++){let c=col[i];const px=i%N,py=(i/N)|0;
+    if(!c)for(const[ox,oy] of [[1,0],[-1,0],[0,1],[0,-1]]){const qx=px+ox,qy=py+oy;if(qx>=0&&qy>=0&&qx<N&&qy<N&&col[qy*N+qx]){c='#101a30';break;}}
+    if(c){const[r,gg,b]=hex(c);d[i*4]=r;d[i*4+1]=gg;d[i*4+2]=b;d[i*4+3]=255;}}
+  x.putImageData(img,0,0);SPR[key]=cs;return cs;}
+const dirOf=h=>((Math.round(h/(Math.PI*2)*16)%16)+16)%16;
+
+/* ---------- exploration, charts, latitude ---------- */
+const FW=100,FH=70;let FOG=new Uint8Array(FW*FH);
+function reveal(x,y,r){const cx=Math.floor(x/50),cy=Math.floor(y/50),rc=Math.ceil(r/50);
+  for(let j=-rc;j<=rc;j++)for(let i=-rc;i<=rc;i++){if(i*i+j*j>rc*rc)continue;const X=cx+i,Y=cy+j;if(X>=0&&Y>=0&&X<FW&&Y<FH)FOG[Y*FW+X]=1;}}
+const latOf=y=>25-((y/WS)-20)*15/570, yOfLat=l=>((25-l)*570/15+20)*WS;
+const fmtLat=l=>{let d=Math.floor(l),m=Math.round((l-d)*60);if(m===60){d++;m=0;}return `${d}° ${String(m).padStart(2,'0')}′ N`;};
+const chartImg=document.createElement('canvas');chartImg.width=500;chartImg.height=350;
+(function(){const c=chartImg.getContext('2d'),im=c.createImageData(500,350),d=im.data;
+  const L=(x,y)=>x<0||y<0||x>=500||y>=350?true:mask[(y*2)*MW+x*2]>=3;
+  for(let y=0;y<350;y++)for(let x=0;x<500;x++){const i=(y*500+x)*4,l=L(x,y);let col=null;
+    if(l){const edge=!L(x+1,y)||!L(x-1,y)||!L(x,y+1)||!L(x,y-1);col=edge?[74,48,22]:((x*3+y*5)%11===0?[176,146,92]:[212,186,128]);}
+    else{let near=0;for(let k=1;k<=4&&!near;k++)if(L(x+k,y)||L(x-k,y)||L(x,y+k)||L(x,y-k))near=k;if(near===3)col=[150,118,70];}
+    if(col){d[i]=col[0];d[i+1]=col[1];d[i+2]=col[2];d[i+3]=255;}}
+  c.putImageData(im,0,0);})();
+function rose(c,x,y,r){c.save();c.translate(x,y);c.strokeStyle='#5a3d1e';c.fillStyle='#5a3d1e';c.lineWidth=1;c.beginPath();c.arc(0,0,r*.55,0,7);c.stroke();
+  for(let i=0;i<8;i++){const a=i*Math.PI/4-Math.PI/2,l=i%2?r*.6:r;c.beginPath();c.moveTo(Math.cos(a)*l,Math.sin(a)*l);c.lineTo(Math.cos(a+.3)*r*.16,Math.sin(a+.3)*r*.16);c.lineTo(Math.cos(a-.3)*r*.16,Math.sin(a-.3)*r*.16);c.closePath();if(i%2)c.stroke();else c.fill();}
+  c.font='13px "IM Fell English SC",Georgia,serif';c.textAlign='center';c.fillText('N',0,-r-4);c.restore();c.textAlign='left';}
+function drawChart(el){const c=el.getContext('2d'),w=500,h=350;c.imageSmoothingEnabled=false;
+  c.fillStyle='#ead7a4';c.fillRect(0,0,w,h);
+  for(let i=0;i<900;i++){c.fillStyle=hs(i)>.5?'rgba(150,110,60,.08)':'rgba(255,255,255,.14)';c.fillRect(hs(i+1)*w,hs(i+2)*h,2+hs(i+3)*5,1+hs(i+4)*2);}
+  const tmp=document.createElement('canvas');tmp.width=w;tmp.height=h;const t2=tmp.getContext('2d');t2.drawImage(chartImg,0,0);
+  const fc=document.createElement('canvas');fc.width=FW;fc.height=FH;const f2=fc.getContext('2d'),fi=f2.createImageData(FW,FH);for(let i=0;i<FW*FH;i++)fi.data[i*4+3]=FOG[i]?255:0;f2.putImageData(fi,0,0);
+  t2.globalCompositeOperation='destination-in';t2.imageSmoothingEnabled=true;t2.drawImage(fc,0,0,w,h);c.drawImage(tmp,0,0);
+  c.fillStyle='#5a3d1e';c.font='italic 12px "IM Fell English SC",Georgia,serif';
+  [25,20,15,10].forEach(l=>{const yy=yOfLat(l)/10;c.fillRect(8,yy,10,1);c.fillText(l+'°',20,yy+4);});
+  for(const p of PORTS){if(!FOG[Math.floor(p.y/50)*FW+Math.floor(p.x/50)])continue;const cx=p.x/10,cy=p.y/10;
+    c.fillStyle='#4a2a12';c.fillRect(cx-3,cy-3,7,7);c.fillStyle=NAT[p.nat].c;c.fillRect(cx-2,cy-2,5,5);
+    if(S.seen[p.id]){c.fillStyle='#3a2410';c.font='13px "IM Fell English SC",Georgia,serif';const tw=c.measureText(p.n).width;c.fillText(p.n,cx+7+tw>w-12?cx-8-tw:cx+7,cy+4);}}
+  if(S.fix&&S.day-S.fix.day<=7){const yy=yOfLat(S.fix.lat)/10;c.strokeStyle='#a8322a';c.setLineDash([7,4]);c.beginPath();c.moveTo(12,yy);c.lineTo(w-12,yy);c.stroke();c.setLineDash([]);c.fillStyle='#a8322a';c.font='italic 12px "IM Fell English SC",Georgia,serif';c.fillText('sighting '+fmtLat(S.fix.lat),w-150,yy-5);}
+  const rr=clamp((S.day-S.fixDay)*35+70,70,800),ex=S.x+Math.cos(S.drift)*rr*.55,ey=S.y+Math.sin(S.drift)*rr*.55;
+  c.strokeStyle='#7a2a1a';c.setLineDash([2,4]);c.beginPath();c.arc(ex/10,ey/10,rr/10,0,7);c.stroke();c.setLineDash([]);
+  c.fillStyle='#7a2a1a';c.font='italic 12px "IM Fell English SC",Georgia,serif';c.fillText('your reckoning',clamp(ex/10-40,14,w-100),clamp(ey/10+rr/10+14,24,h-14));
+  rose(c,56,h-56,32);
+  c.fillStyle='#4a2a12';c.textAlign='right';c.font='24px "IM Fell English SC",Georgia,serif';c.fillText('Mar del Caribe',w-26,44);
+  c.font='italic 12px "IM Fell English SC",Georgia,serif';c.fillText(`as charted by ${S.name}, ${1660+Math.floor(S.day/360)}`,w-26,62);c.textAlign='left';
+  c.strokeStyle='#5a3d1e';c.lineWidth=3;c.strokeRect(4,4,w-8,h-8);c.lineWidth=1;c.strokeRect(10,10,w-20,h-20);}
+function drawFragment(el){const c=el.getContext('2d'),w=180,h=120,cay=CAYS[S.tre],cw=2400,ch=1600,ox=cay.x-cw*.32,oy=cay.y-ch*.66;
+  c.clearRect(0,0,w,h);const quads=[[0,0],[1,0],[1,1],[0,1]];
+  for(let q=0;q<Math.min(4,S.pieces);q++){const[qx,qy]=quads[q],x0=qx*w/2,y0=qy*h/2;
+    c.fillStyle='#e6cf98';c.fillRect(x0+1,y0+1,w/2-2,h/2-2);
+    for(let y=1;y<h/2-1;y++)for(let x=1;x<w/2-1;x++){if(landAt(ox+(x0+x)/w*cw,oy+(y0+y)/h*ch)){c.fillStyle=(x+y)%5?'#8a6430':'#6a4a20';c.fillRect(x0+x,y0+y,1,1);}}
+    c.fillStyle='#7a5a2a';for(let k=0;k<w/2;k+=3){c.fillRect(x0+k,y0+(hs(k+q*9)>.5?0:1),2,1);c.fillRect(x0+k,y0+h/2-1-(hs(k+q*5)>.5?0:1),2,1);}
+    for(let k=0;k<h/2;k+=3){c.fillRect(x0+(hs(k+q*3)>.5?0:1),y0+k,1,2);c.fillRect(x0+w/2-1-(hs(k+q*7)>.5?0:1),y0+k,1,2);}}
+  if(S.pieces>=4){const x=Math.round(w*.32),y=Math.round(h*.66);c.fillStyle='#b8261b';for(let i=-4;i<=4;i++){c.fillRect(x+i,y+i,2,2);c.fillRect(x-i,y+i,2,2);}}}
+
+
+let churchOpen=false,titleOn=false;
 let S=null, paused=true, E=null, B=null, D=null, DN=null, curPort=null, portTab='gov', steer=0;
 const DIFF=[{n:'Apprentice',w:1.3,e:.8},{n:'Journeyman',w:1.1,e:.95},{n:'Adventurer',w:.95,e:1.1},{n:'Swashbuckler',w:.8,e:1.3}];
 const SKILLS={fence:{n:'Fencing',d:'More time to parry in a duel'},gun:{n:'Gunnery',d:'Faster reloads, harder hits'},nav:{n:'Navigation',d:'Faster ship, sharper turns'},wit:{n:'Wit',d:'Better prices, steadier crew, charm'}};
@@ -289,6 +599,7 @@ function sfx(n){
     case 'win':[523,659,784,1047].forEach((f,i)=>tone(f,i===3?.45:.13,'square',.2,t+i*.13));break;
     case 'lose':[392,349,311,262].forEach((f,i)=>tone(f,i===3?.6:.2,'square',.2,t+i*.2));break;
     case 'thud':tone(90,.18,'triangle',.4,t,-30);break;
+    case 'stab':noise(.12,.4,3000,t);tone(300,.12,'square',.2,t,-200);break;
     case 'blip':tone(660,.03,'square',.07,t);break;
   }
 }
@@ -312,8 +623,9 @@ const TR={sea:{e:.17,mel:MEL,bas:BAS,per:3,oct:12,lv:.22,dr:.18},
 let curTrack='sea';
 function musicTick(){
   const ac=SND.ac;if(!ac||ac.state!=='running')return;
-  const tk=(B||D)?'battle':DN?'dance':churchOpen?'church':'sea';
+  const tk=DN?'dance':titleOn?'sea':null;
   if(tk!==curTrack){curTrack=tk;SND.step=0;SND.next=ac.currentTime+.08;}
+  if(!tk)return;
   const T=TR[tk];
   if(SND.next<ac.currentTime-.3)SND.next=ac.currentTime+.05;
   while(SND.next<ac.currentTime+.25){const t=SND.next,st=SND.step;
@@ -337,6 +649,9 @@ document.addEventListener('pointerdown',audioInit,{capture:true});
 document.addEventListener('keydown',audioInit,{capture:true});
 document.addEventListener('visibilitychange',()=>{if(!SND.ac)return;if(document.hidden)SND.ac.suspend();else SND.ac.resume();});
 
+function jingle(k){if(!SND.ac||SND.mode!==0)return;let tt=SND.ac.currentTime+.03;
+  const J={port:[[67,.12],[72,.12],[76,.12],[79,.4]],wed:[[72,.22],[76,.22],[79,.22],[84,.7]]}[k];
+  J.forEach(([n,d])=>{tone(mid(n),d*.95,'square',.2,tt,0,SND.mg);tone(mid(n-12),d*.95,'triangle',.4,tt,0,SND.mg);tt+=d;});}
 /* ---------- state ---------- */
 const atWar=(a,b)=>a!==b&&!!S.wars[[a,b].sort().join('-')];
 const month=()=>Math.floor(S.day/30);
@@ -346,7 +661,7 @@ const ship=()=>SHIPS[S.ship];
 const relWord=r=>r<=-25?'Hostile':r<0?'Wary':r<25?'Neutral':r<60?'Friendly':'Allied';
 const hostile=p=>!p.haven&&S.rel[p.nat]<=-25;
 const garrison=p=>p.size*70+30;
-function save(){try{if(S)localStorage.setItem(SAVE,JSON.stringify(S))}catch(e){}}
+function save(){try{if(S){S.fogs=Array.prototype.join.call(FOG,'');localStorage.setItem(SAVE,JSON.stringify(S));}}catch(e){}}
 function load(){try{const t=localStorage.getItem(SAVE);return t?JSON.parse(t):null}catch(e){return null}}
 function wipe(){try{localStorage.removeItem(SAVE)}catch(e){}}
 function log(t){S.log.unshift({d:dateStr(),t});S.log.length=Math.min(S.log.length,60)}
@@ -359,11 +674,12 @@ function newGame(name,nat,skill,diff){
      x:p.x,y:p.y,heading:awayHeading(p),anchored:false,speed:0,lastPort:home,wind:Math.PI,calm:2,
      rel:{es:-10,en:0,fr:0,nl:0},deeds:{es:0,en:0,fr:0,nl:0},rank:{es:0,en:0,fr:0,nl:0},
      wars:{'en-es':true,'es-fr':true,'es-nl':true,'en-nl':true,'en-fr':false,'fr-nl':false},
-     pieces:0,treasure:null,log:[],ps:{},dau:{},wife:null,wifeGift:-999,kids:[],expect:null,engaged:null,lastMass:-99,lastConf:-99,lastAnoint:-999,lastNews:-999,wins:0,prizes:0,raids:0,acc:0};
+     pieces:0,treasure:null,log:[],ps:{},dau:{},wife:null,wifeGift:-999,kids:[],expect:null,engaged:null,lastMass:-99,lastConf:-99,lastAnoint:-999,lastNews:-999,wins:0,prizes:0,raids:0,acc:0,seen:{[home]:1},tre:ri(0,CAYS.length-1),fixDay:0,drift:rnd(0,6.28),fix:null};
   if(nat==='es'){S.rel.en=-10;S.rel.fr=-10;S.rel.nl=-10;}
   S.rel[nat]=40; S.rank[nat]=1;
   for(const q of PORTS)if(q.size>=2&&Math.random()<.85)S.dau[q.id]={name:pick(DNAMES[q.nat]),beauty:clamp(ri(0,2)+(q.size===3?1:0),0,3),aff:0,met:false,scorn:false,danced:-99};
   refreshPorts();
+  FOG=new Uint8Array(FW*FH);reveal(S.x,S.y,500);
   log(`${name} receives a letter of marque from ${NAT[nat].n} and takes command of a sloop at ${p.n}.`);
   save();
 }
@@ -386,22 +702,9 @@ function clampView(){view.cx=clamp(view.cx,0,Math.max(0,WW-W/view.s));view.cy=cl
 function centerOn(x,y){view.cx=x-W/view.s/2;view.cy=y-H/view.s/2;clampView();}
 window.addEventListener('resize',resize);
 
-const TOWN=['....ff.','....|..','.rr.|rr','rwwr|ww','gwdgggd','ggggggg'];
-const CHURCHART=['...c..','..ccc.','...c..','..wbw.','..www.','.rrrrr','rrrrrr','wwwwww','wwddww'];
+const TOWN=['.......c......','......ccc.....','.......c...f..','......www..|..','......wbw..|..','.rr...www..|r.','rrrr.rwwwrrrrr','wwdw.wwdwwwdww','s.s.s.s.s.s.s.','ssssssssssssss'];
 function sprite(c,art,x,y,u,pal){const h=art.length,w=art[0].length;
   for(let r=0;r<h;r++)for(let col=0;col<w;col++){const ch=art[r][col];if(ch==='.')continue;c.fillStyle=pal[ch];c.fillRect(x+(col-w/2)*u,y+(r-h)*u,u+.4,u+.4);}}
-function topShip(c,x,y,h,L,flag,dead){
-  c.save();c.translate(x,y);c.rotate(h);const u=L/12;
-  if(dead)c.globalAlpha=Math.max(0,dead);
-  c.fillStyle='rgba(0,0,0,.25)';c.fillRect(-6*u,-1.6*u+u*.6,12*u,3.2*u);
-  c.fillStyle='#5b3418';c.beginPath();c.moveTo(6.2*u,0);c.lineTo(3*u,-2*u);c.lineTo(-5.4*u,-2*u);c.lineTo(-6*u,-1.3*u);c.lineTo(-6*u,1.3*u);c.lineTo(-5.4*u,2*u);c.lineTo(3*u,2*u);c.closePath();c.fill();
-  c.fillStyle='#93622f';c.fillRect(-5*u,-1.2*u,8*u,2.4*u);
-  c.fillStyle='#3b2412';c.fillRect(1.6*u,-3.2*u,.4*u,6.4*u);c.fillRect(-2.4*u,-3.5*u,.4*u,7*u);
-  c.fillStyle='#fbf6e8';c.fillRect(1.9*u,-3*u,1*u,6*u);c.fillRect(-2*u,-3.3*u,1.1*u,6.6*u);
-  c.fillStyle=flag;c.fillRect(-6.8*u,-.6*u,1.2*u,1.2*u);
-  c.restore();
-}
-const MM={x:0,y:0,w:0,h:0};
 function draw(){
   const s=view.s,k=1/s,T=performance.now()/1000;
   ctx.setTransform(dpr,0,0,dpr,0,0);ctx.imageSmoothingEnabled=false;
@@ -412,34 +715,21 @@ function draw(){
   ctx.fillStyle='#8cc4ff';
   for(const w of WAVES){if(w.x<x0||w.x>x1||w.y<y0||w.y>y1)continue;if(Math.sin(T*1.6+w.ph)<.5)continue;
     const off=Math.floor((T*.8+w.ph)%3);ctx.fillRect((w.x+off)*PX,w.y*PX,w.len*PX,PX);}
-  ctx.textAlign='center';ctx.fillStyle='rgba(220,236,255,.4)';ctx.font=`700 ${20*k}px "Pixelify Sans",monospace`;
-  [['CARIBBEAN SEA',600,380],['GULF OF MEXICO',90,110],['ATLANTIC OCEAN',720,60],['CARIBBEAN SEA',380,420],['CARIBBEAN SEA',800,440]].forEach(([t,x,y])=>ctx.fillText(t,x*WS,y*WS));
-  if(S.treasure){const t=S.treasure;ctx.fillStyle='#d8261b';const u=4;for(let i=-3;i<=3;i++){ctx.fillRect(t.x+i*u,t.y+i*u,u,u);ctx.fillRect(t.x-i*u,t.y+i*u,u,u);}}
-  const pal={r:'#c4452f',w:'#f1e7cf',d:'#6b4423',g:'#9a948a','|':'#4a3a2a'};
+  const pal={r:'#c4452f',w:'#f1e7cf',d:'#6b4423',b:'#3a2a20',c:'#f0c93c',s:'#9a948a','|':'#4a3a2a'};
   for(const p of PORTS){
-    pal.f=NAT[p.nat].c;sprite(ctx,TOWN,p.tx,p.ty+12,4,pal);
-    sprite(ctx,CHURCHART,p.tx+30,p.ty+12,4,{c:'#f0c93c',w:'#f4efe2',b:'#c9a14a',r:'#8a3d2c',d:'#5a3a1c'});
-    if(hostile(p)||p.haven){ctx.beginPath();ctx.arc(p.tx,p.ty,22*k+16,0,7);ctx.lineWidth=2*k;ctx.strokeStyle=p.haven?'#ffffff':'#ff5a3c';ctx.setLineDash([3*k,3*k]);ctx.stroke();ctx.setLineDash([]);}
+    pal.f=NAT[p.nat].c;sprite(ctx,TOWN,p.tx,p.ty+20,4,pal);
+    if(!S.seen[p.id])continue;
+    if(hostile(p)||p.haven){ctx.beginPath();ctx.arc(p.tx,p.ty,22*k+22,0,7);ctx.lineWidth=2*k;ctx.strokeStyle=p.haven?'#ffffff':'#ff5a3c';ctx.setLineDash([3*k,3*k]);ctx.stroke();ctx.setLineDash([]);}
     const raided=S.ps[p.id].raid>month()-12;
-    ctx.font=`600 ${12*k}px "Pixelify Sans",monospace`;const label=p.n.toUpperCase()+(S.wife&&S.wife.pid===p.id?' ♥':''),tw=ctx.measureText(label).width;
-    const ly=p.ty-16-4*k;
+    ctx.font=`600 ${12*k}px "Pixelify Sans",monospace`;ctx.textAlign='center';const label=p.n.toUpperCase()+(S.wife&&S.wife.pid===p.id?' ♥':''),tw=ctx.measureText(label).width;
+    const ly=p.ty-26-4*k;
     ctx.fillStyle='rgba(10,20,40,.7)';ctx.fillRect(p.tx-tw/2-3*k,ly-11*k,tw+6*k,14*k);
     ctx.fillStyle=raided?'#b8b0a0':'#ffffff';ctx.fillText(label,p.tx,ly);
   }
-  if(S.speed>4&&!paused){ctx.fillStyle='rgba(255,255,255,.75)';const cx=Math.cos(S.heading),cy=Math.sin(S.heading);
-    for(let i=1;i<=5;i++){if(Math.sin(T*8-i)>-.3){const d=14+i*8,w=2+i*.8;ctx.fillRect(S.x-cx*d-cy*w-2,S.y-cy*d+cx*w-2,4,4);ctx.fillRect(S.x-cx*d+cy*w-2,S.y-cy*d-cx*w-2,4,4);}}}
-  topShip(ctx,S.x,S.y,S.heading,34,NAT[S.nat].c);
+  if(S.speed>4&&!paused){ctx.fillStyle='rgba(255,255,255,.8)';const cx=Math.cos(S.heading),cy=Math.sin(S.heading);
+    for(let i=1;i<=5;i++){if(Math.sin(T*8-i)>-.3){const d=16+i*8,w=2+i*.9;ctx.fillRect(Math.round(S.x-cx*d-cy*w-2),Math.round(S.y-cy*d+cx*w-2),4,4);ctx.fillRect(Math.round(S.x-cx*d+cy*w-2),Math.round(S.y-cy*d-cx*w-2),4,4);}}}
+  ctx.drawImage(shipSprite(S.ship,dirOf(S.heading),NAT[S.nat].c),Math.round(S.x-24),Math.round(S.y-24),48,48);
   ctx.restore();
-  // mini-map
-  const mw=Math.round(Math.min(150,W*.34)),mh=Math.round(mw*WH/WW),mx=W-mw-10,my=10;Object.assign(MM,{x:mx,y:my,w:mw,h:mh});
-  ctx.fillStyle='#16110c';ctx.fillRect(mx-3,my-3,mw+6,mh+6);
-  ctx.drawImage(world,mx,my,mw,mh);
-  const f=mw/WW;
-  for(const p of PORTS){ctx.fillStyle=NAT[p.nat].c;ctx.fillRect(mx+p.x*f-1.5,my+p.y*f-1.5,3,3);}
-  if(S.treasure){ctx.fillStyle='#d8261b';ctx.fillRect(mx+S.treasure.x*f-2,my+S.treasure.y*f-2,4,4);}
-  ctx.strokeStyle='#ffffff';ctx.lineWidth=1;ctx.strokeRect(mx+view.cx*f+.5,my+view.cy*f+.5,W*k*f,H*k*f);
-  if(Math.floor(T*3)%2){ctx.fillStyle='#ff3b2f';ctx.fillRect(mx+S.x*f-2.5,my+S.y*f-2.5,5,5);}
-  ctx.strokeStyle='#d3a64f';ctx.lineWidth=1.5;ctx.strokeRect(mx-1.5,my-1.5,mw+3,mh+3);
   drawWind(ctx,34,H-38);
 }
 function drawWind(c,wx,wy){
@@ -452,13 +742,10 @@ function drawWind(c,wx,wy){
 
 /* ---------- input ---------- */
 let pd=null;
-cv.addEventListener('pointerdown',e=>{const r0=cv.getBoundingClientRect(),qx=e.clientX-r0.left,qy=e.clientY-r0.top;
-  pd={x:e.clientX,y:e.clientY,cx:view.cx,cy:view.cy,drag:false,mini:qx>=MM.x&&qx<=MM.x+MM.w&&qy>=MM.y&&qy<=MM.y+MM.h};cv.setPointerCapture(e.pointerId);});
-cv.addEventListener('pointermove',e=>{if(!pd||pd.mini)return;const dx=e.clientX-pd.x,dy=e.clientY-pd.y;if(!pd.drag&&Math.hypot(dx,dy)>8){pd.drag=true;view.follow=false;}
+cv.addEventListener('pointerdown',e=>{pd={x:e.clientX,y:e.clientY,cx:view.cx,cy:view.cy,drag:false};cv.setPointerCapture(e.pointerId);});
+cv.addEventListener('pointermove',e=>{if(!pd)return;const dx=e.clientX-pd.x,dy=e.clientY-pd.y;if(!pd.drag&&Math.hypot(dx,dy)>8){pd.drag=true;view.follow=false;}
   if(pd.drag){view.cx=pd.cx-dx/view.s;view.cy=pd.cy-dy/view.s;clampView();}});
-cv.addEventListener('pointerup',e=>{if(!pd)return;const wasDrag=pd.drag,mini=pd.mini;pd=null;
-  if(mini){const r=cv.getBoundingClientRect();view.follow=false;centerOn((e.clientX-r.left-MM.x)/MM.w*WW,(e.clientY-r.top-MM.y)/MM.h*WH);toast('Tap the sea to return to your ship.');return;}
-  if(!wasDrag&&!view.follow){view.follow=true;}});
+cv.addEventListener('pointerup',()=>{if(!pd)return;const wasDrag=pd.drag;pd=null;if(!wasDrag)view.follow=true;});
 cv.addEventListener('pointercancel',()=>pd=null);
 function holdBtn(el,on,off){
   el.addEventListener('pointerdown',ev=>{ev.preventDefault();try{el.setPointerCapture(ev.pointerId)}catch(_){}el.classList.add('on');on();});
@@ -469,17 +756,21 @@ holdBtn($('#b-left'),()=>{steer=-1;$('#taphint').hidden=true;},()=>{if(steer<0)s
 holdBtn($('#b-right'),()=>{steer=1;$('#taphint').hidden=true;},()=>{if(steer>0)steer=0;});
 const keys={};
 window.addEventListener('keydown',e=>{
+  if(D&&!D.over){const k=e.key.toLowerCase(),am={q:0,w:1,e:2},pm={a:0,s:1,d:2};
+    if(k in am){duelAttack(am[k]);e.preventDefault();return;}if(k in pm){duelGuard(pm[k]);e.preventDefault();return;}
+    if(e.key==='ArrowUp'){duelGuard(D.me.g-1);e.preventDefault();return;}if(e.key==='ArrowDown'){duelGuard(D.me.g+1);e.preventDefault();return;}
+    if(e.key===' '||e.key==='ArrowRight'){duelAttack(D.me.g);e.preventDefault();return;}}
   if(e.key==='ArrowLeft'||e.key==='a'){keys.l=1;e.preventDefault();}
   if(e.key==='ArrowRight'||e.key==='d'){keys.r=1;e.preventDefault();}
   if(e.key===' '&&B&&!B.over){e.preventDefault();battleFire();}
-  if(D&&!D.over){const m={'ArrowUp':0,'w':0,'ArrowDown':2,'s':2,'q':0,'e':1,'Enter':1};if(e.key in m){}}
+  if((e.key==='Escape'||e.key==='m')&&S&&$('#veil').hidden){menu();}
   syncKeys();});
 window.addEventListener('keyup',e=>{if(e.key==='ArrowLeft'||e.key==='a')keys.l=0;if(e.key==='ArrowRight'||e.key==='d')keys.r=0;syncKeys();});
 function syncKeys(){const v=(keys.r?1:0)-(keys.l?1:0);if(B)B.steer=v;else steer=v;}
 
 /* ---------- sailing ---------- */
 function update(dt){
-  S.heading=wrapA(S.heading+steer*ship().turn*(S.skill==='nav'?1.1:1)*.85*dt);
+  S.heading=wrapA(S.heading+steer*ship().turn*(S.skill==='nav'?1.1:1)*.85*dt);reveal(S.x,S.y,420);
   if(S.lastPort){const lp=PORT[S.lastPort];if(Math.hypot(lp.x-S.x,lp.y-S.y)>110)S.lastPort=null;}
   if(S.anchored){S.speed=0;return;}
   const sp=100*windF(S.heading)*ship().spd*(S.skill==='nav'?1.12:1)*(.55+.45*S.hull/ship().hull);
@@ -487,7 +778,7 @@ function update(dt){
   if(onLand(nx,ny)){S.speed=0;if(!S.aground){S.aground=true;sfx('thud');toast('Breakers ahead! Steer away from the coast.');}return;}
   S.aground=false;S.speed=sp;S.x=nx;S.y=ny;
   for(const p of PORTS){if(p.id!==S.lastPort&&Math.hypot(p.x-S.x,p.y-S.y)<40){openPort(p);return;}}
-  if(S.treasure&&Math.hypot(S.treasure.x-S.x,S.treasure.y-S.y)<40){dig();return;}
+  if(S.pieces>=4){const tc=CAYS[S.tre];if(Math.hypot(tc.x-S.x,tc.y-S.y)<75){dig();return;}}
   S.acc+=sp*dt/(24*WS);
   while(S.acc>=1&&!paused){S.acc-=1;newDay();}
 }
@@ -527,19 +818,16 @@ function hud(){
   <span class="chip ${food<10?'warn':''}">FOOD<b>${food}d</b></span><span class="chip ${hp<40?'warn':''}">HULL<b>${hp}%</b></span>
   <span class="chip ${S.morale<30?'warn':''}">MORALE<b>${Math.round(S.morale)}</b></span><span class="chip ${!S.anchored&&wf<.4?'warn':''}">SPEED<b>${kn} kn</b> · ${ww}</span>`;
   if(h!==hudCache){$('#hud').innerHTML=h;hudCache=h;}
-  $('#b-stop').textContent=S.anchored?'Make sail':'Furl sails';
 }
 let toastT=0;
 function toast(t){const el=$('#toast');el.textContent=t;el.style.opacity=1;clearTimeout(toastT);toastT=setTimeout(()=>el.style.opacity=0,2800);}
 
 /* ---------- sheets ---------- */
-function sheet(html){$('#sheet').innerHTML=html;$('#veil').hidden=false;$('#sheet').scrollTop=0;paused=true;steer=0;}
-function closeSheet(){churchOpen=false;$('#veil').hidden=true;paused=false;B=null;D=null;DN=null;E=null;view.follow=true;hud();save();}
+function sheet(html){$('#sheet').innerHTML=html;$('#veil').hidden=false;$('#sheet').scrollTop=0;paused=true;steer=0;bindScenes();}
+function closeSheet(){churchOpen=false;titleOn=false;SX=null;liveScenes=[];$('#veil').hidden=true;paused=false;B=null;D=null;DN=null;E=null;view.follow=true;hud();save();}
 const A={};
 $('#sheet').addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b||b.disabled)return;sfx('blip');const f=A[b.dataset.a];if(f)f(b.dataset.v,b);});
-$('#b-stop').onclick=()=>{if(!S||paused)return;S.anchored=!S.anchored;toast(S.anchored?'Sails furled. You drift at anchor.':'Make sail!');hud();};
-$('#b-status').onclick=()=>{if(S&&!B&&!D&&!DN)status();};
-$('#b-log').onclick=()=>{if(S&&!B&&!D&&!DN)showLog();};
+$('#b-menu').onclick=()=>{if(S&&!paused)menu();};
 A.close=()=>closeSheet();
 
 function status(){
@@ -552,20 +840,20 @@ function status(){
   <dt>Crew</dt><dd>${S.crew} of ${ship().crew} berths</dd><dt>Cargo</dt><dd>${S.cargo} of ${ship().cargo} tons</dd>
   <dt>Ship's purse</dt><dd>${fmt(S.gold)} pieces of eight</dd><dt>Your fortune</dt><dd>${fmt(S.personal)} pieces of eight</dd>
   <dt>Fame</dt><dd>${S.fame} · ${S.wins} victories, ${S.prizes} prizes, ${S.raids} towns sacked</dd>
-  <dt>Map pieces</dt><dd>${S.pieces} of 4${S.treasure?' — the X is marked on your chart':''}</dd>
+  <dt>Map pieces</dt><dd>${S.pieces} of 4${S.pieces>=4?' — the map is whole':''}</dd>
   <dt>Heart</dt><dd>${S.wife?`Married to ${DTITLE[PORT[S.wife.pid].nat]} ${S.wife.name} of ${PORT[S.wife.pid].n}`:sweet.length?`Courting ${sweet.join(', ')}`:'Unattached'}</dd>
   ${S.kids.length?`<dt>Children</dt><dd>${S.kids.map(k=>`${k.name} (${kidAge(k)})`).join(', ')}</dd>`:''}${S.expect?'<dt>Expecting</dt><dd>A child is on the way</dd>':''}
   <dt>Skill</dt><dd>${SKILLS[S.skill].n}</dd><dt>Wind</dt><dd>From the ${windFrom()}</dd></dl>
   <h3>Standing with the crowns</h3>
   <table class="t"><thead><tr><th>Nation</th><th>Attitude</th><th>Your rank</th></tr></thead><tbody>${rows}</tbody></table>
   <p class="note" style="margin-top:10px">At war: ${wars.join(', ')||'none — an uneasy peace'}.</p>
-  <div class="row"><button class="btn pri" data-a="close">Back to the chart</button></div>`);
+  <div class="row"><button class="btn pri" data-a="menu">Back</button></div>`);
 }
 function fameTitle(){const f=S.fame;return f<5?'an unknown captain':f<20?'a captain of some repute':f<45?'a feared rover':f<80?'a famous buccaneer':'a legend of the Main';}
 function showLog(){
   sheet(`<p class="eyebrow">Ship's log</p><h2>The ${ship().n}'s log</h2>
   <ul class="loglist">${S.log.map(l=>`<li><i>${l.d.toUpperCase()}</i>${l.t}</li>`).join('')}</ul>
-  <div class="row"><button class="btn pri" data-a="close">Back to the chart</button></div>`);
+  <div class="row"><button class="btn pri" data-a="menu">Back</button></div>`);
 }
 
 /* ---------- encounters ---------- */
@@ -594,7 +882,7 @@ function encounter(){
   const warn=e.nat&&S.rel[e.nat]>=0&&!atWar(S.nat,e.nat)?`<p class="note">Attacking her will sour ${NAT[e.nat].n}'s view of you${NK.some(n=>atWar(n,e.nat))?', but her enemies will thank you':''}.</p>`:
     e.nat?`<p class="note">${NK.filter(n=>atWar(n,e.nat)).map(n=>NAT[n].n).join(' and ')||'No one'} would reward you for taking her.</p>`:'<p class="note">Every crown pays well for a pirate taken.</p>';
   const say={merchant:'Her decks ride low. She is heavy with cargo.',warship:'Her gunports are open and her decks are crowded with marines.',pirate:'She flies no honest colors.',hunter:'Her captain carries a commission to bring you in, dead or in chains.'}[e.kind];
-  sheet(`<p class="eyebrow">Sail ho!</p><h2>A ${e.label}</h2><p>${say} ${e.aggr?'<b>She is bearing down on you.</b>':''}</p>
+  sheet(`<p class="eyebrow">Sail ho!</p><h2>A ${e.label}</h2>${scn('encounter',e.ship+'|'+(e.nat?NAT[e.nat].c:'#111111'))}<p>${say} ${e.aggr?'<b>She is bearing down on you.</b>':''}</p>
   <dl class="stats"><dt>Colors</dt><dd>${flag}</dd><dt>Guns</dt><dd>${e.guns}</dd><dt>Crew</dt><dd>about ${Math.max(10,Math.round(e.crew/10)*10)}</dd><dt>Your ship</dt><dd>${S.crew} men, ${S.guns} guns, hull ${Math.round(S.hull/ship().hull*100)}%</dd></dl>
   ${warn}
   <div class="row"><button class="btn pri" data-a="engage">Engage</button>
@@ -608,6 +896,16 @@ A.engage=()=>startBattle(false);
 
 /* ---------- sea battle (steer & fire) ---------- */
 function reloadTime(guns,crew,mine){let t=4.4/clamp(crew/(guns*2.2),.35,1);if(mine&&S.skill==='gun')t*=.78;if(!mine)t/=DIFF[S.diff].e;return t;}
+function arenaHTML(title,eyebrow,them,a,b,note){return `<p class="eyebrow">${eyebrow}</p><h2 style="font-size:22px">${title}</h2>
+  <canvas class="arena" id="bc"></canvas>
+  <div class="bstats"><div><h4>YOU · ${S.guns} GUNS</h4><div class="meterline"><span>Hull</span><span id="ph"></span></div><div class="gauge h"><i id="phg"></i></div><div class="meterline"><span>Crew</span><span id="pc"></span></div></div>
+  <div><h4>${them}</h4><div class="meterline"><span>${a}</span><span id="qh"></span></div><div class="gauge h"><i id="qhg"></i></div><div class="meterline"><span>${b}</span><span id="qc"></span></div></div></div>
+  <div class="bmsg" id="bmsg"></div>
+  <div class="bctl"><button type="button" id="bl" aria-label="Steer to port">◀</button><button type="button" id="bf" class="fire">FIRE<i id="brl"></i></button><button type="button" id="br" aria-label="Steer to starboard">▶</button></div>
+  <p class="note" style="margin-top:8px">${note}</p>`;}
+function bindArena(){holdBtn($('#bl'),()=>{if(B)B.steer=-1;},()=>{if(B&&B.steer<0)B.steer=0;});
+  holdBtn($('#br'),()=>{if(B)B.steer=1;},()=>{if(B&&B.steer>0)B.steer=0;});
+  $('#bf').addEventListener('pointerdown',ev=>{ev.preventDefault();battleFire();});}
 function startBattle(enemyFirst){
   const e=E,a=Math.random()*6.283,d=enemyFirst?200:340;
   B={e,t:0,steer:0,balls:[],fx:[],over:false,msgT:3,dead:1,
@@ -615,17 +913,9 @@ function startBattle(enemyFirst){
     p:{x:0,y:0,h:S.heading,rl:0,rlMax:1,v:0},
     q:{x:Math.cos(a)*d,y:Math.sin(a)*d,h:enemyFirst?a+Math.PI+rnd(-.6,.6):rnd(0,6.28),rl:enemyFirst?.6:2.6,v:0}};
   if(e.nat&&e.kind!=='hunter')adjRel(e.nat,-4);
-  const my=ship();
-  sheet(`<p class="eyebrow">Engagement · wind from the ${windFrom()}</p><h2 style="font-size:22px">Your ${my.n.toLowerCase()} vs. the ${e.label}</h2>
-  <canvas class="arena" id="bc"></canvas>
-  <div class="bstats"><div><h4>YOU · ${S.guns} GUNS</h4><div class="meterline"><span>Hull</span><span id="ph"></span></div><div class="gauge h"><i id="phg"></i></div><div class="meterline"><span>Crew</span><span id="pc"></span></div></div>
-  <div><h4>THEM · ${e.guns} GUNS</h4><div class="meterline"><span>Hull</span><span id="qh"></span></div><div class="gauge h"><i id="qhg"></i></div><div class="meterline"><span>Crew</span><span id="qc"></span></div></div></div>
-  <div class="bmsg" id="bmsg"></div>
-  <div class="bctl"><button type="button" id="bl" aria-label="Steer to port">◀</button><button type="button" id="bf" class="fire">FIRE<i id="brl"></i></button><button type="button" id="br" aria-label="Steer to starboard">▶</button></div>
-  <p class="note" style="margin-top:8px">Your guns fire out of both sides. Turn until she lies off your beam and the guide line turns green, then fire. Ram her to board. Sail out of sight to escape.</p>`);
-  holdBtn($('#bl'),()=>{if(B)B.steer=-1;},()=>{if(B&&B.steer<0)B.steer=0;});
-  holdBtn($('#br'),()=>{if(B)B.steer=1;},()=>{if(B&&B.steer>0)B.steer=0;});
-  $('#bf').addEventListener('pointerdown',ev=>{ev.preventDefault();battleFire();});
+  sheet(arenaHTML(`Your ${ship().n.toLowerCase()} vs. the ${e.label}`,`Engagement · wind from the ${windFrom()}`,`THEM · ${e.guns} GUNS`,'Hull','Crew',
+    'Your guns fire out of both sides. Turn until she lies off your beam and the guide line turns green, then fire. Ram her to board. Sail out of sight to escape.'));
+  bindArena();
 }
 function volley(sh,guns,mine,sides,L){
   const n=Math.ceil(guns/2);
@@ -641,7 +931,7 @@ function battleFire(){
   if(P.rl>0){B.msg='The guns are still reloading!';B.msgT=1;return;}
   volley(P,S.guns,true,[-1,1],ship().len);P.rlMax=P.rl=reloadTime(S.guns,S.crew,true);B.msg='Fire!';B.msgT=.8;
 }
-function hitShip(b,s,L){const dx=b.x-s.x,dy=b.y-s.y,c=Math.cos(-s.h),sn=Math.sin(-s.h),lx=dx*c-dy*sn,ly=dx*sn+dy*c;return (lx/(L/2))**2+(ly/(L*.19))**2<1;}
+function hitShip(b,s,L){const dx=b.x-s.x,dy=b.y-s.y,c=Math.cos(-s.h),sn=Math.sin(-s.h),lx=dx*c-dy*sn,ly=dx*sn+dy*c;return (lx/(L*.62))**2+(ly/(L*.24))**2<1;}
 function updBattle(dt){
   const P=B.p,Q=B.q,e=B.e,my=ship(),es=SHIPS[e.ship];
   B.t+=dt;B.msgT-=dt;
@@ -687,45 +977,122 @@ function updBattle(dt){
   if(rl)rl.style.width=((1-P.rl/P.rlMax)*100)+'%';
   if(bm)bm.textContent=B.msgT>0?B.msg:(P.rl>0?'Reloading…':dist<310&&Math.abs(Math.abs(wrapA(brg+Math.PI-P.h))-Math.PI/2)<.3?'She is in your sights — fire!':dist>500?'She is far off.':'Bring her onto your beam.');
 }
-function drawBattle(){
-  const el=document.getElementById('bc');if(!el||!B)return;
-  const w=el.clientWidth,h=el.clientHeight;if(el.width!==Math.round(w*dpr)){el.width=Math.round(w*dpr);el.height=Math.round(h*dpr);}
-  const c=el.getContext('2d');c.setTransform(dpr,0,0,dpr,0,0);c.imageSmoothingEnabled=false;
-  const P=B.p,Q=B.q,e=B.e,my=ship(),es=SHIPS[e.ship];
-  const mx=(P.x+Q.x)/2,my2=(P.y+Q.y)/2,dist=Math.hypot(P.x-Q.x,P.y-Q.y);
-  const sc=clamp(Math.min(w,h)/(dist+240),.3,1.35);
-  c.fillStyle='#1d4aa8';c.fillRect(0,0,w,h);
-  const g=64,vx0=mx-w/2/sc,vy0=my2-h/2/sc,vx1=mx+w/2/sc,vy1=my2+h/2/sc;
-  for(let gx=Math.floor(vx0/g);gx<=vx1/g;gx++)for(let gy=Math.floor(vy0/g);gy<=vy1/g;gy++){
-    const hs=Math.sin(gx*12.9898+gy*78.233)*43758.5453,fr=hs-Math.floor(hs);
-    if(Math.sin(B.t*1.5+fr*6.28)>.35){c.fillStyle=fr>.5?'#5e9cf0':'#3e7fdc';c.fillRect((gx*g+fr*40-mx)*sc+w/2,(gy*g+fr*30-my2)*sc+h/2,Math.max(4,12*sc),Math.max(3,4*sc));}}
-  c.save();c.translate(w/2,h/2);c.scale(sc,sc);c.translate(-mx,-my2);
+function lowArena(){const el=document.getElementById('bc');if(!el)return null;const w=el.clientWidth||300,h=el.clientHeight||200;
+  const cw=Math.max(100,Math.round(w/2.4)),ch=Math.max(70,Math.round(h/2.4));if(el.width!==cw||el.height!==ch){el.width=cw;el.height=ch;}
+  const c=el.getContext('2d');c.setTransform(1,0,0,1,0,0);c.imageSmoothingEnabled=false;g=c;return{cw,ch};}
+function arenaSea(cw,ch,cx,cy,sc,t){R(0,0,cw,ch,'#1d4aa8');const st=48,x0=Math.floor((cx-cw/2/sc)/st),x1=Math.ceil((cx+cw/2/sc)/st),y0=Math.floor((cy-ch/2/sc)/st),y1=Math.ceil((cy+ch/2/sc)/st);
+  for(let gx=x0;gx<=x1;gx++)for(let gy=y0;gy<=y1;gy++){const r=hs(gx*31+gy*17);if(Math.sin(t*1.5+r*6.28)<.3)continue;
+    R((gx*st+r*30-cx)*sc+cw/2,(gy*st+hs(gx+gy*7)*30-cy)*sc+ch/2,r>.5?3:2,1,r>.6?'#6aa6f0':'#3e7fdc');}}
+function arenaFx(cx,cy,sc,cw,ch){const S2=(x,y)=>[(x-cx)*sc+cw/2,(y-cy)*sc+ch/2];
+  for(const f of B.fx){const[X,Y]=S2(f.x,f.y);
+    if(f.t==='smoke')Circ(X,Y,Math.max(1,Math.round(f.r*.5*(2.2-f.life*1.5))),`rgba(235,235,230,${(f.life*.8).toFixed(2)})`);
+    else if(f.t==='boom'){R(X-2,Y-2,4,4,'#ffb030');Pt(X,Y,'#fff3a0');}
+    else{const r=Math.max(1,Math.round(3*(1.6-f.life)));Pt(X-r,Y,'#ffffff');Pt(X+r,Y,'#ffffff');Pt(X,Y-r,'#ffffff');Pt(X,Y+r,'#ffffff');}}
+  for(const b of B.balls){const[X,Y]=S2(b.x,b.y);R(X-1,Y-1,2,2,'#0d0d0d');}}
+function windMini(cw,ch){const x=12,y=ch-12,a=S.wind;Circ(x,y,8,'rgba(10,20,40,.6)');Ln(x-Math.cos(a)*6,y-Math.sin(a)*6,x+Math.cos(a)*6,y+Math.sin(a)*6,'#ffffff');
+  const hx=x+Math.cos(a)*6,hy=y+Math.sin(a)*6;Pt(hx+Math.cos(a+2.4)*2,hy+Math.sin(a+2.4)*2,'#ffffff');Pt(hx+Math.cos(a-2.4)*2,hy+Math.sin(a-2.4)*2,'#ffffff');}
+function guideLines(px,py,h,on,sc,rel){for(const sd of[-1,1]){const a=h+sd*Math.PI/2,lit=on&&Math.sign(rel)===sd,len=300*sc;for(let r=10;r<len;r+=lit?3:5)Pt(px+Math.cos(a)*r,py+Math.sin(a)*r,lit?'#7dff8c':'rgba(255,255,255,.45)');}}
+function drawBattle(){const A2=lowArena();if(!A2||!B)return;const{cw,ch}=A2,P=B.p,Q=B.q,e=B.e;
+  const mx=(P.x+Q.x)/2,my=(P.y+Q.y)/2,dist=Math.hypot(P.x-Q.x,P.y-Q.y),sc=clamp(Math.min(cw,ch)/(dist+170),.12,.55);
+  arenaSea(cw,ch,mx,my,sc,B.t);
+  const S2=(x,y)=>[(x-mx)*sc+cw/2,(y-my)*sc+ch/2];
   const brg=Math.atan2(Q.y-P.y,Q.x-P.x),rel=wrapA(brg-P.h),aligned=dist<310&&Math.abs(Math.abs(rel)-Math.PI/2)<.3&&e.hull>0;
-  for(const sd of[-1,1]){const a=P.h+sd*Math.PI/2,on=aligned&&Math.sign(rel)===sd;
-    c.strokeStyle=on?'rgba(120,255,140,.95)':'rgba(255,255,255,.28)';c.lineWidth=(on?3:2)/sc;c.setLineDash([8/sc,8/sc]);
-    c.beginPath();c.moveTo(P.x+Math.cos(a)*my.len*.3,P.y+Math.sin(a)*my.len*.3);c.lineTo(P.x+Math.cos(a)*300,P.y+Math.sin(a)*300);c.stroke();}
-  c.setLineDash([]);
-  topShip(c,Q.x,Q.y,Q.h,Math.max(es.len,26/sc),e.nat?NAT[e.nat].c:'#111111',e.hull<=0?(B.dead=Math.max(0,B.dead-.008)):0);
-  topShip(c,P.x,P.y,P.h,Math.max(my.len,26/sc),NAT[S.nat].c,0);
-  c.fillStyle='#0d0d0d';for(const b of B.balls)c.fillRect(b.x-3,b.y-3,6,6);
-  for(const f of B.fx){
-    if(f.t==='smoke'){c.fillStyle=`rgba(235,235,230,${f.life*.8})`;c.beginPath();c.arc(f.x,f.y,f.r*(2.2-f.life*1.5),0,7);c.fill();}
-    else if(f.t==='boom'){c.fillStyle=`rgba(255,${120+Math.round(f.life*200)},40,${f.life*1.6})`;c.fillRect(f.x-f.r,f.y-f.r,f.r*2,f.r*2);}
-    else{c.strokeStyle=`rgba(255,255,255,${f.life*1.4})`;c.lineWidth=2;c.beginPath();c.arc(f.x,f.y,f.r*(2-f.life*1.5),0,7);c.stroke();}}
-  c.restore();
-  drawWind(c,34,h-34);
-  if(dist>360){const a=Math.atan2(Q.y-P.y,Q.x-P.x);c.fillStyle='#ffd34d';c.save();c.translate(w/2+Math.cos(a)*(Math.min(w,h)/2-18),h/2+Math.sin(a)*(Math.min(w,h)/2-18));c.rotate(a);c.beginPath();c.moveTo(9,0);c.lineTo(-6,-6);c.lineTo(-6,6);c.fill();c.restore();}
+  const[px,py]=S2(P.x,P.y),[qx,qy]=S2(Q.x,Q.y);
+  guideLines(px,py,P.h,aligned,sc,rel);
+  if(e.hull>0||B.dead>0){if(e.hull<=0)B.dead=Math.max(0,B.dead-.012);g.globalAlpha=e.hull>0?1:B.dead;g.drawImage(shipSprite(e.ship,dirOf(Q.h),e.nat?NAT[e.nat].c:'#111111'),Math.round(qx-12),Math.round(qy-12));g.globalAlpha=1;}
+  g.drawImage(shipSprite(S.ship,dirOf(P.h),NAT[S.nat].c),Math.round(px-12),Math.round(py-12));
+  arenaFx(mx,my,sc,cw,ch);windMini(cw,ch);
+  if(qx<0||qy<0||qx>cw||qy>ch){const a=Math.atan2(qy-ch/2,qx-cw/2),r=Math.min(cw,ch)/2-6,ex=cw/2+Math.cos(a)*r,ey=ch/2+Math.sin(a)*r;
+    Poly([[ex+Math.cos(a)*5,ey+Math.sin(a)*5],[ex+Math.cos(a+2.4)*4,ey+Math.sin(a+2.4)*4],[ex+Math.cos(a-2.4)*4,ey+Math.sin(a-2.4)*4]],'#ffd34d');}
 }
-function board(){
-  const e=B.e;
-  startDuel({foe:`the captain of the ${e.label}`,skill:e.skill,mine:S.crew,theirs:e.crew,
+/* ---------- assault on a town ---------- */
+const COATS={es:'#7a1f14',en:'#a8322a',fr:'#2d4a8a',nl:'#c96a1a'};
+function shoreY(x){return -300+26*Math.sin(x/130)+14*Math.sin(x/57+1);}
+const BEACH=[170,300];
+function raidFallout(p){const wf=S.rel[p.nat]>-25;
+  adjRel(p.nat,wf?-75:-30);
+  if(wf){S.rank[p.nat]=0;S.deeds[p.nat]=0;log(`${NAT[p.nat].n} brands you an outlaw and strips you of your titles.`);}
+  const d=S.dau[p.id],home=S.wife&&S.wife.pid===p.id;
+  if(d&&!home){d.scorn=true;d.aff=0;}
+  if(S.engaged===p.id)S.engaged=null;
+  if(home){S.fame=Math.max(0,S.fame-5);log(`${S.wife.name} is mortified that you attacked her own town.`);}}
+function startAssault(p){
+  raidFallout(p);const mx=40+p.size*45;
+  B={mode:'assault',port:p,t:0,steer:0,balls:[],fx:[],over:false,msgT:3,msg:`The guns of ${p.n} open fire!`,
+    fort:{x:-40,y:-372,hp:mx,max:mx,guns:4+p.size*4,rl:2},p:{x:-280,y:380,h:-Math.PI/2+.35,rl:0,rlMax:1,v:0}};
+  sheet(arenaHTML(`Run the guns of ${p.n}`,`Assault · wind from the ${windFrom()}`,`FORT · ${B.fort.guns} GUNS`,'Walls','Garrison',
+    "Steer for the beach with the white flag and land your men. Broadsides can batter the walls and slow the fort's guns. Sail out of range to call off the attack."));
+  bindArena();sfx('alarm');}
+function updAssault(dt){const P=B.p,F=B.fort,my=ship();B.t+=dt;B.msgT-=dt;
+  if(!B.over)P.h=wrapA(P.h+B.steer*my.turn*(S.skill==='nav'?1.15:1)*.9*dt);
+  P.v=B.over?P.v*.94:72*windF(P.h)*my.spd*(S.skill==='nav'?1.1:1)*(.45+.55*S.hull/my.hull);
+  let nx=P.x+Math.cos(P.h)*P.v*dt,ny=P.y+Math.sin(P.h)*P.v*dt;
+  if(ny<shoreY(nx)+14){const beach=nx>BEACH[0]&&nx<BEACH[1];
+    if(beach&&!B.over){B.over=true;B.msg='Your boats hit the beach! Charge!';B.msgT=9;sfx('alarm');setTimeout(()=>{if(B)landTroops();},1000);}
+    else if(!beach){if(!B.rocks){B.rocks=true;sfx('thud');B.msg='Rocks! Steer for the beach.';B.msgT=1.6;}nx=P.x;ny=P.y;P.v=0;}}
+  else B.rocks=false;
+  P.x=nx;P.y=ny;P.rl=Math.max(0,P.rl-dt);
+  F.rl-=dt;const dist=Math.hypot(P.x-F.x,P.y-F.y);
+  if(!B.over&&F.hp>0&&F.rl<=0&&dist<540){const n=Math.max(1,Math.round(F.guns/3*(F.hp/F.max*.7+.3))),tt=dist/240,tx=P.x+Math.cos(P.h)*P.v*tt,ty=P.y+Math.sin(P.h)*P.v*tt;
+    for(let i=0;i<n;i++){const a=Math.atan2(ty-F.y,tx-F.x)+rnd(-.08,.08);B.balls.push({x:F.x,y:F.y+12,vx:Math.cos(a)*240,vy:Math.sin(a)*240,life:tt+rnd(-.05,.3),mine:false});}
+    B.fx.push({x:F.x,y:F.y+12,r:8,life:.8,t:'smoke'});sfx('cannonFar');F.rl=rnd(2.8,3.8)/DIFF[S.diff].e;}
+  if(F.hp<=0&&!B.silenced){B.silenced=true;B.msg="The fort's guns fall silent!";B.msgT=2;sfx('win');}
+  const gm=S.skill==='gun'?1.2:1,em=DIFF[S.diff].e;
+  for(const b of B.balls){b.x+=b.vx*dt;b.y+=b.vy*dt;b.life-=dt;
+    if(b.life>0){if(b.mine){if(F.hp>0&&Math.hypot(b.x-F.x,b.y-F.y)<44){b.life=-9;F.hp=Math.max(0,F.hp-3.2*gm);B.fx.push({x:b.x,y:b.y,r:7,life:.5,t:'boom'});sfx('hit');}}
+      else if(hitShip(b,P,my.len)){b.life=-9;B.fx.push({x:b.x,y:b.y,r:7,life:.5,t:'boom'});sfx('hit');S.hull=Math.max(0,S.hull-3.4*em);S.crew=Math.max(0,S.crew-(Math.random()<.7?ri(1,3):0));}}
+    else if(b.life>-5){if(b.y>shoreY(b.x)+4){B.fx.push({x:b.x,y:b.y,r:4,life:.6,t:'splash'});sfx('splash');}b.life=-9;}}
+  B.balls=B.balls.filter(b=>b.life>0);B.fx=B.fx.filter(f=>(f.life-=dt)>0);
+  if(!B.over){if(S.hull<=0||S.crew<=4){B.over=true;B.msg='Your ship is battered! Haul off!';B.msgT=9;setTimeout(()=>{if(B)assaultEnd('repulsed');},1200);}
+    else if(dist>1150){B.over=true;B.msg='You haul out of range.';B.msgT=9;setTimeout(()=>{if(B)assaultEnd('withdraw');},900);}}
+  const set=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
+  set('ph',Math.round(S.hull));set('pc',S.crew);set('qh',Math.round(F.hp));set('qc','~'+Math.round(garrison(B.port)*(.7+.3*F.hp/F.max)));
+  const g1=document.getElementById('phg'),g2=document.getElementById('qhg'),rl=document.getElementById('brl'),bm=document.getElementById('bmsg');
+  if(g1)g1.style.width=(S.hull/my.hull*100)+'%';if(g2)g2.style.width=(F.hp/F.max*100)+'%';if(rl)rl.style.width=((1-P.rl/P.rlMax)*100)+'%';
+  if(bm)bm.textContent=B.msgT>0?B.msg:(F.hp>0&&dist<540?'Under fire! Make for the beach.':'Steer for the beach with the white flag.');
+}
+function drawAssault(){const A2=lowArena();if(!A2||!B)return;const{cw,ch}=A2,P=B.p,F=B.fort,t=B.t,p=B.port;
+  const mx=(P.x+F.x)/2,my=(P.y+F.y)/2,dist=Math.hypot(P.x-F.x,P.y-F.y),sc=clamp(Math.min(cw,ch)/(dist+180),.12,.45);
+  arenaSea(cw,ch,mx,my,sc,t);
+  const S2=(x,y)=>[(x-mx)*sc+cw/2,(y-my)*sc+ch/2];
+  for(let sx=0;sx<cw;sx++){const wx=mx+(sx-cw/2)/sc,sy=Math.round((shoreY(wx)-my)*sc+ch/2);if(sy<=0)continue;const beach=wx>BEACH[0]&&wx<BEACH[1];
+    R(sx,0,1,sy,C.grass);for(let y=1;y<sy-4;y+=2){const wy=my+(y-ch/2)/sc;if(hs(Math.round(wx/6)*13+Math.round(wy/6)*7)>.82)Pt(sx,y,C.grass2);}R(sx,sy-3,1,3,beach?C.sand:C.stone3);Pt(sx,sy,beach?C.sand2:'#8cc4ff');
+    const cell=Math.floor(wx/22);if(hs(cell)>.5){const ty=Math.round((shoreY(wx)-50-hs(cell+5)*160-my)*sc+ch/2);if(ty>1&&ty<sy-6&&Math.abs(wx-F.x)>70){Circ(sx,ty,2,C.leaf);Pt(sx,ty-1,C.leaf2);}}}
+  for(let i=0;i<7;i++){const[hx,hy]=S2(F.x+70+i*38,F.y-60-hs(i)*50);R(hx-3,hy-2,7,5,C.white);R(hx-3,hy-3,7,2,C.red);}
+  const[cxh,cyh]=S2(F.x+150,F.y-120);R(cxh-2,cyh-8,4,10,C.white);Pt(cxh,cyh-11,C.gold);Pt(cxh-1,cyh-10,C.gold);Pt(cxh+1,cyh-10,C.gold);Pt(cxh,cyh-10,C.gold);
+  const[fx,fy]=S2(F.x,F.y),fs=Math.max(8,Math.round(88*sc));
+  R(fx-fs/2,fy-fs/2,fs,fs,F.hp>0?C.stone2:C.stone3);R(fx-fs/2+2,fy-fs/2+2,fs-4,fs-4,'#6c6862');
+  for(const[ox,oy] of [[-1,-1],[1,-1],[1,1],[-1,1]])Circ(fx+ox*fs/2,fy+oy*fs/2,2,F.hp>0?C.stone2:C.stone3);
+  for(let i=0;i<3;i++)R(fx-fs/2+3+i*Math.max(3,(fs-6)/3),fy+fs/2-1,2,3,C.black);
+  if(F.hp>0){Ln(fx,fy,fx,fy-9,C.dark);R(fx+1,fy-9,5,3,NAT[p.nat].c);}
+  else for(let i=0;i<3;i++){const ph=(t*.6+i*.33)%1;Circ(fx+i-1,fy-ph*14,1+Math.round(ph*3),`rgba(70,70,75,${(1-ph)*.7})`);}
+  const bxw=(BEACH[0]+BEACH[1])/2,[bx,by]=S2(bxw,shoreY(bxw)-14);Ln(bx,by,bx,by-8,C.dark);R(bx+1,by-8,4,3,C.white);
+  const[px,py]=S2(P.x,P.y);
+  const brg=Math.atan2(F.y-P.y,F.x-P.x),rel=wrapA(brg-P.h);guideLines(px,py,P.h,F.hp>0&&dist<310&&Math.abs(Math.abs(rel)-Math.PI/2)<.3,sc,rel);
+  g.drawImage(shipSprite(S.ship,dirOf(P.h),NAT[S.nat].c),Math.round(px-12),Math.round(py-12));
+  arenaFx(mx,my,sc,cw,ch);windMini(cw,ch);
+}
+function landTroops(){const p=B.port,F=B.fort,gar=Math.max(20,Math.round(garrison(p)*(.7+.3*F.hp/F.max)+ri(-10,20)));
+  startDuel({foe:`the commander of ${p.n}`,skill:.8,mine:S.crew,theirs:gar,town:true,nat:p.nat,coat:COATS[p.nat],cb:win=>assaultDone(p,win)});}
+function assaultDone(p,win){sfx(win?'win':'lose');S.heading=awayHeading(p);S.hull=Math.max(5,Math.round(S.hull));
+  if(win){const loot=p.size*ri(800,1500);S.gold+=loot;S.fame+=8;S.raids++;S.ps[p.id].raid=month();S.crew=Math.max(8,S.crew-ri(3,12));
+    NK.forEach(n=>{if(atWar(n,p.nat)){S.deeds[n]+=3;adjRel(n,6);}});
+    log(`Sacked ${p.n} and carried off ${fmt(loot)} pieces of eight.`);
+    result(`${p.n} has fallen`,`The commander surrenders his sword. Your men strip the treasury and the merchants' strongboxes: <b>${fmt(loot)}</b> pieces of eight.`,'plunder');}
+  else{const lost=Math.round(S.crew*.45);S.crew=Math.max(6,S.crew-lost);S.morale=clamp(S.morale-20,0,100);
+    log(`Repulsed at ${p.n}. Lost ${lost} men.`);result('Beaten back',`The garrison holds. You fall back to the boats with ${lost} men lost.`,'fort:'+p.id);}}
+function assaultEnd(how){const p=B.port;S.heading=awayHeading(p);S.hull=Math.max(8,Math.round(S.hull));S.crew=Math.max(6,S.crew);
+  if(how==='repulsed'){S.morale=clamp(S.morale-15,0,100);log(`Driven off by the guns of ${p.n}.`);result('Driven off',`The fort's guns batter your ship until you must haul off. ${p.n} will be ready for you next time.`,'fort:'+p.id);}
+  else{log(`Broke off the attack on ${p.n}.`);result('You break off the attack',"You haul out of range of the fort's guns.",'fort:'+p.id);}}
+function board(){const e=B.e;
+  startDuel({foe:`the captain of the ${e.label}`,skill:e.skill,mine:S.crew,theirs:e.crew,coat:e.nat&&e.kind!=='hunter'?COATS[e.nat]:'#3a3a3a',beard:e.kind==='pirate'?'#3a2210':null,
     cb:win=>{if(win){S.crew=Math.max(5,S.crew-Math.round(e.crew*rnd(.1,.25)));capture(e);}else defeated('Your boarders are thrown back and you are taken in irons.');}});
 }
 function endBattle(how){
   const e=B.e;S.hull=Math.round(S.hull);
   if(how==='sunk'){sfx('win');S.wins++;S.fame+=e.kind==='merchant'?1:3;credit(e,.6);const salv=Math.round(e.gold*.15);S.gold+=salv;
     log(`Sank a ${e.label}. Salvaged ${salv} pieces of eight from the wreckage.`);
-    return result('She goes down',`The ${e.label} rolls over and sinks beneath the waves. Your men fish ${fmt(salv)} pieces of eight from the floating wreckage.`);}
+    return result('She goes down',`The ${e.label} rolls over and sinks beneath the waves. Your men fish ${fmt(salv)} pieces of eight from the floating wreckage.`,'seascape:sunk');}
   if(how==='struck')return capture(e);
   if(how==='escaped'){log(`A ${e.label} escaped us.`);return result('She got away',`The ${e.label} disappears over the horizon.`);}
   if(how==='fled'){log(`Broke off from a ${e.label}.`);return result('You broke away','You leave the enemy in your wake and set your course again.');}
@@ -746,7 +1113,7 @@ function capture(e){
   log(`Took the ${e.label} as a prize: ${fmt(e.gold)} pieces of eight and ${cg} tons of cargo.`);
   const swap=e.ship!==S.ship;
   B=null;D=null;E=e;
-  sheet(`<p class="eyebrow">Prize taken</p><h2>The ${e.label} is yours</h2>
+  sheet(`<p class="eyebrow">Prize taken</p><h2>The ${e.label} is yours</h2>${scn('encounter',e.ship+'|'+NAT[S.nat].c)}
   <dl class="stats"><dt>Plunder</dt><dd>${fmt(e.gold)} pieces of eight</dd><dt>Cargo</dt><dd>${cg} tons${cg<e.cargo?' (your hold is full)':''}</dd>
   <dt>Recruits</dt><dd>${joined} of her sailors sign your articles</dd><dt>Fame</dt><dd>${fameTitle()}</dd></dl>
   ${swap?`<p>Her ${SHIPS[e.ship].n.toLowerCase()} could be your new flagship: ${SHIPS[e.ship].guns} gun ports, ${SHIPS[e.ship].crew} berths, ${SHIPS[e.ship].cargo} tons of hold, hull ${Math.max(10,e.hull)}/${SHIPS[e.ship].hull}.</p>`:''}
@@ -754,88 +1121,108 @@ function capture(e){
 }
 A.swap=()=>{const e=E,nb=SHIPS[e.ship];S.ship=e.ship;S.hull=Math.max(10,e.hull);S.guns=Math.min(nb.guns,Math.max(S.guns,e.guns));S.crew=Math.min(S.crew,nb.crew);S.cargo=Math.min(S.cargo,nb.cargo);
   log(`Transferred our flag to the captured ${nb.n.toLowerCase()}.`);closeSheet();toast(`You now command a ${nb.n.toLowerCase()}.`);};
-function result(title,text){B=null;D=null;sheet(`<p class="eyebrow">After the fight</p><h2>${title}</h2><p>${text}</p><div class="row"><button class="btn pri" data-a="close">Back to the chart</button></div>`);}
+function result(title,text,sc){B=null;D=null;const[sn,sa]=(sc||'seascape:calm').split(':');sheet(`<p class="eyebrow">After the fight</p><h2>${title}</h2>${scn(sn,sa)}<p>${text}</p><div class="row"><button class="btn pri" data-a="close">Back to the chart</button></div>`);}
 function defeated(text){
   sfx('lose');const lostGold=Math.round(S.gold*.6);S.gold-=lostGold;S.cargo=0;S.crew=Math.max(12,Math.round(S.crew*.45));S.hull=Math.round(ship().hull*.35);S.morale=45;S.day+=120;S.fame=Math.max(0,S.fame-3);
   const safe=PORTS.filter(p=>!hostile(p)&&p.nat===S.nat)[0]||PORT.tortuga;
   S.x=safe.x;S.y=safe.y;S.lastPort=safe.id;S.heading=awayHeading(safe);centerOn(S.x,S.y);
   log(`Captured and held for four months. Ransomed, we limped into ${safe.n} with ${fmt(lostGold)} lost.`);
   B=null;D=null;
-  sheet(`<p class="eyebrow">Defeat</p><h2>Struck colors</h2><p>${text}</p><p>Four months in a damp cell end when your friends pay the ransom. You lose ${fmt(lostGold)} pieces of eight and all your cargo, and your battered ship is returned to you at ${safe.n}.</p>
+  sheet(`<p class="eyebrow">Defeat</p><h2>Struck colors</h2>${scn('jail')}<p>${text}</p><p>Four months in a damp cell end when your friends pay the ransom. You lose ${fmt(lostGold)} pieces of eight and all your cargo, and your battered ship is returned to you at ${safe.n}.</p>
   <div class="row"><button class="btn pri" data-a="close">Begin again</button></div>`);
 }
 
 /* ---------- duel ---------- */
-const HN=['HIGH','MIDDLE','LOW'];
+const HN=['high','middle','low'];
 const ageF=()=>age()>40?Math.max(.6,1-(age()-40)*.025):1;
 function startDuel(o){
-  const ratio=o.mine/Math.max(1,o.theirs);
-  const start=ratio>=2.5?1:ratio<=.4?-1:0;
-  const win=clamp((S.kids&&S.kids.some(k=>k.mid)?1.08:1)*.8*DIFF[S.diff].w*(S.skill==='fence'?1.25:1)*ageF()*o.skill*(ratio<.6?.9:1),.33,1.4);
-  D={...o,pos:start,phase:'gap',t:0,next:1.1,act:null,h:1,win,over:false,lock:0,msg:'En garde!',fx:null,fxT:0,feinted:false};
+  const ratio=o.mine/Math.max(1,o.theirs),start=ratio>=2.5?1:ratio<=.4?-1:0;
+  const sk=clamp(.85*DIFF[S.diff].w*(S.skill==='fence'?1.25:1)*ageF()*o.skill*(S.kids&&S.kids.some(k=>k.mid)?1.08:1)*(ratio<.6?.9:ratio>1.8?1.08:1),.4,1.5);
+  D={...o,pos:start,sk,t:0,over:false,msg:'En garde!',msgT:1.4,fx:[],fl:{me:0,him:0},
+    me:{g:1,st:'idle',t:0,line:1},him:{g:ri(0,2),st:'idle',t:0,next:1.4,line:1,open:0,gt:rnd(.8,1.6),dur:1}};
   B=null;
-  sheet(`<p class="eyebrow">Swords drawn</p><h2>You face ${o.foe}</h2>
-  <p class="sub">Your ${o.mine} men against their ${o.theirs}. ${start>0?'Your numbers press them back.':start<0?'You are badly outnumbered.':''}</p>
-  <canvas class="stage" id="dc" style="height:170px"></canvas>
-  <div class="call" id="dcall">En garde!</div><div class="timer"><i id="dbar"></i></div>
-  <div class="dbtns"><button type="button" data-h="0">High</button><button type="button" data-h="1">Middle</button><button type="button" data-h="2">Low</button></div>
-  <p class="note" style="margin-top:10px"><b style="color:var(--blood)">Red:</b> he lunges — parry at the same height. Watch for feints! <b style="color:var(--guard)">Blue:</b> he guards — strike at a different height, or he may counter. Drive him to the rail to win.</p>`);
-  document.querySelectorAll('.dbtns button').forEach(b=>b.addEventListener('pointerdown',ev=>{ev.preventDefault();duelPress(+b.dataset.h);}));
+  sheet(`<p class="eyebrow">${o.town?'Ashore':'Boarding'} · swords drawn</p><h2>You face ${o.foe}</h2>
+  <p class="sub">Your ${o.mine} men against their ${Math.round(o.theirs)}.${start>0?' Your numbers press them back.':start<0?' You are badly outnumbered.':''}</p>
+  <canvas class="scene" id="dc" width="160" height="90"></canvas>
+  <div class="call" id="dcall">En garde!</div>
+  <div class="fgrid"><span>Attack</span><button type="button" data-f="a0">▲ High</button><button type="button" data-f="a1">● Mid</button><button type="button" data-f="a2">▼ Low</button>
+  <span>Parry</span><button type="button" data-f="p0">▲ High</button><button type="button" data-f="p1">● Mid</button><button type="button" data-f="p2">▼ Low</button></div>
+  <p class="note" style="margin-top:10px">When his blade turns red he is about to lunge: parry at that height. Attack where his sword is not. A clean parry leaves him open for a moment. Drive him back to win.</p>`);
+  document.querySelectorAll('.fgrid button').forEach(b=>b.addEventListener('pointerdown',ev=>{ev.preventDefault();const f=b.dataset.f;if(f[0]==='a')duelAttack(+f[1]);else duelGuard(+f[1]);}));
 }
-function duelPress(h){
-  if(!D||D.over||D.lock>0)return;
-  if(D.phase!=='tele'){D.lock=.45;D.msg='Too hasty!';if(Math.random()<.3)hitMe('Too hasty — he punishes you!');return;}
-  if(D.act==='atk'){if(h===D.h)hitFoe('Parried — and riposte!');else hitMe('His blade finds you!');}
-  else{if(h!==D.h)hitFoe('A clean hit!');else if(Math.random()<.4)hitMe('Blocked — and he counters!');else{D.msg='Blocked.';sfx('clang');}}
-  D.phase='gap';D.t=0;D.next=rnd(.3,.7);
-}
-function hitFoe(m){sfx('clang');D.pos++;D.msg=m;D.fx='me';D.fxT=.3;if(D.pos>=4)endDuel(true);}
-function hitMe(m){sfx('ouch');D.pos--;D.msg=m;D.fx='him';D.fxT=.3;if(D.pos<=-4)endDuel(false);}
-function endDuel(w){D.over=true;D.msg=w?'He throws down his sword!':'You are driven back and disarmed!';const cb=D.cb;setTimeout(()=>{D=null;cb(w);},1400);}
-function updDuel(dt){
-  D.t+=dt;D.lock=Math.max(0,D.lock-dt);D.fxT=Math.max(0,D.fxT-dt);
+function duelGuard(l){if(!D||D.over||D.me.st==='lunge')return;D.me.g=clamp(l,0,2);}
+function duelAttack(l){if(!D||D.over)return;const m=D.me;if(m.st!=='idle')return;m.st='lunge';m.t=0;m.line=l;m.g=l;}
+function spark(l){D.fx.push({x:80+D.pos*8,y:[55,61,69][l],life:.25});}
+function resolveMine(){const m=D.me,h=D.him;
+  if(h.open>0){h.open=0;return hitFoe('A clean hit!');}
+  if(h.st==='strike')return;
+  if(m.line===h.g){sfx('clang');spark(m.line);D.msg='Parried!';D.msgT=.6;
+    if(Math.random()<clamp(.5/D.sk,.15,.7)){h.st='wind';h.t=0;h.line=ri(0,2);h.dur=clamp(.42*D.sk,.25,.6);h.feint=false;D.msg='Parried — he ripostes!';}return;}
+  if(h.st!=='wind'&&Math.random()<clamp(.4/D.sk,.1,.55)){h.g=m.line;sfx('clang');spark(m.line);D.msg='He reads you and parries!';D.msgT=.7;return;}
+  const mid=h.st==='wind';if(mid){h.st='idle';h.next=rnd(.5,.9);}
+  hitFoe(mid?'You catch him mid-swing!':'Your blade finds him!');}
+function resolveHis(){const m=D.me,h=D.him;
+  if(m.st==='lunge')return hitMe('You run onto his blade!');
+  if(m.g===h.line){sfx('clang');spark(h.line);h.open=.7;D.msg='Parried! He is open!';D.msgT=.7;}
+  else hitMe('His blade finds you!');}
+function hitFoe(t){sfx('stab');D.pos++;D.fl.him=.3;D.msg=t;D.msgT=.8;if(D.pos>=4)endDuel(true);}
+function hitMe(t){sfx('ouch');D.pos--;D.fl.me=.3;D.msg=t;D.msgT=.8;if(D.pos<=-4)endDuel(false);}
+function endDuel(w){D.over=true;D.msg=w?'He throws down his sword!':'You are disarmed!';D.msgT=9;const cb=D.cb;setTimeout(()=>{D=null;cb(w);},1500);}
+function updDuel(dt){const m=D.me,h=D.him;D.t+=dt;D.msgT-=dt;D.fl.me=Math.max(0,D.fl.me-dt);D.fl.him=Math.max(0,D.fl.him-dt);h.open=Math.max(0,h.open-dt);
+  D.fx.forEach(f=>f.life-=dt);D.fx=D.fx.filter(f=>f.life>0);
   if(!D.over){
-    if(D.phase==='gap'&&D.t>=D.next){D.phase='tele';D.t=0;D.act=Math.random()<.62?'atk':'grd';D.h=ri(0,2);D.feinted=false;D.cur=D.win*(D.act==='grd'?1.25:1)*rnd(.85,1.05);
-      D.msg=D.act==='atk'?`He lunges ${HN[D.h]}!`:`He guards ${HN[D.h]}`;sfx('tick');}
-    else if(D.phase==='tele'&&D.act==='atk'&&!D.feinted&&S.diff>=1&&D.t>D.cur*.35&&Math.random()<dt*(.5+S.diff*.25)){
-      D.feinted=true;D.h=(D.h+ri(1,2))%3;D.t=D.cur*.3;D.msg=`Feint! He cuts ${HN[D.h]}!`;}
-    else if(D.phase==='tele'&&D.t>=D.cur){if(D.act==='atk')hitMe('Too slow!');else D.msg='He recovers.';D.phase='gap';D.t=0;D.next=rnd(.3,.7);}
-  }
-  const call=$('#dcall'),bar=$('#dbar');
-  if(call){call.textContent=D.msg;call.className='call'+(D.phase==='tele'&&!D.over?(D.act==='atk'?' atk':' grd'):'');}
-  if(bar)bar.style.width=(D.phase==='tele'&&!D.over?(1-D.t/D.cur)*100:0)+'%';
-  drawDuel();
-}
-function fencer(c,x,gy,dir,col,swordH,lunge,glow){
-  const hy=[gy-62,gy-46,gy-26][swordH];
-  c.strokeStyle=col;c.lineWidth=4;c.lineCap='round';
-  c.beginPath();c.moveTo(x,gy-58);c.lineTo(x,gy-28);c.moveTo(x,gy-28);c.lineTo(x-10*dir,gy);c.moveTo(x,gy-28);c.lineTo(x+12*dir,gy);
-  c.moveTo(x,gy-52);c.lineTo(x+16*dir+lunge*dir,hy);c.moveTo(x,gy-52);c.lineTo(x-12*dir,gy-62);c.stroke();
-  c.fillStyle=col;c.beginPath();c.arc(x,gy-68,7,0,7);c.fill();
-  c.fillRect(x-11,gy-77,22,4);c.beginPath();c.moveTo(x-7,gy-77);c.lineTo(x,gy-85);c.lineTo(x+7,gy-77);c.fill();
-  c.strokeStyle=glow||'#d9dcdf';c.lineWidth=glow?3:2;c.beginPath();c.moveTo(x+16*dir+lunge*dir,hy);c.lineTo(x+46*dir+lunge*dir,hy-(swordH===0?6:swordH===2?-4:0));c.stroke();
-}
-function drawDuel(){
-  const el=document.getElementById('dc');if(!el||!D)return;
-  const w=el.clientWidth,h=el.clientHeight;if(el.width!==Math.round(w*dpr)){el.width=Math.round(w*dpr);el.height=Math.round(h*dpr);}
-  const c=el.getContext('2d');c.setTransform(dpr,0,0,dpr,0,0);
-  c.fillStyle='#9fbab6';c.fillRect(0,0,w,h);
-  for(let i=0;i<8;i++){c.fillStyle=i%2?'#6f5030':'#7a5934';c.fillRect(0,h*.42+i*(h*.58/8),w,h*.58/8);}
-  c.fillStyle='#3b2817';c.fillRect(0,h*.36,14,h*.64);c.fillRect(w-14,h*.36,14,h*.64);
-  const gy=h-14,cx=w/2+D.pos*(w*.085);
-  for(let i=-4;i<=4;i++){c.fillStyle=i===D.pos?'#d3a64f':'rgba(236,223,191,.45)';c.beginPath();c.arc(w/2+i*(w*.085),10,i===0?4:3,0,7);c.fill();}
-  const meH=D.fx==='me'&&D.fxT>0?D.h:1,meL=D.fx==='me'&&D.fxT>0?18:0,tele=D.phase==='tele'&&!D.over;
-  const himH=tele?D.h:1,himL=(D.fx==='him'&&D.fxT>0)?18:tele&&D.act==='atk'?-8:0;
-  fencer(c,cx-48,gy,1,'#1e1a16',meH,meL,null);
-  fencer(c,cx+48,gy,-1,'#7a1f14',himH,himL,tele?(D.act==='atk'?'#e0553a':'#5b8fe0'):null);
-}
+    if(m.st==='lunge'){m.t+=dt;if(m.t>=.18){m.st='rec';m.t=0;resolveMine();}}
+    else if(m.st==='rec'){m.t+=dt;if(m.t>=.32)m.st='idle';}}
+  if(!D.over){
+    if(h.st==='idle'){h.gt-=dt;if(h.gt<=0){h.g=ri(0,2);h.gt=rnd(.7,1.7);}
+      h.next-=dt;if(h.next<=0&&h.open<=0){h.st='wind';h.t=0;h.line=ri(0,2);h.dur=clamp(.6*D.sk,.3,.9)*rnd(.85,1.1);h.feint=S.diff>=1&&Math.random()<.1+S.diff*.07;sfx('tick');}}
+    else if(h.st==='wind'){h.t+=dt;if(h.feint&&h.t>h.dur*.5){h.feint=false;h.line=(h.line+ri(1,2))%3;h.t=h.dur*.4;sfx('tick');}
+      if(h.t>=h.dur){h.st='strike';h.t=0;resolveHis();}}
+    else if(h.st==='strike'){h.t+=dt;if(h.t>=.22){h.st='idle';h.next=rnd(.5,1.2)*clamp(D.sk,.75,1.3);h.gt=rnd(.3,.9);}}}
+  const call=$('#dcall');if(call){let txt='',cls='call';
+    if(h.st==='wind'&&!D.over){txt=`He lunges ${HN[h.line]}!`;cls+=' atk';}else if(D.msgT>0)txt=D.msg;else if(h.open>0){txt='He is open — strike!';cls+=' grd';}
+    call.textContent=txt;call.className=cls;}
+  document.querySelectorAll('.fgrid button[data-f^="p"]').forEach(b=>b.setAttribute('aria-pressed',String(+b.dataset.f[1]===m.g)));
+  drawDuel();}
+function duelBg(t,town,nat){
+  if(town){Bands(0,30,[C.sky,C.sky2]);Cloud(20,6,10);R(0,22,SW,30,C.stone);for(let x=0;x<SW;x+=8)R(x,18,5,4,C.stone);
+    for(let y=24;y<52;y+=5)for(let x=((y/5)%2)*6;x<SW;x+=12)R(x,y,11,1,C.stone3);
+    R(68,30,24,22,'#2a2430');Circ(80,30,12,'#2a2430');Ln(80,4,80,18,C.dark);for(let i=0;i<10;i++)R(81+i,5+Math.round(Math.sin(t*4-i*.6)),1,6,NAT[nat]?NAT[nat].c:C.red);
+    R(0,52,SW,38,C.stone3);for(let y=54;y<SH;y+=4)for(let x=((y/4)%2)*3;x<SW;x+=6)R(x,y,5,3,'#6c6862');}
+  else{Bands(0,32,[C.sky,C.sky2,C.sky3]);Cloud(30,8,12);SeaBand(32,42,t);
+    R(0,40,SW,7,C.wood);R(0,40,SW,1,C.wood3);for(let x=2;x<SW;x+=6)R(x,42,2,5,C.wood3);
+    R(0,47,SW,43,C.wood2);for(let y=51;y<SH;y+=5){R(0,y,SW,1,C.wood);for(let x=((y/5)%3)*14;x<SW;x+=40)R(x,y-4,1,4,C.wood);}
+    R(138,0,6,47,C.wood);R(138,0,2,47,C.wood3);Ln(141,0,160,30,'#5b4a3a');Ln(141,0,118,40,'#5b4a3a');R(146,52,13,10,C.wood);R(146,55,13,1,C.dark);}
+  const a=Math.sin(t*6)>0,b=Math.sin(t*5+2)>0;
+  Fig(14,58,{coat:'#3d5fb8',hat:'band',arm:a?'up':'out'});Fig(23,58,{coat:'#6a2a2a',hat:'tri',face:-1,arm:a?'out':'up'});
+  Fig(124,58,{coat:'#7a5a3a',hat:'cap',arm:b?'out':'up'});Fig(133,58,{coat:'#5a5d66',beard:'#3a2210',face:-1,arm:b?'up':'out'});}
+function fencer(x,y,dir,o){const coat=o.flash?'#ffffff':o.coat,lng=o.pose==='lunge'?1:0,wnd=o.pose==='wind',opn=o.pose==='open';
+  const bx=Math.round(x+dir*lng*4),fx=x+dir*(7+lng*7),kx=x-dir*7;
+  Ln(bx,y-15,kx,y,'#e6dcc4',2);Ln(bx,y-15,fx,y,'#e6dcc4',2);R(kx-2,y-1,5,2,C.black);R(fx-2,y-1,5,2,C.black);
+  R(bx-4,y-29,9,15,coat);R(bx-4,y-19,9,2,C.dark);Pt(bx+dir,y-26,C.gold);Pt(bx+dir,y-23,C.gold);
+  Ln(bx-dir*3,y-27,bx-dir*9,y-33,coat,2);Pt(bx-dir*9,y-34,C.skin);
+  R(bx-3,y-36,7,7,C.skin);Pt(bx+dir*2,y-34,C.ink);R(bx-dir*4,y-34,2,4,o.hair||C.dark);if(o.beard)R(bx-3,y-31,7,2,o.beard);
+  R(bx-5,y-38,11,2,C.black);R(bx-3,y-40,7,2,C.black);if(o.plume)R(bx-dir*3,y-43,2,4,o.plume);
+  const L=o.line,hy=[y-32,y-25,y-17][L];let hx=bx+dir*(7+lng*8),hh=hy;if(wnd){hx=bx+dir;hh=hy-4;}if(opn){hx=bx+dir*5;hh=y-18;}
+  Ln(bx+dir*3,y-27,hx,hh,coat,2);Pt(hx,hh,C.skin);
+  let ang=[-.38,0,.38][L];if(wnd)ang-=1.15;if(opn)ang=1.25;
+  Ln(hx,hh,hx+Math.cos(ang)*17*dir,hh+Math.sin(ang)*17,wnd?'#ff6a50':'#e4ecf0');Ln(hx+dir,hh-1,hx+dir,hh+1,C.gold);}
+function drawDuel(){const el=document.getElementById('dc');if(!el||!D)return;g=el.getContext('2d');g.imageSmoothingEnabled=false;const t=D.t,m=D.me,h=D.him;
+  duelBg(t,D.town,D.nat);
+  const cx=80+D.pos*8;
+  fencer(cx-17,86,1,{coat:'#2e3f7a',plume:C.red,line:m.st==='idle'?m.g:m.line,pose:m.st==='lunge'?'lunge':'idle',flash:D.fl.me>0&&Math.floor(t*20)%2});
+  const hp=h.st==='wind'?'wind':h.st==='strike'?'lunge':h.open>0?'open':'idle';
+  fencer(cx+17,86,-1,{coat:D.coat||'#7a1f14',beard:D.beard,line:(h.st==='wind'||h.st==='strike')?h.line:h.g,pose:hp,flash:D.fl.him>0&&Math.floor(t*20)%2});
+  for(const f of D.fx){Pt(f.x,f.y,C.white);Pt(f.x-1,f.y,C.candle);Pt(f.x+1,f.y,C.candle);Pt(f.x,f.y-1,C.candle);Pt(f.x,f.y+1,C.candle);
+    if(f.life>.12){Pt(f.x-2,f.y-2,C.gold);Pt(f.x+2,f.y+2,C.gold);Pt(f.x+2,f.y-2,C.gold);Pt(f.x-2,f.y+2,C.gold);}}
+  for(let i=-4;i<=4;i++)R(80+i*8-1,88,3,1,i===D.pos?C.gold:'rgba(255,255,255,.4)');}
 
 /* ---------- the governor's ball ---------- */
 const STEPS=['Step left','Turn','Step right'];
 function startDance(pid){
   const p=PORT[pid],d=S.dau[pid];d.danced=S.day;
   DN={pid,i:0,n:8,hits:0,phase:'gap',t:0,next:1,cue:0,win:clamp(1.05*DIFF[S.diff].w*ageF()*(S.skill==='wit'?1.15:1),.45,1.5),msg:'The musicians strike up a sarabande…',over:false};
-  sheet(`<p class="eyebrow">The governor's ball · ${p.n}</p><h2>A dance with ${DTITLE[p.nat]} ${d.name}</h2>
+  sheet(`<p class="eyebrow">The governor's ball · ${p.n}</p><h2>A dance with ${DTITLE[p.nat]} ${d.name}</h2>${scn('ball')}
   <p class="sub">Follow the steps in time with the music. Eight measures.</p>
   <div class="call" id="dncall"></div><div class="timer"><i id="dnbar"></i></div>
   <div class="dbtns"><button type="button" data-s="0">Left</button><button type="button" data-s="1">Turn</button><button type="button" data-s="2">Right</button></div>
@@ -863,7 +1250,7 @@ function endDance(){
   d.aff+=gain;
   const words=gain>=3?'She laughs and squeezes your hand as the music ends. She cannot take her eyes off you.':gain===2?'She curtsies warmly and asks whether you will call again soon.':gain===1?'She thanks you politely. Perhaps next time.':'She limps away to sit with her aunt. That did not go well.';
   log(`Danced with ${DTITLE[p.nat]} ${d.name} at ${p.n}.`);
-  setTimeout(()=>{DN=null;sheet(`<p class="eyebrow">The governor's ball · ${p.n}</p><h2>The music ends</h2><p>${words}</p><p class="note">${h} of 8 steps in time.</p>
+  setTimeout(()=>{DN=null;sheet(`<p class="eyebrow">The governor's ball · ${p.n}</p><h2>The music ends</h2>${scn('ball')}<p>${words}</p><p class="note">${h} of 8 steps in time.</p>
     <div class="row"><button class="btn pri" data-a="tab" data-v="gov">Return to the governor's house</button></div>`);},900);
 }
 function daughterHTML(p){
@@ -895,12 +1282,12 @@ function daughterHTML(p){
 function danceBtn(d){const ok=S.day-d.danced>=20;return `<div class="row"><button class="btn" data-a="dance" ${ok?'':'disabled'}>Ask her to dance</button></div>${ok?'':'<p class="note">You danced with her only recently. Call again after your next voyage.</p>'}`;}
 A.dance=()=>startDance(curPort.id);
 A.propose=()=>{const p=curPort,d=S.dau[p.id];S.engaged=p.id;sfx('win');log(`Betrothed to ${DTITLE[p.nat]} ${d.name} of ${p.n}.`);
-  sheet(`<p class="eyebrow">${p.n} · ${dateStr()}</p><h2>She said yes!</h2><p>${d.name} accepts, and the governor gives his blessing. The banns will be read, and you will be married at ${churchName(p)}.</p>
+  sheet(`<p class="eyebrow">${p.n} · ${dateStr()}</p><h2>She said yes!</h2>${scn('governor',p.id)}<p>${d.name} accepts, and the governor gives his blessing. The banns will be read, and you will be married at ${churchName(p)}.</p>
   <div class="row"><button class="btn pri" data-a="tab" data-v="church">Go to the church</button></div>`);};
 A.wed=()=>{const p=curPort,d=S.dau[p.id],dowry=1000*(d.beauty+1);
-  sfx('bell');S.engaged=null;S.wife={pid:p.id,name:d.name};S.personal+=dowry;S.fame+=5;S.morale=clamp(S.morale+20,0,100);S.wifeGift=S.day;
+  sfx('bell');jingle('wed');S.engaged=null;S.wife={pid:p.id,name:d.name};S.personal+=dowry;S.fame+=5;S.morale=clamp(S.morale+20,0,100);S.wifeGift=S.day;
   log(`Married ${DTITLE[p.nat]} ${d.name} at ${churchName(p)}. Dowry: ${fmt(dowry)}.`);
-  sheet(`<p class="eyebrow">Holy Matrimony · ${dateStr()}</p><h2>Wedding bells</h2>
+  sheet(`<p class="eyebrow">Holy Matrimony · ${dateStr()}</p><h2>Wedding bells</h2>${scn('church',p.id+'|wed')}
   <p>Before the altar of ${churchName(p)}, you and ${d.name} exchange your vows, and the priest blesses your marriage. The whole town turns out to see the bride, and your crew drink your health until dawn.</p>
   <dl class="stats"><dt>Dowry</dt><dd>${fmt(dowry)} pieces of eight, added to your fortune</dd><dt>Home port</dt><dd>${p.n} — visit the governor's house when you are in port</dd></dl>
   <div class="row"><button class="btn pri" data-a="tab" data-v="church">Return to the church</button></div>`);};
@@ -911,11 +1298,11 @@ function birth(){const w=S.wife,nat=PORT[w.pid].nat,boy=Math.random()<.5;
   sfx('win');log(`A letter from ${w.name}: our ${boy?'son':'daughter'} ${name} is born at ${PORT[w.pid].n}.`);toast(`A letter from ${w.name}: a ${boy?'son':'daughter'}, ${name}, is born!`);}
 /* ---------- ports ---------- */
 function openPort(p,tab){
-  sfx('bell');curPort=p;S.lastPort=p.id;S.x=p.x;S.y=p.y;S.speed=0;centerOn(p.x,p.y);
+  sfx('bell');jingle('port');S.seen[p.id]=1;S.fixDay=S.day;S.drift=rnd(0,6.28);curPort=p;S.lastPort=p.id;S.x=p.x;S.y=p.y;S.speed=0;centerOn(p.x,p.y);
   portTab=tab||(p.nat===S.nat||S.wife&&S.wife.pid===p.id?'gov':'tavern');
   const o=S.ps[p.id],raidable=o.raid<=month()-12;
   if(hostile(p)){
-    sheet(`<p class="eyebrow"><span class="flag" style="background:${NAT[p.nat].c}"></span>${NAT[p.nat].n} · closed to you</p><h2>${p.n}</h2>
+    sheet(`<p class="eyebrow"><span class="flag" style="background:${NAT[p.nat].c}"></span>${NAT[p.nat].n} · closed to you</p><h2>${p.n}</h2>${scn('fort',p.id)}
     <p>The fort's guns are trained on your ship and the harbor chain is up. ${NAT[p.nat].n} will not let you land.</p>
     <p class="note">Garrison: about ${garrison(p)} soldiers. Your crew: ${S.crew}.${raidable?'':' The town was sacked recently and has little left to take.'}</p>
     <div class="row"><button class="btn red" data-a="raid" ${S.crew<25||!raidable?'disabled':''}>Attack the town</button><button class="btn pri" data-a="sail">Sail away</button></div>
@@ -997,7 +1384,7 @@ function renderPort(){
   }
   if(portTab==='attack'){
     const raidable=o.raid<=month()-12,own=p.nat===S.nat,friendly=S.rel[p.nat]>-25,home=S.wife&&S.wife.pid===p.id;
-    body=`<p>Storm ${p.n} by land. About ${garrison(p)} soldiers hold the fort against your ${S.crew} men, and its guns will rake your boats as you row ashore.</p>
+    body=`<p>Sail into the harbor under the guns of the fort and run your ship onto the beach. If you make it ashore, about ${garrison(p)} soldiers stand between your ${S.crew} men and the treasury.</p>
     <p class="note">${own?`This is a town of your own nation. ${NAT[p.nat].n} will strip you of every title and brand you an outlaw.`:friendly?`${NAT[p.nat].n} will become your sworn enemy and take away any rank you hold.`:'Her enemies will reward you.'}${home?' <b>Your wife lives here.</b>':''}${S.dau[p.id]&&!home&&S.dau[p.id].met?` ${DTITLE[p.nat]} ${S.dau[p.id].name} will never forgive you.`:''}</p>
     <div class="row"><button class="btn red" data-a="raid" ${S.crew<25||!raidable?'disabled':''}>Attack the town</button></div>
     ${S.crew<25?'<p class="note">You need at least 25 men to attack a town.</p>':''}${raidable?'':'<p class="note">The town was sacked recently and has little left to take.</p>'}`;
@@ -1005,6 +1392,7 @@ function renderPort(){
   sheet(`<p class="eyebrow"><span class="flag" style="background:${NAT[p.nat].c}"></span>${NAT[p.nat].n}${p.haven?' · pirate haven':''} · ${['','small','busy','great'][p.size]} port</p>
   <h2>${p.n}${S.wife&&S.wife.pid===p.id?' ♥':''}</h2><p class="sub">${dateStr()}. ${NAT[p.nat].n} regards you as ${relWord(S.rel[p.nat]).toLowerCase()}.</p>
   <div class="tabs">${tabs.map(([k,l])=>`<button type="button" data-a="tab" data-v="${k}" aria-pressed="${portTab===k}">${l}</button>`).join('')}</div>
+  ${scn({gov:'governor',tavern:'tavern',market:'market',yard:'shipyard',church:'church',plunder:'plunder',attack:'fort'}[portTab],p.id)}
   ${body}
   <div class="row" style="margin-top:16px"><button class="btn pri" data-a="sail">Set sail</button></div>`);
   hud();
@@ -1023,7 +1411,7 @@ function rumor(p){
   if(S.morale<30)opts.push('Your own crew are muttering over their cups. They want their share of the plunder.');
   return pick(opts);
 }
-function completeMap(){S.treasure=pick(CAYS);log(`The four scraps fit together. The X marks ${S.treasure.n}.`);toast('The map is complete! The X is marked on your chart.');}
+function completeMap(){log('The four scraps of the treasure map fit together.');toast('The treasure map is whole! Study it in your charts.');}
 A.hire=v=>{const p=curPort,o=S.ps[p.id],cost=S.skill==='wit'?6:8;let n=Math.min(o.rec,ship().crew-S.crew,Math.floor(S.gold/cost));if(v!=='all')n=Math.min(n,10);
   if(n<1)return;o.rec-=n;S.crew+=n;S.gold-=n*cost;S.morale=clamp(S.morale+2,0,100);renderPort();};
 A.piece=()=>{const o=S.ps[curPort.id];if(S.gold<o.pieceCost)return;S.gold-=o.pieceCost;o.piece=false;S.pieces++;
@@ -1050,26 +1438,11 @@ A.kwed=i=>{const k=S.kids[+i];if(S.gold<500)return;S.gold-=500;k.wed=true;S.fame
 A.retire_ask=()=>{sheet(`<p class="eyebrow">Retire</p><h2>Leave the sea for good?</h2><p>Your career ends here, and your fortune, titles, family and fame decide how you live out your days.</p>
   <div class="row"><button class="btn red" data-a="retire">Retire</button><button class="btn pri" data-a="tab" data-v="plunder">Not yet</button></div>`);};
 A.retire=()=>retire();
-A.raid=()=>{const p=curPort,g=garrison(p)+ri(-10,30),wasFriendly=S.rel[p.nat]>-25;
-  const lostC=Math.round(S.crew*rnd(.06,.16)),lostH=ri(5,18);S.crew=Math.max(6,S.crew-lostC);S.hull=Math.max(5,S.hull-lostH);
-  toast(`The fort's guns rake your boats. ${lostC} men lost.`);
-  startDuel({foe:`the commander of ${p.n}`,skill:.8,mine:S.crew,theirs:g,cb:win=>{
-    adjRel(p.nat,wasFriendly?-75:-30);
-    if(wasFriendly){S.rank[p.nat]=0;S.deeds[p.nat]=0;log(`${NAT[p.nat].n} brands you an outlaw and strips you of your titles.`);}
-    const d=S.dau[p.id],home=S.wife&&S.wife.pid===p.id;
-    if(d&&!home){d.scorn=true;d.aff=0;}
-    if(home){S.fame=Math.max(0,S.fame-5);log(`${S.wife.name} is mortified that you attacked her own town.`);}
-    sfx(win?'win':'lose');if(win){const loot=p.size*ri(800,1500);S.gold+=loot;S.fame+=8;S.raids++;S.ps[p.id].raid=month();S.crew=Math.max(8,S.crew-ri(3,12));
-      NK.forEach(n=>{if(atWar(n,p.nat)){S.deeds[n]+=3;adjRel(n,6);}});
-      log(`Sacked ${p.n} and carried off ${fmt(loot)} pieces of eight.`);
-      result(`${p.n} has fallen`,`The commander surrenders his sword. Your men strip the treasury and the merchants' strongboxes: <b>${fmt(loot)}</b> pieces of eight.${wasFriendly?` ${NAT[p.nat].n} will not forget this.`:''}`);}
-    else{const lost=Math.round(S.crew*.45);S.crew=Math.max(6,S.crew-lost);S.morale=clamp(S.morale-20,0,100);
-      log(`Repulsed at ${p.n}. Lost ${lost} men.`);result('Beaten back',`The garrison holds. You fall back to the boats with ${lost} more men lost.`);}
-  }});};
-function dig(){
-  sfx('win');const g=ri(3500,7000);S.gold+=g;S.fame+=6;log(`Dug up a buried treasure on ${S.treasure.n}: ${fmt(g)} pieces of eight!`);
-  const where=S.treasure.n;S.treasure=null;S.pieces=0;
-  sheet(`<p class="eyebrow">Treasure</p><h2>X marks the spot</h2><p>On ${where}, your shovels strike the lid of an iron-bound chest. Inside lies <b>${fmt(g)}</b> pieces of eight in old Spanish coin.</p><div class="row"><button class="btn pri" data-a="close">Back to the chart</button></div>`);
+A.raid=()=>startAssault(curPort);
+function dig(){const c=CAYS[S.tre];
+  sfx('win');const gold=ri(3500,7000);S.gold+=gold;S.fame+=6;log(`Dug up a buried treasure on ${c.n}: ${fmt(gold)} pieces of eight!`);
+  S.pieces=0;let n=S.tre;while(n===S.tre)n=ri(0,CAYS.length-1);S.tre=n;
+  sheet(`<p class="eyebrow">Treasure</p><h2>X marks the spot</h2>${scn('treasure')}<p>Your lookout knows the island from the map. On ${c.n}, your shovels strike the lid of an iron-bound chest. Inside lies <b>${fmt(gold)}</b> pieces of eight in old Spanish coin.</p><div class="row"><button class="btn pri" data-a="close">Back to the chart</button></div>`);
 }
 
 /* ---------- retire / title ---------- */
@@ -1084,8 +1457,8 @@ function retire(){
     'Your fortune and titles are the envy of the courts of Europe. Ballads of your exploits are sung for a hundred years.';
   const pr=S.kids.filter(k=>k.priest);
   const fam=wifeD?` ${S.wife.name} is at your side${S.kids.length?`, and ${S.kids.length} children fill your table on Sundays${pr.length?`, while ${pr[0].name} says the Mass`:''}. Your grandchildren grow up on tales of the Spanish Main.`:'.'}`:' You never married, and the house is quiet in the evenings.';
-  wipe();
-  sheet(`<p class="eyebrow">The end of a career · ${dateStr()}</p><h2>${S.name} retires at ${age()}</h2>
+  wipe();titleOn=true;
+  sheet(`<p class="eyebrow">The end of a career · ${dateStr()}</p><h2>${S.name} retires at ${age()}</h2>${scn('title')}
   <p>${end}${fam}</p>
   <dl class="stats"><dt>Fortune</dt><dd>${fmt(S.personal+S.gold*.25)} pieces of eight</dd><dt>Fame</dt><dd>${S.fame} · ${fameTitle()}</dd>
   <dt>Titles</dt><dd>${NK.filter(n=>S.rank[n]>0).map(n=>`${RANKS[S.rank[n]]} of ${NAT[n].n}`).join(', ')||'none'}</dd>
@@ -1096,41 +1469,83 @@ function retire(){
 }
 let pickN='en',pickS='fence',pickD=1;
 A.title=()=>titleScreen();
-function titleScreen(){
+function titleScreen(){titleOn=true;
   const saved=load();
-  sheet(`<p class="eyebrow">The Caribbean · 1660</p><div class="title-art">Brethren of the Coast</div>
+  sheet(`<p class="eyebrow">The Caribbean · 1660</p><div class="title-art">Brethren of the Coast</div>${scn('title')}
   <p class="sub">Sail the Spanish Main as a privateer. Take prizes, cross swords, sack towns, court a governor's daughter, and retire rich — if you live that long.</p>
   ${saved?`<div class="row"><button class="btn pri" data-a="cont">Continue: ${saved.name}, ${MONTHS[Math.floor(saved.day/30)%12]} ${1660+Math.floor(saved.day/360)}</button></div><h3>Or begin anew</h3>`:''}
   <label class="lbl" for="nm">YOUR NAME</label><input class="txt" id="nm" maxlength="24" value="Captain Hawkes" autocomplete="off">
   <label class="lbl">SAIL UNDER THE FLAG OF</label><div class="pick">${NK.map(n=>`<button type="button" data-a="pn" data-v="${n}" aria-pressed="${pickN===n}"><span class="flag" style="background:${NAT[n].c}"></span>${NAT[n].n}<small>Start at ${PORT[{es:'havana',en:'portroyal',fr:'tortuga',nl:'willemstad'}[n]].n}${n==='es'?' · at war with everyone':''}</small></button>`).join('')}</div>
   <label class="lbl">YOUR SPECIAL SKILL</label><div class="pick">${Object.entries(SKILLS).map(([k,s])=>`<button type="button" data-a="ps" data-v="${k}" aria-pressed="${pickS===k}">${s.n}<small>${s.d}</small></button>`).join('')}</div>
   <label class="lbl">DIFFICULTY</label><div class="pick">${DIFF.map((d,i)=>`<button type="button" data-a="pd" data-v="${i}" aria-pressed="${pickD===i}">${d.n}</button>`).join('')}</div>
-  <div class="row"><button class="btn pri" data-a="start" style="min-height:52px;font-size:17px">Weigh anchor</button></div>`);
+  <div class="row"><button class="btn pri" data-a="start" style="min-height:52px;font-size:17px">Weigh anchor</button></div>
+  <div class="row"><button class="btn" type="button" data-a="snd">${SMODES[SND.mode]}</button></div>`);
 }
 const keepName=()=>{const el=$('#nm');return el?el.value:''};
 A.pn=v=>{const n=keepName();pickN=v;titleScreen();$('#nm').value=n;};
 A.ps=v=>{const n=keepName();pickS=v;titleScreen();$('#nm').value=n;};
 A.pd=v=>{const n=keepName();pickD=+v;titleScreen();$('#nm').value=n;};
 A.start=()=>{const n=(keepName()||'').trim()||'Captain Hawkes';newGame(n,pickN,pickS,pickD);begin();
-  sheet(`<p class="eyebrow">${dateStr()}</p><h2>Your orders</h2><p>${NAT[S.nat].n} has granted you a letter of marque. You command a sloop of 8 guns and 40 men, with 600 pieces of eight in the ship's purse.</p>
+  sheet(`<p class="eyebrow">${dateStr()}</p><h2>Your orders</h2>${scn('cabin')}<p>${NAT[S.nat].n} has granted you a letter of marque. You command a sloop of 8 guns and 40 men, with 600 pieces of eight in the ship's purse.</p>
   <p>Hold <b>◀</b> and <b>▶</b> to steer. Your ship always runs before the wind, which now blows from the <b>${windFrom()}</b>. Sail with it or across it and you fly; turn into it and you'll hardly move. Sail into a harbor to enter port.</p>
+  <p>The Main is wide and your charts are blank. Tap <b>☰ Menu</b> to pause: read your charts, which fill in as you explore, and take a sun sighting to learn your latitude.</p>
   <p>Take prizes from your nation's enemies, then visit a governor to be rewarded. Win a rank and you may be introduced to a governor's daughter. When the crew grows restless, divide the plunder.</p>
   <div class="row"><button class="btn pri" data-a="close">To sea!</button></div>`);};
-A.cont=()=>{S=load();if(!S)return titleScreen();begin();closeSheet();};
+A.cont=()=>{S=load();if(!S)return titleScreen();FOG=Uint8Array.from((S.fogs||'').padEnd(FW*FH,'0').slice(0,FW*FH),ch=>ch==='1'?1:0);S.seen=S.seen||{};begin();closeSheet();};
 function begin(){resize();centerOn(S.x,S.y);view.follow=true;hud();}
+
+/* ---------- captain's cabin menu ---------- */
+let SX=null;
+function menu(){sheet(`<p class="eyebrow">At sea · ${dateStr()}</p><h2>Captain's cabin</h2>${scn('cabin')}
+  <div class="mgrid">
+  <button class="btn" type="button" data-a="status">Captain's papers</button><button class="btn" type="button" data-a="log">Ship's log</button>
+  <button class="btn" type="button" data-a="charts">Charts &amp; maps</button><button class="btn" type="button" data-a="sight">Take a sun sighting</button>
+  <button class="btn" type="button" data-a="furl">${S.anchored?'Make sail':'Furl sails'}</button><button class="btn" type="button" data-a="snd">${SMODES[SND.mode]}</button>
+  </div>
+  <div class="row"><button class="btn pri" type="button" data-a="close">Back to the helm</button></div>
+  <div class="row"><button class="btn" type="button" data-a="quit">Save and quit to title</button></div>`);}
+A.menu=()=>menu();A.status=()=>status();A.log=()=>showLog();A.charts=()=>charts();A.sight=()=>sighting();
+A.furl=()=>{S.anchored=!S.anchored;menu();};
+A.snd=()=>{SND.mode=(SND.mode+1)%3;try{localStorage.setItem('brethren-sound',SND.mode)}catch(_){}
+  if(S&&!titleOn)menu();else{const n=keepName();titleScreen();if($('#nm'))$('#nm').value=n||'Captain Hawkes';}};
+A.quit=()=>{save();S=null;B=null;D=null;DN=null;titleScreen();};
+function charts(){
+  sheet(`<p class="eyebrow">Charts · ${dateStr()}</p><h2>Your charts of the Main</h2><p class="sub">Coasts appear on your chart only once you have sailed past them. Ports you have visited are named.</p>
+  <canvas class="chart" id="chart" width="500" height="350"></canvas>
+  <p class="note">${S.fix&&S.day-S.fix.day<=7?`Red line: your sun sighting, ${fmtLat(S.fix.lat)}.`:'Take a sun sighting to find your latitude.'} The dotted circle is your navigator's best reckoning of where you are. It grows the longer you sail without a fix.</p>
+  <h3>Treasure map</h3>${S.pieces?`<canvas class="frag" id="frag" width="180" height="120"></canvas><p class="note">${S.pieces<4?`${S.pieces} of 4 pieces. Old sailors in the taverns may sell you the rest.`:`The map is whole. The X lies near ${fmtLat(latOf(CAYS[S.tre].y))}, beside a small island. Find that coast and sail close by.`}</p>`:'<p class="note">You have no pieces of a treasure map.</p>'}
+  <div class="row"><button class="btn pri" type="button" data-a="menu">Back</button></div>`);
+  drawChart($('#chart'));if(S.pieces)drawFragment($('#frag'));}
+function sighting(){SX={t:rnd(0,6),done:false};
+  sheet(`<p class="eyebrow">At sea · ${dateStr()}</p><h2>Take a sun sighting</h2><p class="sub">The ship is rolling. Tap Mark when the lower edge of the sun just touches the horizon.</p>
+  <canvas class="scene" id="sx" width="160" height="90"></canvas>
+  <div class="row"><button class="btn red" id="sxb" type="button" style="min-height:56px;font-size:18px">Mark</button></div>
+  <p id="sxr"></p><div class="row"><button class="btn pri" type="button" data-a="menu">Back</button></div>`);
+  $('#sxb').addEventListener('pointerdown',ev=>{ev.preventDefault();if(SX.done){SX.done=false;SX.t+=rnd(1,3);$('#sxb').textContent='Mark';$('#sxr').textContent='';}else markSun();});}
+const sunY=t=>44+15*Math.sin(t*1.25)+5*Math.sin(t*2.7+1);
+function updSextant(dt){if(!SX.done)SX.t+=dt;const el=document.getElementById('sx');if(!el)return;g=el.getContext('2d');g.imageSmoothingEnabled=false;
+  Bands(0,52,['#4a8ad0',C.sky,C.sky2,C.sky3]);SeaBand(52,90,SX.t);R(0,52,SW,1,'#1a3a80');
+  const y=Math.round(sunY(SX.t));Circ(80,y,6,'#ff9a3a');Circ(80,y,4,'#ffd06a');
+  R(80,8,1,74,'rgba(255,255,255,.2)');
+  for(let yy=0;yy<SH;yy++){const d=yy-45,hw=Math.abs(d)<40?Math.round(Math.sqrt(1600-d*d)*1.3):0;R(0,yy,80-hw,1,'#0b0b10');R(80+hw,yy,SW-80-hw,1,'#0b0b10');}
+  for(let a=0;a<64;a++){const an=a/64*Math.PI*2;Pt(80+Math.cos(an)*52,45+Math.sin(an)*40,C.gold2);}}
+function markSun(){if(!SX||SX.done)return;SX.done=true;const err=Math.abs(sunY(SX.t)+6-52),lat=latOf(S.y)+(Math.random()<.5?-1:1)*err*.12+rnd(-.06,.06);
+  S.fix={lat,day:S.day};S.fixDay=S.day-Math.floor((S.day-S.fixDay)/2);sfx(err<2?'coin':'blip');
+  $('#sxr').innerHTML=`<b>Latitude ${fmtLat(lat)}.</b> ${err<1.5?'A clean sighting. You trust it.':err<4?'A fair sighting, give or take a little.':'A poor sighting. The ship rolled as you marked it.'}<br><span class="note">The line is drawn on your charts for the next week.</span>`;
+  $('#sxb').textContent='Take another';}
 
 /* ---------- loop ---------- */
 let last=performance.now();
 function loop(now){const dt=Math.min(.05,(now-last)/1000);last=now;
   if(S){if(!paused)update(dt);if(view.follow)centerOn(S.x,S.y);draw();hud();}
   else{ctx.setTransform(dpr,0,0,dpr,0,0);ctx.imageSmoothingEnabled=false;ctx.fillStyle='#1d4aa8';ctx.fillRect(0,0,W,H);}
-  if(B){updBattle(dt);drawBattle();}
+  if(B){if(B.mode==='assault'){updAssault(dt);drawAssault();}else{updBattle(dt);drawBattle();}}
+  if(SX)updSextant(dt);
+  if(liveScenes.length)drawScenes(now/1000);
   if(D)updDuel(dt);
   if(DN)updDance(dt);
   musicTick();waterTick();
   requestAnimationFrame(loop);}
-const sndBtn=$('#snd');const sndLabel=()=>sndBtn.textContent=SMODES[SND.mode];sndLabel();
-sndBtn.addEventListener('click',()=>{SND.mode=(SND.mode+1)%3;try{localStorage.setItem('brethren-sound',SND.mode)}catch(_){}sndLabel();sfx('blip');});
 resize();titleScreen();requestAnimationFrame(loop);
 document.addEventListener('visibilitychange',()=>{if(document.hidden)save();});
 })();
