@@ -3,9 +3,9 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=Cinzel:wght@400;600&family=Pinyon+Script&family=IM+Fell+English:ital@0;1&family=Great+Vibes&family=Libre+Baskerville:ital@0;1&family=Uncial+Antiqua&family=UnifrakturMaguntia&family=Public+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=EB+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Cinzel:wght@400;600&family=Pinyon+Script&family=IM+Fell+English:ital@0;1&family=Great+Vibes&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Uncial+Antiqua&family=UnifrakturMaguntia&family=Rye&family=Public+Sans:wght@400;500;600&display=swap">
 <style>
-/* Layout: control column left, sticky spread previews right (outside spread over inside spread); stacks on phones. */
+/* Layout: control column left, sticky spread previews right (outside / inside / both); stacks on phones. */
 :root{
   --bg:#f5f7f4; --panel:#ffffff; --ink:#1b2620; --muted:#5d6b63; --line:#d9e0da;
   --accent:#1f5a3a; --accent-ink:#ffffff; --gold:#a9802c; --warn:#a14a1c; --warn-bg:#fbeee6;
@@ -25,20 +25,23 @@ header{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 16px;margin-bott
 h1{font-family:var(--display);font-weight:600;font-size:2rem;margin:0;letter-spacing:.01em;text-wrap:balance}
 h1 span{color:var(--gold)}
 header p{margin:0;color:var(--muted)}
-.grid{display:grid;grid-template-columns:minmax(0,340px) minmax(0,1fr);gap:24px;align-items:start}
+.grid{display:grid;grid-template-columns:minmax(0,350px) minmax(0,1fr);gap:24px;align-items:start}
 @media (max-width:900px){.grid{grid-template-columns:minmax(0,1fr)}}
 .controls{display:flex;flex-direction:column;gap:14px}
 fieldset{border:1px solid var(--line);background:var(--panel);border-radius:8px;margin:0;padding:12px 14px 14px;display:flex;flex-direction:column;gap:10px;min-width:0}
 legend{font-family:var(--display);font-size:1.25rem;font-weight:600;padding:0 6px}
 legend small{font-family:var(--body);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:500;margin-right:6px}
-h3{margin:4px 0 0;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);font-weight:600}
+h3{margin:6px 0 0;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);font-weight:600}
+.sub{display:flex;flex-direction:column;gap:10px;padding:10px;border-radius:6px;border:1px solid var(--line)}
 label{display:flex;flex-direction:column;gap:4px;font-size:.78rem;font-weight:500;color:var(--muted);letter-spacing:.02em}
 .row{display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:10px}
+.row2{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:8px 10px}
 input[type=text],input[type=number],select,textarea{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:7px 9px;width:100%;min-width:0}
-textarea{resize:vertical;min-height:110px;font-family:"EB Garamond",Georgia,serif;font-size:1rem;line-height:1.4}
+textarea{resize:vertical;min-height:100px;font-family:"EB Garamond",Georgia,serif;font-size:1rem;line-height:1.4}
 input[type=color]{width:100%;height:34px;border:1px solid var(--line);border-radius:6px;background:var(--bg);padding:2px}
 input[type=range]{width:100%;accent-color:var(--accent)}
 .check{flex-direction:row;align-items:center;gap:8px;color:var(--ink);font-size:.85rem}
+.checks{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 10px}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 button{font:inherit;font-weight:600;border-radius:6px;padding:9px 14px;cursor:pointer;border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink)}
 button.ghost{background:transparent;color:var(--accent);padding:6px 10px;font-size:.82rem}
@@ -49,7 +52,7 @@ button.ghost{background:transparent;color:var(--accent);padding:6px 10px;font-si
 .note{font-size:.78rem;color:var(--muted);margin:0}
 .warn{font-size:.8rem;color:var(--warn);background:var(--warn-bg);border-radius:6px;padding:6px 9px;margin:0}
 .spec{font-variant-numeric:tabular-nums;font-size:.78rem;color:var(--muted);margin:0}
-.previews{display:flex;flex-direction:column;gap:18px;position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px)}
+.previews{display:flex;flex-direction:column;gap:14px;position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px)}
 @media (max-width:900px){.previews{position:static}}
 figure{margin:0;display:flex;flex-direction:column;gap:6px;min-width:0;align-items:flex-start}
 figcaption{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 12px;align-items:baseline;width:100%}
@@ -58,15 +61,21 @@ figcaption .parts{display:flex;justify-content:space-between;width:100%;font-siz
 canvas{display:block;width:auto;height:auto;max-width:100%;max-height:calc(100vh - 170px);box-shadow:0 1px 2px rgba(0,0,0,.12),0 8px 24px rgba(0,0,0,.12);background:#fff}
 .previews.both canvas{max-height:calc(50vh - 95px)}
 @media (max-width:900px){canvas,.previews.both canvas{max-height:none;width:100%}}
+#outsideCanvas{touch-action:none}
 .seg{display:inline-flex;border:1px solid var(--line);border-radius:7px;overflow:hidden;background:var(--panel)}
 .seg button{border:0;border-radius:0;background:transparent;color:var(--muted);padding:7px 14px;font-size:.85rem}
 .seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
 .pbar{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;justify-content:space-between}
-#outsideCanvas.dragging{cursor:grabbing}
-#outsideCanvas{touch-action:none}
 .legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:.75rem;color:var(--muted)}
 .legend i{display:inline-block;width:18px;height:0;border-top:2px dashed;vertical-align:middle;margin-right:6px}
 .legend .b i{border-color:#d33}.legend .s i{border-color:#2a7de1}.legend .f i{border-color:#1c9a5a}
+legend .tog{all:unset;cursor:pointer;display:inline-flex;align-items:baseline;gap:6px;font:inherit;color:inherit;border-radius:4px}
+legend .tog::after{content:"";width:.45em;height:.45em;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:translateY(-.15em) rotate(45deg);margin-left:4px;transition:transform .15s}
+fieldset.collapsed legend .tog::after{transform:translateY(.05em) rotate(-45deg)}
+legend .tog:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+fieldset.collapsed{padding-bottom:4px}
+fieldset.collapsed > :not(legend){display:none!important}
+.allbar{display:flex;gap:8px;justify-content:flex-end}
 #status{min-height:1.4em}
 #fallback img{max-width:100%;border:1px solid var(--line);margin-top:6px}
 </style>
@@ -79,6 +88,7 @@ canvas{display:block;width:auto;height:auto;max-width:100%;max-height:calc(100vh
 
   <div class="grid">
     <div class="controls">
+      <div class="allbar"><button type="button" class="ghost" id="expandAll">Expand all</button><button type="button" class="ghost" id="collapseAll">Collapse all</button></div>
       <fieldset>
         <legend><small>Step 1</small>Card size</legend>
         <label for="size">Finished (folded) size
@@ -116,20 +126,15 @@ canvas{display:block;width:auto;height:auto;max-width:100%;max-height:calc(100vh
           <label for="fit">Image fit
             <select id="fit"><option value="cover">Fill panel (crop)</option><option value="contain">Whole image (border)</option></select>
           </label>
-          <label for="frontBg">Border colour<input type="color" id="frontBg" value="#14321f"></label>
+          <label for="frontBg">Background colour<input type="color" id="frontBg" value="#ffffff"></label>
         </div>
-        <label for="zoom">Zoom <input type="range" id="zoom" min="20" max="300" value="100"></label><p class="spec" id="zoomVal">100%</p><label hidden></label>
+        <label for="zoom">Zoom <span class="spec" id="zoomVal">100%</span><input type="range" id="zoom" min="20" max="300" value="100"></label>
         <div class="btns"><button type="button" class="ghost" id="recenter">Re-centre image</button></div>
-        <label for="fText">Front wording (optional)<input type="text" id="fText" placeholder="e.g. Gloria in Excelsis Deo"></label>
-        <div class="row">
-          <label for="fFont">Font<select id="fFont" class="fontSel"></select></label>
-          <label for="fSize">Size (pt)<input type="number" id="fSize" value="28" min="8" max="120"></label>
-        </div>
-        <div class="row">
-          <label for="fColor">Colour<input type="color" id="fColor" value="#f4e2a8"></label>
-          <label for="fPos">Position<select id="fPos"><option value="top">Top</option><option value="middle">Middle</option><option value="bottom" selected>Bottom</option></select></label>
-        </div>
-        <label class="check"><input type="checkbox" id="fBand"> Soft dark band behind wording</label>
+        <h3>Front wording</h3>
+        <label for="fText">Text<input type="text" id="fText" value="Merry Christmas" placeholder="e.g. Gloria in Excelsis Deo"></label>
+        <div data-tctl="fT" data-font="Cinzel" data-size="28" data-style="regular" data-color="#f4e2a8"></div>
+        <div data-pctl="fPos" data-val="100"></div>
+        <label class="check"><input type="checkbox" id="fBand" checked> Soft dark band behind wording</label>
       </fieldset>
 
       <fieldset data-view="outside">
@@ -138,24 +143,18 @@ canvas{display:block;width:auto;height:auto;max-width:100%;max-height:calc(100vh
           <strong>Choose logo</strong> or drop it here<br><span class="note">A PNG with a transparent background works best.</span>
         </div>
         <input type="file" id="logoFile" accept="image/*" hidden>
-        <div class="row" id="logoRow">
-          <p class="note" id="logoInfo">No logo yet. The dashed box shows where it will sit.</p>
-        </div>
+        <p class="note" id="logoInfo">No logo yet. The dashed box shows where it will sit.</p>
         <label for="logoSize">Logo width <input type="range" id="logoSize" min="10" max="70" value="30"></label>
-        <label for="bBrand">Company name<input type="text" id="bBrand" placeholder="Company name"></label>
-        <label for="bText">Small text<textarea id="bText" style="min-height:70px" placeholder="Website, artwork credit, or a short line about the card"></textarea></label>
-        <div class="row">
-          <label for="bFont">Font<select id="bFont" class="fontSel"></select></label>
-          <label for="bSize">Name size (pt)<input type="number" id="bSize" value="11" min="5" max="40"></label>
-        </div>
-        <div class="row">
-          <label for="bPos">Placement<select id="bPos"><option value="bottom">Bottom (classic)</option><option value="middle">Middle</option></select></label>
-          <label for="bOrn">Ornament<select id="bOrn" class="ornSel"></select></label>
-        </div>
-        <div class="row">
-          <label for="bColor">Text colour<input type="color" id="bColor" value="#1e3a2a"></label>
-          <label for="bBg">Back colour<input type="color" id="bBg" value="#ffffff"></label>
-        </div>
+        <h3>Company name</h3>
+        <label for="bBrand">Text<input type="text" id="bBrand" value="Gordon Heritage Press"></label>
+        <div data-tctl="bN" data-font="Cormorant Garamond" data-size="12" data-style="bold" data-color="#1e3a2a"></div>
+        <h3>Small text</h3>
+        <label for="bText">Text<textarea id="bText" style="min-height:64px" placeholder="Website, artwork credit, or a short line about the card">www.yourwebsite.com</textarea></label>
+        <div data-tctl="bS" data-font="EB Garamond" data-size="8" data-style="regular" data-color="#5d6b63"></div>
+        <h3>Layout</h3>
+        <div data-octl="bOrn" data-orn="star" data-mode="colour"></div>
+        <div data-pctl="bPos" data-val="100"></div>
+        <label for="bBg">Back colour<input type="color" id="bBg" value="#ffffff"></label>
       </fieldset>
 
       <fieldset id="insideSet" data-view="inside">
@@ -163,26 +162,38 @@ canvas{display:block;width:auto;height:auto;max-width:100%;max-height:calc(100vh
         <div id="panelControls"></div>
         <h3>Both inside pages</h3>
         <div class="row">
-          <label for="iColor">Text colour<input type="color" id="iColor" value="#1e3a2a"></label>
           <label for="iBg">Paper colour<input type="color" id="iBg" value="#ffffff"></label>
+          <label for="iLead">Line spacing <input type="range" id="iLead" min="110" max="200" value="145"></label>
         </div>
-        <label for="ornStyle">Ornament colours
-          <select id="ornStyle"><option value="colour">Traditional colours (gold, holly green, berry red)</option><option value="bw">Black &amp; white</option></select>
-        </label>
-        <label for="iLead">Line spacing <input type="range" id="iLead" min="110" max="200" value="145"></label>
         <label for="ornScale">Ornament size <input type="range" id="ornScale" min="60" max="200" value="100"></label>
-        <label class="check"><input type="checkbox" id="frame"> Decorative frame around each inside page</label>
       </fieldset>
 
       <fieldset>
-        <legend><small>Step 5</small>Export</legend>
-        <p class="note">Two 300 dpi JPGs with bleed included and guides removed. The outside file is back on the left, front on the right. The inside file is the left page, then the right page.</p>
+        <legend><small>Step 5</small>Decorative frames</legend>
+        <label for="frameStyle">Frame style<select id="frameStyle"></select></label>
+        <div class="row">
+          <label for="frameMode">Frame colour<select id="frameMode"><option value="colour">Colour</option><option value="bw">Black &amp; white</option></select></label>
+          <label for="frameSize">Frame weight <input type="range" id="frameSize" min="60" max="170" value="100"></label>
+        </div>
+        <p class="note">Show the frame on:</p>
+        <div class="checks">
+          <label class="check"><input type="checkbox" id="frFront"> Front</label>
+          <label class="check"><input type="checkbox" id="frBack"> Back</label>
+          <label class="check"><input type="checkbox" id="frL" checked> Inside left</label>
+          <label class="check"><input type="checkbox" id="frR" checked> Inside right</label>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend><small>Step 6</small>Export</legend>
+        <p class="note">300 dpi JPGs with bleed included and guides removed. Outside is back then front; inside is left page then right page. The full card file puts the outside spread on the left and the inside spread on the right.</p>
         <div class="btns">
-          <button type="button" id="saveOutside">Save outside JPG</button>
-          <button type="button" id="saveInside">Save inside JPG</button>
+          <button type="button" id="saveFull">Save full card JPG</button>
+          <button type="button" class="ghost" id="saveOutside">Outside only</button>
+          <button type="button" class="ghost" id="saveInside">Inside only</button>
         </div>
         <p class="note" id="status" role="status"></p>
-        <div id="fallback" hidden><p class="note">Right-click or long-press the image to save it.</p><img id="fallbackImg" alt="Exported card spread"></div>
+        <div id="fallback" hidden><p class="note">Right-click or long-press the image to save it.</p><img id="fallbackImg" alt="Exported card file"></div>
       </fieldset>
     </div>
 
@@ -203,40 +214,84 @@ canvas{display:block;width:auto;height:auto;max-width:100%;max-height:calc(100vh
 
 <script>
 (function(){
-const FONTS=["Cormorant Garamond","EB Garamond","Cinzel","IM Fell English","Libre Baskerville","Uncial Antiqua","UnifrakturMaguntia","Pinyon Script","Great Vibes"];
+const FONTS=["Cormorant Garamond","EB Garamond","Cinzel","IM Fell English","Libre Baskerville","Uncial Antiqua","UnifrakturMaguntia","Rye","Pinyon Script","Great Vibes"];
 const ORNS=[["none","None"],["star","Star with rules"],["bethlehem","Star of Bethlehem"],["holly","Holly sprig"],["snowflake","Snowflake"],["tree","Christmas tree"],["bell","Bell"],["candle","Candle"],["cross","Cross"],["chirho","Chi-Rho"],["flourish","Flourish divider"]];
+const FRAMES=[["classic","Double rule with stars"],["victorian","Victorian flourishes"],["medieval","Medieval braid"],["barbed","Barbed wire"],["rope","Western rope"],["holly","Holly garland"],["stars","Starry border"]];
 const SIZES={"7x5p":[127,178],"7x5l":[178,127],"6x4p":[102,152],"6x4l":[152,102],"sq":[140,140],"a4p":[205,290]};
 const DPI=300, mm2px=mm=>mm/25.4*DPI, pt2px=pt=>pt/72*DPI;
 const $=id=>document.getElementById(id);
 
+/* ---------- build repeated controls ---------- */
 const PANELS=[
- {k:"l",title:"Left inside page",text:"Fear not; for, behold, I bring you good tidings of great joy, that shall be to all the people:\n\nFor, this day, is born to you a Saviour, who is Christ the Lord, in the city of David.\n\nLuke 2:10–11",sig:"",font:"Cormorant Garamond",size:12,align:"center",pos:"center",orn:"bethlehem",ornPos:"above"},
- {k:"r",title:"Right inside page",text:"Love came down at Christmas,\nLove all lovely, Love Divine;\nLove was born at Christmas,\nStar and Angels gave the sign.\n\n— Christina Rossetti",sig:"With love at Christmas",font:"EB Garamond",size:13,align:"center",pos:"center",orn:"holly",ornPos:"above"}
+ {k:"l",title:"Left inside page",text:"Fear not; for, behold, I bring you good tidings of great joy, that shall be to all the people:\n\nFor, this day, is born to you a Saviour, who is Christ the Lord, in the city of David.\n\nLuke 2:10–11",sig:"",mFont:"Cormorant Garamond",mSize:12,cFont:"Cormorant Garamond",cSize:12,cStyle:"italic",orn:"bethlehem"},
+ {k:"r",title:"Right inside page",text:"Love came down at Christmas,\nLove all lovely, Love Divine;\nLove was born at Christmas,\nStar and Angels gave the sign.\n\n— Christina Rossetti",sig:"With love at Christmas",mFont:"EB Garamond",mSize:13,cFont:"Pinyon Script",cSize:18,cStyle:"regular",orn:"holly"}
 ];
 const pc=$("panelControls");
 PANELS.forEach(p=>{
-  const d=document.createElement("div");d.style.cssText="display:flex;flex-direction:column;gap:10px;margin-bottom:12px";
-  d.innerHTML=`<h3>${p.title}</h3>
-  <label for="${p.k}Text">Text<textarea id="${p.k}Text"></textarea></label>
-  <label for="${p.k}Sig">Closing line (italic)<input type="text" id="${p.k}Sig" placeholder="Optional, e.g. Wishing you a blessed Christmas"></label>
-  <div class="row"><label for="${p.k}Font">Font<select id="${p.k}Font" class="fontSel"></select></label>
-  <label for="${p.k}Size">Size (pt)<input type="number" id="${p.k}Size" min="6" max="60"></label></div>
-  <div class="row"><label for="${p.k}Align">Alignment<select id="${p.k}Align"><option value="center">Centred</option><option value="left">Left</option></select></label>
-  <label for="${p.k}Pos">Placement<select id="${p.k}Pos"><option value="upper">Upper</option><option value="center">Middle</option><option value="lower">Lower</option></select></label></div>
-  <div class="row"><label for="${p.k}Orn">Ornament<select id="${p.k}Orn" class="ornSel"></select></label>
-  <label for="${p.k}OrnPos">Ornament goes<select id="${p.k}OrnPos"><option value="above">Above text</option><option value="below">Below text</option><option value="both">Above and below</option></select></label></div>`;
+  const d=document.createElement("div");d.className="sub";d.style.marginBottom="12px";
+  d.innerHTML=`<h3 style="margin-top:0">${p.title}</h3>
+  <label for="${p.k}Text">Main text<textarea id="${p.k}Text"></textarea></label>
+  <div data-tctl="${p.k}M" data-font="${p.mFont}" data-size="${p.mSize}" data-style="regular" data-color="#1e3a2a"></div>
+  <label for="${p.k}Sig">Closing line<input type="text" id="${p.k}Sig" placeholder="Optional, e.g. Wishing you a blessed Christmas"></label>
+  <div data-tctl="${p.k}C" data-font="${p.cFont}" data-size="${p.cSize}" data-style="${p.cStyle}" data-color="#8c1d1d"></div>
+  <label for="${p.k}Align">Alignment<select id="${p.k}Align"><option value="center">Centred</option><option value="left">Left</option></select></label>
+  <div data-pctl="${p.k}Pos" data-val="50"></div>
+  <div data-octl="${p.k}Orn" data-orn="${p.orn}" data-mode="colour"></div>
+  <label for="${p.k}OrnPos">Ornament goes<select id="${p.k}OrnPos"><option value="above">Above text</option><option value="below">Below text</option><option value="both">Above and below</option></select></label>`;
   pc.appendChild(d);
+});
+const defaults={};
+document.querySelectorAll("[data-tctl]").forEach(el=>{
+  const p=el.dataset.tctl;el.className="row2";defaults[p+"Font"]=el.dataset.font;defaults[p+"Style"]=el.dataset.style;
+  el.innerHTML=`<label for="${p}Font">Font<select id="${p}Font" class="fontSel"></select></label>
+  <label for="${p}Size">Size (pt)<input type="number" id="${p}Size" value="${el.dataset.size}" min="5" max="140" step="0.5"></label>
+  <label for="${p}Style">Style<select id="${p}Style"><option value="regular">Regular</option><option value="italic">Italic</option><option value="bold">Bold</option><option value="bolditalic">Bold italic</option></select></label>
+  <label for="${p}Color">Colour<input type="color" id="${p}Color" value="${el.dataset.color}"></label>`;
+});
+document.querySelectorAll("[data-pctl]").forEach(el=>{
+  const id=el.dataset.pctl;el.className="row";
+  el.innerHTML=`<label for="${id}Preset">Vertical position<select id="${id}Preset" class="preset" data-for="${id}"><option value="0">Top</option><option value="33.3">Upper third</option><option value="50">Middle</option><option value="66.7">Lower third</option><option value="100">Bottom</option><option value="custom">Custom</option></select></label>
+  <label for="${id}">Fine-tune<input type="range" id="${id}" min="0" max="100" step="0.1" value="${el.dataset.val}"></label>`;
+});
+document.querySelectorAll("[data-octl]").forEach(el=>{
+  const id=el.dataset.octl;el.className="row";defaults[id]=el.dataset.orn;defaults[id+"Mode"]=el.dataset.mode;
+  el.innerHTML=`<label for="${id}">Ornament<select id="${id}" class="ornSel"></select></label>
+  <label for="${id}Mode">Ornament colour<select id="${id}Mode"><option value="colour">Colour</option><option value="bw">Black &amp; white</option></select></label>`;
 });
 document.querySelectorAll(".fontSel").forEach(s=>FONTS.forEach(f=>{const o=document.createElement("option");o.value=f;o.textContent=f;s.appendChild(o);}));
 document.querySelectorAll(".ornSel").forEach(s=>ORNS.forEach(([v,t])=>{const o=document.createElement("option");o.value=v;o.textContent=t;s.appendChild(o);}));
-PANELS.forEach(p=>{$(p.k+"Text").value=p.text;$(p.k+"Sig").value=p.sig;$(p.k+"Font").value=p.font;$(p.k+"Size").value=p.size;$(p.k+"Align").value=p.align;$(p.k+"Pos").value=p.pos;$(p.k+"Orn").value=p.orn;$(p.k+"OrnPos").value=p.ornPos;});
-$("fFont").value="Cinzel";$("fText").value="Merry Christmas";$("fBand").checked=true;
-$("bFont").value="Cormorant Garamond";$("bBrand").value="Gordon Heritage Press";$("bText").value="www.yourwebsite.com";$("bOrn").value="star";
+FRAMES.forEach(([v,t])=>{const o=document.createElement("option");o.value=v;o.textContent=t;$("frameStyle").appendChild(o);});
+$("frameStyle").value="victorian";
+Object.entries(defaults).forEach(([id,val])=>{$(id).value=val;});
+PANELS.forEach(p=>{$(p.k+"Text").value=p.text;$(p.k+"Sig").value=p.sig;});
 
+/* ---------- collapsible steps ---------- */
+const sets=[...document.querySelectorAll(".controls fieldset")];
+let closed={};try{closed=JSON.parse(localStorage.getItem("cardCollapsed")||"{}");}catch(e){}
+function setOpen(fs,i,open){fs.classList.toggle("collapsed",!open);fs.querySelector(".tog").setAttribute("aria-expanded",String(open));closed[i]=!open;}
+function saveClosed(){try{localStorage.setItem("cardCollapsed",JSON.stringify(closed));}catch(e){}}
+sets.forEach((fs,i)=>{const lg=fs.querySelector("legend"),b=document.createElement("button");b.type="button";b.className="tog";
+  while(lg.firstChild)b.appendChild(lg.firstChild);lg.appendChild(b);
+  setOpen(fs,i,!closed[i]);
+  b.addEventListener("click",()=>{setOpen(fs,i,fs.classList.contains("collapsed"));saveClosed();});});
+$("expandAll").addEventListener("click",()=>{sets.forEach((fs,i)=>setOpen(fs,i,true));saveClosed();});
+$("collapseAll").addEventListener("click",()=>{sets.forEach((fs,i)=>setOpen(fs,i,false));saveClosed();});
+
+/* ---------- saved settings ---------- */
 const fields=[...document.querySelectorAll(".controls input:not([type=file]), .controls select, .controls textarea")];
-try{const s=JSON.parse(localStorage.getItem("cardFormatter2")||"null");if(s)fields.forEach(el=>{if(s[el.id]!==undefined){el.type==="checkbox"?el.checked=s[el.id]:el.value=s[el.id];}});}catch(e){}
-function persist(){try{const o={};fields.forEach(el=>{o[el.id]=el.type==="checkbox"?el.checked:el.value;});localStorage.setItem("cardFormatter2",JSON.stringify(o));}catch(e){}}
+const STORE="cardFormatter3";
+try{const s=JSON.parse(localStorage.getItem(STORE)||"null");if(s)fields.forEach(el=>{if(s[el.id]!==undefined){el.type==="checkbox"?el.checked=s[el.id]:el.value=s[el.id];}});}catch(e){}
+function persist(){try{const o={};fields.forEach(el=>{o[el.id]=el.type==="checkbox"?el.checked:el.value;});localStorage.setItem(STORE,JSON.stringify(o));}catch(e){}}
 const v=id=>{const el=$(id);return el.type==="checkbox"?el.checked:el.value;};
+
+let raf=0;
+const schedule=()=>{if(!raf)raf=requestAnimationFrame(render);};
+function syncPreset(sel,rng){const m=[...sel.options].find(o=>o.value!=="custom"&&Math.abs(+o.value-+rng.value)<.6);sel.value=m?m.value:"custom";}
+document.querySelectorAll(".preset").forEach(sel=>{const rng=$(sel.dataset.for);
+  sel.addEventListener("change",()=>{if(sel.value!=="custom"){rng.value=sel.value;schedule();}});
+  rng.addEventListener("input",()=>syncPreset(sel,rng));syncPreset(sel,rng);});
+
+function fontOf(p,size){const st=v(p+"Style");return `${st.includes("italic")?"italic ":""}${st.includes("bold")?"600 ":""}${size}px "${v(p+"Font")}"`;}
 
 function dims(){
   const bleed=Math.max(0,+v("bleed")||0), safe=Math.max(0,+v("safe")||0);
@@ -248,18 +303,20 @@ function dims(){
     left:{x0:b+s,x1:mid-s,y0:b+s,y1:H-b-s},
     right:{x0:mid+s,x1:W-b-s,y0:b+s,y1:H-b-s}};
 }
+function placeY(r,h,pos){const c=r.y0+(r.y1-r.y0)*pos/100;return Math.min(Math.max(c-h/2,r.y0),Math.max(r.y0,r.y1-h));}
 
 /* ---------- ornaments ---------- */
+const PAL={gold:"#b08d3c",green:"#2f6b3a",red:"#b3261e",flame:"#e39a2d",ice:"#4f86b3"};
+const OCOL={star:["gold","gold"],bethlehem:["gold","gold"],holly:["green","red"],snowflake:["ice","ice"],tree:["green","red"],bell:["gold","red"],candle:["red","flame"],cross:["gold","gold"],chirho:["gold","gold"],flourish:["gold","gold"]};
+function pal(type,mode){if(mode==="bw")return ["#1a1a1a","#1a1a1a","#1a1a1a"];const c=OCOL[type]||["gold","gold"];return [PAL[c[0]],PAL[c[1]],PAL.gold];}
 function star5(ctx,cx,cy,R,inner){ctx.beginPath();for(let i=0;i<10;i++){const a=i*Math.PI/5-Math.PI/2,r=i%2?R*(inner||.42):R;ctx.lineTo(cx+Math.cos(a)*r,cy+Math.sin(a)*r);}ctx.closePath();ctx.fill();}
 function leaf(ctx,cx,cy,L,w,ang){ctx.save();ctx.translate(cx,cy);ctx.rotate(ang);ctx.beginPath();ctx.moveTo(0,0);
   const n=8;for(let i=1;i<=n;i++){const t=i/n;ctx.lineTo(t*L,-w*Math.sin(Math.PI*t)*(i%2?1.2:.78));}
   for(let i=n-1;i>=1;i--){const t=i/n;ctx.lineTo(t*L,w*Math.sin(Math.PI*t)*(i%2?1.2:.78));}
   ctx.closePath();ctx.fill();ctx.restore();}
-const PAL={gold:"#b08d3c",green:"#2f6b3a",red:"#b3261e",flame:"#e39a2d",ice:"#4f86b3"};
-const COLOURS={star:["gold","gold"],bethlehem:["gold","gold"],holly:["green","red"],snowflake:["ice","ice"],tree:["green","red"],bell:["gold","red"],candle:["red","flame"],cross:["gold","gold"],chirho:["gold","gold"],flourish:["gold","gold"],frame:["gold","gold"]};
-function pal(type){if(v("ornStyle")==="bw")return ["#1a1a1a","#1a1a1a","#1a1a1a"];const c=COLOURS[type]||["gold","gold"];return [PAL[c[0]],PAL[c[1]],PAL.gold];}
-function ornament(ctx,type,cx,cy,s){
-  const [col,berry,gold]=pal(type);
+function leafShape(ctx,cx,cy,L,w,ang){ctx.save();ctx.translate(cx,cy);ctx.rotate(ang);ctx.beginPath();ctx.moveTo(0,0);ctx.quadraticCurveTo(L*.5,-w,L,0);ctx.quadraticCurveTo(L*.5,w,0,0);ctx.fill();ctx.restore();}
+function ornament(ctx,type,cx,cy,s,mode){
+  const [col,berry,gold]=pal(type,mode);
   ctx.save();ctx.fillStyle=col;ctx.strokeStyle=col;ctx.lineCap="round";ctx.lineJoin="round";
   switch(type){
   case "star":
@@ -274,15 +331,15 @@ function ornament(ctx,type,cx,cy,s){
   case "holly":
     leaf(ctx,cx+s*.02,cy+s*.04,s*.62,s*.17,-.32);leaf(ctx,cx-s*.02,cy+s*.04,s*.62,s*.17,Math.PI+.32);leaf(ctx,cx,cy+s*.05,s*.42,s*.13,Math.PI/2+.1);
     ctx.fillStyle=berry;[[-.07,-.02],[.07,-.02],[0,-.12]].forEach(([x,y])=>{ctx.beginPath();ctx.arc(cx+x*s,cy+y*s,s*.075,0,7);ctx.fill();});
-    ctx.fillStyle="rgba(255,255,255,.55)";[[-.07,-.02],[.07,-.02],[0,-.12]].forEach(([x,y])=>{ctx.beginPath();ctx.arc(cx+x*s-s*.025,cy+y*s-s*.025,s*.018,0,7);ctx.fill();});break;
-  case "snowflake":
+    if(mode!=="bw"){ctx.fillStyle="rgba(255,255,255,.55)";[[-.07,-.02],[.07,-.02],[0,-.12]].forEach(([x,y])=>{ctx.beginPath();ctx.arc(cx+x*s-s*.025,cy+y*s-s*.025,s*.018,0,7);ctx.fill();});}break;
+  case "snowflake":{
     ctx.lineWidth=s*.045;const R=s*.45;
     for(let k=0;k<6;k++){const a=k*Math.PI/3-Math.PI/2,ca=Math.cos(a),sa=Math.sin(a);ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+ca*R,cy+sa*R);
       [.45,.72].forEach(t=>{const bx=cx+ca*R*t,by=cy+sa*R*t,l=R*(t<.5?.3:.22);[-1,1].forEach(d=>{const b=a+d*Math.PI/4;ctx.moveTo(bx,by);ctx.lineTo(bx+Math.cos(b)*l,by+Math.sin(b)*l);});});ctx.stroke();}
-    ctx.beginPath();ctx.arc(cx,cy,s*.06,0,7);ctx.fill();break;
+    ctx.beginPath();ctx.arc(cx,cy,s*.06,0,7);ctx.fill();break;}
   case "tree":
     for(let i=0;i<3;i++){const top=cy-s*.34+i*s*.17,hw=s*(.13+i*.09);ctx.beginPath();ctx.moveTo(cx,top);ctx.lineTo(cx+hw,top+s*.24);ctx.lineTo(cx-hw,top+s*.24);ctx.closePath();ctx.fill();}
-    ctx.fillRect(cx-s*.04,cy+s*.24,s*.08,s*.12);ctx.fillStyle=gold;star5(ctx,cx,cy-s*.38,s*.09);ctx.fillStyle=berry;
+    ctx.fillRect(cx-s*.04,cy+s*.24,s*.08,s*.12);ctx.fillStyle=gold;star5(ctx,cx,cy-s*.38,s*.09);ctx.fillStyle=mode==="bw"?"#ffffff":berry;
     [[-.08,-.08],[.1,.02],[-.14,.16],[.06,.18],[.2,.24]].forEach(([x,y])=>{ctx.beginPath();ctx.arc(cx+x*s,cy+y*s,s*.025,0,7);ctx.fill();});break;
   case "bell":
     ctx.beginPath();ctx.moveTo(cx-s*.1,cy-s*.28);ctx.quadraticCurveTo(cx-s*.22,cy-s*.26,cx-s*.23,cy);ctx.quadraticCurveTo(cx-s*.25,cy+s*.17,cx-s*.34,cy+s*.22);
@@ -293,7 +350,7 @@ function ornament(ctx,type,cx,cy,s){
     ctx.fillRect(cx-s*.08,cy-s*.08,s*.16,s*.42);ctx.fillRect(cx-s*.2,cy+s*.34,s*.4,s*.05);
     ctx.lineWidth=s*.02;ctx.beginPath();ctx.moveTo(cx,cy-s*.08);ctx.lineTo(cx,cy-s*.13);ctx.stroke();
     ctx.fillStyle=berry;ctx.beginPath();ctx.moveTo(cx,cy-s*.44);ctx.quadraticCurveTo(cx+s*.1,cy-s*.22,cx,cy-s*.13);ctx.quadraticCurveTo(cx-s*.1,cy-s*.22,cx,cy-s*.44);ctx.fill();
-    ctx.globalAlpha=.25;ctx.beginPath();ctx.arc(cx,cy-s*.26,s*.2,0,7);ctx.fill();break;
+    if(mode!=="bw"){ctx.globalAlpha=.25;ctx.beginPath();ctx.arc(cx,cy-s*.26,s*.2,0,7);ctx.fill();}break;
   case "cross":
     ctx.fillRect(cx-s*.045,cy-s*.42,s*.09,s*.84);ctx.fillRect(cx-s*.24,cy-s*.22,s*.48,s*.09);
     ctx.globalAlpha=.3;ctx.lineWidth=s*.02;for(let i=0;i<12;i++){const a=i*Math.PI/6;ctx.beginPath();ctx.moveTo(cx+Math.cos(a)*s*.3,cy-s*.17+Math.sin(a)*s*.3);ctx.lineTo(cx+Math.cos(a)*s*.42,cy-s*.17+Math.sin(a)*s*.42);ctx.stroke();}break;
@@ -311,6 +368,68 @@ function ornament(ctx,type,cx,cy,s){
   ctx.restore();
 }
 
+/* ---------- decorative frames ---------- */
+const FDEPTH={classic:.75,victorian:1.95,medieval:1.15,barbed:1.0,rope:1.0,holly:1.3,stars:1.0};
+const FCOL={classic:["#b08d3c","#b08d3c"],victorian:["#b08d3c","#b08d3c"],medieval:["#7d1c1c","#b08d3c"],barbed:["#4f555b","#4f555b"],rope:["#a57c4b","#5b3f20"],holly:["#2f6b3a","#b3261e"],stars:["#b08d3c","#b08d3c"]};
+// Runs fn once per edge in local coordinates: x runs along the edge from a corner, y points into the panel.
+function edges(ctx,r,fn){const w=r.x1-r.x0,h=r.y1-r.y0;
+  [[r.x0,r.y0,0,w],[r.x1,r.y0,Math.PI/2,h],[r.x1,r.y1,Math.PI,w],[r.x0,r.y1,-Math.PI/2,h]].forEach(([x,y,a,L])=>{ctx.save();ctx.translate(x,y);ctx.rotate(a);fn(L);ctx.restore();});}
+function spiral(ctx,cx,cy,r0,r1,a0,sweep){const n=40;for(let i=0;i<=n;i++){const t=i/n,a=a0+sweep*t,r=r0+(r1-r0)*t;ctx.lineTo(cx+Math.cos(a)*r,cy+Math.sin(a)*r);}}
+function vicScroll(ctx,u){
+  ctx.beginPath();ctx.moveTo(3.6*u,.42*u);ctx.bezierCurveTo(2.6*u,.42*u,1.4*u,.6*u,1.15*u,1.3*u);spiral(ctx,1.55*u,1.3*u,.4*u,.1*u,Math.PI,-1.7*Math.PI);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(2.6*u,.44*u);ctx.quadraticCurveTo(2.2*u,.6*u,2.25*u,.95*u);spiral(ctx,2.5*u,.95*u,.25*u,.06*u,Math.PI,-1.6*Math.PI);ctx.stroke();
+  ctx.beginPath();ctx.arc(3.72*u,.42*u,.07*u,0,7);ctx.fill();}
+function vicMid(ctx,L,u){const m=L/2;
+  ctx.beginPath();ctx.moveTo(m,.3*u);ctx.lineTo(m+.2*u,.55*u);ctx.lineTo(m,.8*u);ctx.lineTo(m-.2*u,.55*u);ctx.closePath();ctx.fill();
+  [-1,1].forEach(d=>{ctx.save();ctx.translate(m,0);ctx.scale(d,1);ctx.beginPath();ctx.moveTo(.3*u,.55*u);ctx.bezierCurveTo(.8*u,.4*u,1.4*u,.45*u,1.6*u,.75*u);spiral(ctx,1.4*u,.85*u,.22*u,.05*u,-.45,1.7*Math.PI);ctx.stroke();ctx.restore();});}
+function drawFrame(ctx,r,paper){
+  const st=v("frameStyle"),bw=v("frameMode")==="bw",[c1,c2]=bw?["#111111","#111111"]:FCOL[st];
+  const t=Math.min(r.x1-r.x0,r.y1-r.y0)*.045*(+v("frameSize")/100);
+  const rect=(ins,lw)=>{ctx.lineWidth=lw;ctx.strokeRect(r.x0+ins,r.y0+ins,r.x1-r.x0-2*ins,r.y1-r.y0-2*ins);};
+  ctx.save();ctx.strokeStyle=c1;ctx.fillStyle=c1;ctx.lineCap="round";ctx.lineJoin="round";
+  switch(st){
+  case "classic":
+    rect(t*.06,t*.09);rect(t*.45,t*.035);
+    edges(ctx,r,()=>{ctx.fillStyle=paper;ctx.beginPath();ctx.arc(t*.26,t*.26,t*.34,0,7);ctx.fill();ctx.fillStyle=c1;star5(ctx,t*.26,t*.26,t*.32);});break;
+  case "victorian":
+    rect(t*.04,t*.08);rect(t*.3,t*.03);ctx.lineWidth=t*.06;
+    edges(ctx,r,L=>{vicScroll(ctx,t);ctx.save();ctx.transform(0,1,1,0,0,0);vicScroll(ctx,t);ctx.restore();
+      leafShape(ctx,t*.42,t*.42,t*.85,t*.2,Math.PI/4);if(L>12*t)vicMid(ctx,L,t);});break;
+  case "medieval":
+    rect(t*.035,t*.07);rect(t,t*.05);
+    edges(ctx,r,L=>{const n=Math.max(1,Math.round((L-2*t)/(t*1.3))),p=(L-2*t)/n,a=t*.24,c=t*.52;
+      [1,-1].forEach(sg=>{ctx.beginPath();for(let i=0;i<=n*24;i++){const x=t+i*p/24;ctx.lineTo(x,c+sg*a*Math.sin(2*Math.PI*(x-t)/p));}
+        ctx.lineWidth=t*.2;ctx.strokeStyle=c2;ctx.stroke();ctx.lineWidth=t*.07;ctx.strokeStyle=paper;ctx.stroke();});});
+    edges(ctx,r,()=>{ctx.fillStyle=c1;ctx.fillRect(0,0,t*1.03,t*1.03);ctx.fillStyle=bw?paper:c2;
+      ctx.fillRect(t*.42,t*.16,t*.18,t*.7);ctx.fillRect(t*.16,t*.42,t*.7,t*.18);});break;
+  case "barbed":
+    edges(ctx,r,L=>{const c=t*.45,a=t*.1,p=t*.5;ctx.lineWidth=t*.07;
+      [1,-1].forEach(sg=>{ctx.beginPath();for(let x=0;x<=L;x+=p/12)ctx.lineTo(x,c+sg*a*Math.sin(2*Math.PI*x/p));ctx.stroke();});
+      const n=Math.max(1,Math.round(L/(t*2.2))),sp=L/n;ctx.lineWidth=t*.06;
+      for(let k=0;k<n;k++){const x=(k+.5)*sp;ctx.beginPath();ctx.moveTo(x-t*.3,c-t*.3);ctx.lineTo(x+t*.3,c+t*.3);ctx.moveTo(x+t*.3,c-t*.3);ctx.lineTo(x-t*.3,c+t*.3);ctx.stroke();
+        ctx.beginPath();ctx.ellipse(x,c,t*.1,t*.17,0,0,7);ctx.stroke();}});
+    edges(ctx,r,()=>{ctx.fillRect(t*.3,t*.3,t*.3,t*.3);});break;
+  case "rope":
+    edges(ctx,r,L=>{const c=t*.45,n=Math.max(1,Math.floor(L/(t*.34)));
+      for(let k=0;k<n;k++){const x=(k+.5)*(L/n);ctx.beginPath();ctx.ellipse(x,c,t*.25,t*.11,-.75,0,7);ctx.fillStyle=bw?paper:c1;ctx.fill();ctx.lineWidth=bw?t*.035:t*.025;ctx.strokeStyle=bw?c1:c2;ctx.stroke();}});
+    edges(ctx,r,()=>{ctx.beginPath();ctx.arc(t*.45,t*.45,t*.32,0,7);ctx.lineWidth=t*.18;ctx.strokeStyle=bw?c1:c2;ctx.stroke();ctx.lineWidth=t*.08;ctx.strokeStyle=bw?paper:c1;ctx.stroke();});break;
+  case "holly":
+    edges(ctx,r,L=>{const c=t*.5,s0=t*1.3,e=L-t*1.3;if(e<=s0)return;const n=Math.max(1,Math.round((e-s0)/(t*.85))),sp=(e-s0)/n;
+      for(let k=0;k<=n;k++){const x=s0+k*sp;ctx.fillStyle=c1;leaf(ctx,x,c,t*.8,t*.2,k%2?-.42:.42);
+        if(k%3===1){ctx.fillStyle=c2;[[0,-.09],[-.09,.06],[.09,.06]].forEach(([dx,dy])=>{ctx.beginPath();ctx.arc(x+dx*t,c+dy*t,t*.09,0,7);ctx.fill();});}}});
+    edges(ctx,r,()=>{ctx.fillStyle=c1;[0,Math.PI/4,Math.PI/2].forEach(a=>leaf(ctx,t*.35,t*.35,t*.95,t*.22,a));
+      ctx.fillStyle=c2;[[.35,.35],[.52,.3],[.3,.52]].forEach(([x,y])=>{ctx.beginPath();ctx.arc(x*t,y*t,t*.11,0,7);ctx.fill();});});break;
+  case "stars":
+    rect(t*.03,t*.035);rect(t*.9,t*.035);
+    edges(ctx,r,L=>{const c=t*.46,s0=t,e=L-t;if(e<=s0)return;const n=Math.max(1,Math.round((e-s0)/(t*.8)));
+      for(let k=0;k<=n;k++)star5(ctx,s0+k*(e-s0)/n,c,k%2?t*.13:t*.22);});
+    edges(ctx,r,()=>{ctx.fillStyle=paper;ctx.beginPath();ctx.arc(t*.46,t*.46,t*.36,0,7);ctx.fill();ctx.fillStyle=c1;star5(ctx,t*.46,t*.46,t*.34);});break;
+  }
+  ctx.restore();
+  return t*FDEPTH[st]+mm2px(2.5);
+}
+const inset=(r,m)=>({x0:r.x0+m,x1:r.x1-m,y0:r.y0+m,y1:r.y1-m});
+
 /* ---------- sample cover ---------- */
 function makeSample(){
   const c=document.createElement("canvas");c.width=1200;c.height=1700;const x=c.getContext("2d");
@@ -325,14 +444,14 @@ function makeSample(){
   x.fillStyle="#ffd979";x.fillRect(355,1400,50,100);return c;
 }
 const sample=makeSample();
-let img=null,imgName="",logo=null,logoName="",panX=0,panY=0,raf=0;
+let img=null,imgName="",logo=null,panX=0,panY=0;
 
 function placement(src,PW,H){
   const iw=src.naturalWidth||src.width, ih=src.naturalHeight||src.height;
   const base=v("fit")==="cover"?Math.max(PW/iw,H/ih):Math.min(PW/iw,H/ih);
   const sc=base*(+v("zoom")/100), dw=iw*sc, dh=ih*sc;
   let x=(PW-dw)/2+panX*PW, y=(H-dh)/2+panY*H;
-  const cl=(val,a,b)=>Math.min(Math.max(val,Math.min(a,b)),Math.max(a,b));
+  const cl=(q,a,b)=>Math.min(Math.max(q,Math.min(a,b)),Math.max(a,b));
   x=cl(x,0,PW-dw);y=cl(y,0,H-dh);panX=(x-(PW-dw)/2)/PW;panY=(y-(H-dh)/2)/H;
   return {x,y,dw,dh,sc};
 }
@@ -349,77 +468,71 @@ function guides(ctx,d){
   ctx.strokeStyle="#2a7de1";[d.left,d.right].forEach(r=>ctx.strokeRect(r.x0,r.y0,r.x1-r.x0,r.y1-r.y0));ctx.restore();
 }
 
+/* ---------- panels ---------- */
 function drawFront(ctx,d){
-  const {W,H,mid,right}=d, PW=W-mid;
+  const {W,H,mid}=d, PW=W-mid;
   ctx.save();ctx.beginPath();ctx.rect(mid,0,PW,H);ctx.clip();
   ctx.fillStyle=v("frontBg");ctx.fillRect(mid,0,PW,H);
   const src=img||sample,p=placement(src,PW,H);ctx.imageSmoothingQuality="high";ctx.drawImage(src,mid+p.x,p.y,p.dw,p.dh);
+  let r=d.right;if(v("frFront"))r=inset(d.right,drawFrame(ctx,d.right,v("frontBg")));
   const t=v("fText").trim();
-  if(t){const size=pt2px(+v("fSize")||28);ctx.font=`${size}px "${v("fFont")}"`;ctx.textAlign="center";
-    const cx=(right.x0+right.x1)/2,lines=wrapLines(ctx,t,right.x1-right.x0),lh=size*1.2,bh=lines.length*lh,pos=v("fPos");
-    const top=pos==="top"?right.y0+size*.2:pos==="middle"?(H-bh)/2:right.y1-bh-size*.2;
+  if(t){const size=pt2px(+v("fTSize")||28);ctx.font=fontOf("fT",size);ctx.textAlign="center";
+    const cx=(r.x0+r.x1)/2,lines=wrapLines(ctx,t,r.x1-r.x0),lh=size*1.2,bh=lines.length*lh;
+    const top=placeY(r,bh,+v("fPos"));
     if(v("fBand")){const pad=size*.6,g=ctx.createLinearGradient(0,top-pad,0,top+bh+pad);g.addColorStop(0,"rgba(0,0,0,0)");g.addColorStop(.25,"rgba(0,0,0,.45)");g.addColorStop(.75,"rgba(0,0,0,.45)");g.addColorStop(1,"rgba(0,0,0,0)");ctx.fillStyle=g;ctx.fillRect(mid,top-pad,PW,bh+2*pad);}
-    ctx.fillStyle=v("fColor");lines.forEach((l,i)=>ctx.fillText(l,cx,top+(i+.82)*lh));}
+    ctx.fillStyle=v("fTColor");lines.forEach((l,i)=>ctx.fillText(l,cx,top+(i+.82)*lh));}
   ctx.restore();return p;
 }
-
 function drawBack(ctx,d,forExport){
-  const {H,mid,left}=d;ctx.fillStyle=v("bBg");ctx.fillRect(0,0,mid,H);
-  const pw=left.x1-left.x0,cx=(left.x0+left.x1)/2,size=pt2px(+v("bSize")||11),col=v("bColor"),font=v("bFont");
+  const {H,mid}=d,paper=v("bBg");ctx.fillStyle=paper;ctx.fillRect(0,0,mid,H);
+  let r=d.left;if(v("frBack"))r=inset(d.left,drawFrame(ctx,d.left,paper));
+  const pw=r.x1-r.x0,cx=(r.x0+r.x1)/2;
+  const ns=pt2px(+v("bNSize")||12),ss=pt2px(+v("bSSize")||8);
   const lw=pw*(+v("logoSize")/100);let lh=0;
   if(logo)lh=lw*(logo.naturalHeight/logo.naturalWidth);else if(!forExport)lh=lw*.45;
-  const orn=v("bOrn"),os=size*2*(+v("ornScale")/100),oh=orn!=="none"?os*1.1:0;
-  ctx.font=`600 ${size}px "${font}"`;const brand=v("bBrand").trim(),bl=brand?wrapLines(ctx,brand,pw):[];
-  const small=size*.72;ctx.font=`${small}px "${font}"`;const sl=v("bText").trim()?wrapLines(ctx,v("bText").trim(),pw):[];
-  const gap=size*.5,total=oh+(lh?lh+gap:0)+bl.length*size*1.25+(sl.length?gap*.6+sl.length*small*1.4:0);
-  let y=v("bPos")==="bottom"?left.y1-total:(H-total)/2;
-  if(oh){ornament(ctx,orn,cx,y+os*.5,os);y+=oh;}
-  if(lh){if(logo){ctx.drawImage(logo,cx-lw/2,y,lw,lh);}else{ctx.save();ctx.strokeStyle="#9aa";ctx.setLineDash([8,6]);ctx.lineWidth=3;ctx.strokeRect(cx-lw/2,y,lw,lh);ctx.fillStyle="#9aa";ctx.font=`${size*.8}px "Public Sans",sans-serif`;ctx.textAlign="center";ctx.fillText("Logo",cx,y+lh/2+size*.3);ctx.restore();}y+=lh+gap;}
-  ctx.fillStyle=col;ctx.textAlign="center";ctx.font=`600 ${size}px "${font}"`;bl.forEach(l=>{ctx.fillText(l,cx,y+size*.95);y+=size*1.25;});
-  if(sl.length){y+=gap*.6;ctx.font=`${small}px "${font}"`;ctx.globalAlpha=.85;sl.forEach(l=>{ctx.fillText(l,cx,y+small*1.05);y+=small*1.4;});ctx.globalAlpha=1;}
+  const orn=v("bOrn"),os=ns*2*(+v("ornScale")/100),oh=orn!=="none"?os*1.1:0;
+  ctx.font=fontOf("bN",ns);const bl=v("bBrand").trim()?wrapLines(ctx,v("bBrand").trim(),pw):[];
+  ctx.font=fontOf("bS",ss);const sl=v("bText").trim()?wrapLines(ctx,v("bText").trim(),pw):[];
+  const gap=ns*.5,total=oh+(lh?lh+gap:0)+bl.length*ns*1.25+(sl.length?gap*.6+sl.length*ss*1.4:0);
+  let y=placeY(r,total,+v("bPos"));
+  if(oh){ornament(ctx,orn,cx,y+os*.5,os,v("bOrnMode"));y+=oh;}
+  if(lh){if(logo){ctx.drawImage(logo,cx-lw/2,y,lw,lh);}else{ctx.save();ctx.strokeStyle="#9aa";ctx.setLineDash([8,6]);ctx.lineWidth=3;ctx.strokeRect(cx-lw/2,y,lw,lh);ctx.fillStyle="#9aa";ctx.font=`${ns*.8}px "Public Sans",sans-serif`;ctx.textAlign="center";ctx.fillText("Logo",cx,y+lh/2+ns*.3);ctx.restore();}y+=lh+gap;}
+  ctx.textAlign="center";ctx.fillStyle=v("bNColor");ctx.font=fontOf("bN",ns);bl.forEach(l=>{ctx.fillText(l,cx,y+ns*.95);y+=ns*1.25;});
+  if(sl.length){y+=gap*.6;ctx.fillStyle=v("bSColor");ctx.font=fontOf("bS",ss);sl.forEach(l=>{ctx.fillText(l,cx,y+ss*1.05);y+=ss*1.4;});}
 }
-
-function drawFrame(ctx,r,col,d){
-  const lw=Math.max(2,d.W/1500),gap=mm2px(1.2),cs=mm2px(1.6);
-  ctx.save();ctx.strokeStyle=col;ctx.lineWidth=lw;ctx.strokeRect(r.x0,r.y0,r.x1-r.x0,r.y1-r.y0);ctx.lineWidth=lw*.6;ctx.strokeRect(r.x0+gap,r.y0+gap,r.x1-r.x0-2*gap,r.y1-r.y0-2*gap);
-  ctx.fillStyle=col;[[r.x0,r.y0],[r.x1,r.y0],[r.x0,r.y1],[r.x1,r.y1]].forEach(([x,y])=>{ctx.fillStyle=v("iBg");ctx.beginPath();ctx.arc(x,y,cs*1.1,0,7);ctx.fill();ctx.fillStyle=col;star5(ctx,x,y,cs,.4);});ctx.restore();
-}
-
 function drawPanel(ctx,d,k,r0){
-  const frame=v("frame");let r={...r0};
-  if(frame){drawFrame(ctx,r0,pal("frame")[0],d);const m=mm2px(5);r={x0:r0.x0+m,x1:r0.x1-m,y0:r0.y0+m,y1:r0.y1-m};}
-  const size=pt2px(+v(k+"Size")||12),font=v(k+"Font"),lh=size*(+v("iLead")/100),col=v("iColor");
-  const w=r.x1-r.x0;ctx.font=`${size}px "${font}"`;const lines=v(k+"Text").trim()?wrapLines(ctx,v(k+"Text"),w-size*.5):[];
-  ctx.font=`italic ${size}px "${font}"`;const sig=v(k+"Sig").trim(),sl=sig?wrapLines(ctx,sig,w-size*.5):[];
-  const orn=v(k+"Orn"),op=v(k+"OrnPos"),os=size*2.3*(+v("ornScale")/100);
+  const paper=v("iBg");let r=r0;
+  if(v("fr"+k.toUpperCase()))r=inset(r0,drawFrame(ctx,r0,paper));
+  const ms=pt2px(+v(k+"MSize")||12),cs=pt2px(+v(k+"CSize")||12),lead=+v("iLead")/100,w=r.x1-r.x0;
+  ctx.font=fontOf(k+"M",ms);const lines=v(k+"Text").trim()?wrapLines(ctx,v(k+"Text"),w-ms*.5):[];
+  ctx.font=fontOf(k+"C",cs);const sig=v(k+"Sig").trim(),sl=sig?wrapLines(ctx,sig,w-cs*.5):[];
+  const orn=v(k+"Orn"),mode=v(k+"OrnMode"),op=v(k+"OrnPos"),os=ms*2.3*(+v("ornScale")/100);
   const above=orn!=="none"&&(op==="above"||op==="both"),below=orn!=="none"&&(op==="below"||op==="both");
-  const oh=os*1.2,gap=sl.length&&lines.length?lh*1.1:0;
-  const total=(above?oh:0)+lines.length*lh+gap+sl.length*lh+(below?oh:0);
-  const pos=v(k+"Pos");let y=pos==="upper"?r.y0+(r.y1-r.y0)*.08:pos==="lower"?r.y1-total-(r.y1-r.y0)*.08:(r.y0+r.y1-total)/2;
-  y=Math.max(r.y0,y);
-  const align=v(k+"Align"),x=align==="center"?(r.x0+r.x1)/2:r.x0+size*.25,ox=align==="center"?x:x+os*.6;
-  if(above){ornament(ctx,orn,ox,y+oh/2,os);y+=oh;}
-  ctx.textAlign=align;ctx.fillStyle=col;ctx.font=`${size}px "${font}"`;
-  lines.forEach(l=>{ctx.fillText(l,x,y+lh*.75);y+=lh;});
-  y+=gap;ctx.font=`italic ${size}px "${font}"`;sl.forEach(l=>{ctx.fillText(l,x,y+lh*.75);y+=lh;});
-  if(below){ornament(ctx,orn,ox,y+oh/2,os);}
+  const oh=os*1.2,gap=sl.length&&lines.length?ms*lead*1.1:0;
+  const total=(above?oh:0)+lines.length*ms*lead+gap+sl.length*cs*lead+(below?oh:0);
+  let y=placeY(r,total,+v(k+"Pos"));
+  const align=v(k+"Align"),x=align==="center"?(r.x0+r.x1)/2:r.x0+ms*.25,ox=align==="center"?x:x+os*.6;
+  if(above){ornament(ctx,orn,ox,y+oh/2,os,mode);y+=oh;}
+  ctx.textAlign=align;ctx.fillStyle=v(k+"MColor");ctx.font=fontOf(k+"M",ms);
+  lines.forEach(l=>{ctx.fillText(l,x,y+ms*lead*.75);y+=ms*lead;});
+  y+=gap;ctx.fillStyle=v(k+"CColor");ctx.font=fontOf(k+"C",cs);sl.forEach(l=>{ctx.fillText(l,x,y+cs*lead*.75);y+=cs*lead;});
+  if(below)ornament(ctx,orn,ox,y+oh/2,os,mode);
 }
-
 function drawOutside(ctx,d,forExport){drawBack(ctx,d,forExport);const p=drawFront(ctx,d);if(!forExport)guides(ctx,d);return p;}
 function drawInside(ctx,d,forExport){ctx.fillStyle=v("iBg");ctx.fillRect(0,0,d.W,d.H);drawPanel(ctx,d,"l",d.left);drawPanel(ctx,d,"r",d.right);if(!forExport)guides(ctx,d);}
 
+/* ---------- render loop ---------- */
 const oc=$("outsideCanvas"),ic=$("insideCanvas");
 function render(){
   raf=0;const d=dims();
   [oc,ic].forEach(c=>{if(c.width!==d.W||c.height!==d.H){c.width=d.W;c.height=d.H;}});
   const p=drawOutside(oc.getContext("2d"),d,false);drawInside(ic.getContext("2d"),d,false);
   const cap=`${d.W} × ${d.H} px`;$("capO").textContent=cap;$("capI").textContent=cap;
-  $("spec").textContent=d.trimW?`Each file ${d.W} × ${d.H} px at 300 dpi · flat trim ${2*d.trimW} × ${d.trimH} mm (two ${d.trimW} mm panels) + ${d.bleed} mm bleed each edge`:`Each file ${d.W} × ${d.H} px at 300 dpi (custom); fold at the centre`;
+  $("spec").textContent=d.trimW?`Each spread ${d.W} × ${d.H} px at 300 dpi · flat trim ${2*d.trimW} × ${d.trimH} mm + ${d.bleed} mm bleed each edge`:`Each spread ${d.W} × ${d.H} px at 300 dpi (custom); fold at the centre`;
   if(img){const dpi=Math.round(DPI/p.sc),w=$("dpiWarn");w.hidden=dpi>=200;if(dpi<200)w.textContent=`Cover image prints at about ${dpi} dpi. Below 200 dpi it may look soft; try a larger original or less zoom.`;
     $("imgInfo").textContent=`${imgName} · ${img.naturalWidth} × ${img.naturalHeight} px · prints at about ${dpi} dpi`;}
-  $("customRow").hidden=v("size")!=="custom";$("zoomVal").textContent=$("zoom").value+"%";persist();
+  $("customRow").hidden=v("size")!=="custom";$("zoomVal").textContent=v("zoom")+"%";persist();
 }
-const schedule=()=>{if(!raf)raf=requestAnimationFrame(render);};
 
 function readImage(f,ok,infoEl){
   if(!f||!f.type.startsWith("image/")){infoEl.textContent="That file isn't an image. Choose a JPG or PNG.";return;}
@@ -435,17 +548,17 @@ function hookDrop(dropId,fileId,onFile){
   dz.addEventListener("drop",e=>onFile(e.dataTransfer.files[0]));
 }
 hookDrop("drop","file",f=>readImage(f,(im,n)=>{img=im;imgName=n;panX=panY=0;$("zoom").value=100;schedule();},$("imgInfo")));
-hookDrop("logoDrop","logoFile",f=>readImage(f,(im,n)=>{logo=im;logoName=n;$("logoInfo").textContent=`${n} · ${im.naturalWidth} × ${im.naturalHeight} px`;schedule();},$("logoInfo")));
+hookDrop("logoDrop","logoFile",f=>readImage(f,(im,n)=>{logo=im;$("logoInfo").textContent=`${n} · ${im.naturalWidth} × ${im.naturalHeight} px`;schedule();},$("logoInfo")));
 $("recenter").addEventListener("click",()=>{panX=panY=0;schedule();});
 
 let drag=null;
 oc.addEventListener("pointermove",e=>{
   const r=oc.getBoundingClientRect(),onFront=(e.clientX-r.left)>r.width/2;
   if(!drag){oc.style.cursor=onFront?"grab":"default";return;}
-  panX=drag.px+(e.clientX-drag.x)/(r.width/2);panY=drag.py+(e.clientY-drag.y)/r.height;schedule();
+  oc.style.cursor="grabbing";panX=drag.px+(e.clientX-drag.x)/(r.width/2);panY=drag.py+(e.clientY-drag.y)/r.height;schedule();
 });
-oc.addEventListener("pointerdown",e=>{const r=oc.getBoundingClientRect();if(e.clientX-r.left<r.width/2)return;drag={x:e.clientX,y:e.clientY,px:panX,py:panY};oc.setPointerCapture(e.pointerId);oc.classList.add("dragging");});
-const end=()=>{drag=null;oc.classList.remove("dragging");};
+oc.addEventListener("pointerdown",e=>{const r=oc.getBoundingClientRect();if(e.clientX-r.left<r.width/2)return;drag={x:e.clientX,y:e.clientY,px:panX,py:panY};oc.setPointerCapture(e.pointerId);});
+const end=()=>{drag=null;};
 oc.addEventListener("pointerup",end);oc.addEventListener("pointercancel",end);
 
 fields.forEach(el=>{el.addEventListener("input",schedule);el.addEventListener("change",schedule);});
@@ -457,14 +570,16 @@ function setView(view){
 document.querySelectorAll(".seg button").forEach(b=>b.addEventListener("click",()=>setView(b.dataset.view)));
 document.querySelectorAll("fieldset[data-view]").forEach(fs=>fs.addEventListener("focusin",()=>{const cur=document.querySelector('.seg button[aria-pressed="true"]').dataset.view;if(cur!=="both")setView(fs.dataset.view);}));
 try{const sv=localStorage.getItem("cardView");if(sv)setView(sv);}catch(e){}
-$("zoom").addEventListener("input",()=>{$("zoomVal").textContent=$("zoom").value+"%";});
 
+/* ---------- export ---------- */
 let downloads=null;
 if(window.claude&&window.claude.use){window.claude.use("downloads").then(x=>{downloads=x;}).catch(()=>{});}
-function exportSpread(which){
-  const d=dims(),c=document.createElement("canvas");c.width=d.W;c.height=d.H;const ctx=c.getContext("2d");
-  which==="outside"?drawOutside(ctx,d,true):drawInside(ctx,d,true);
-  const name=`christmas-card-${which}-${d.W}x${d.H}.jpg`;$("status").textContent="Preparing file…";
+function exportFile(which){
+  const d=dims(),c=document.createElement("canvas");c.width=which==="full"?d.W*2:d.W;c.height=d.H;const ctx=c.getContext("2d");
+  if(which==="outside")drawOutside(ctx,d,true);
+  else if(which==="inside")drawInside(ctx,d,true);
+  else{drawOutside(ctx,d,true);ctx.save();ctx.translate(d.W,0);drawInside(ctx,d,true);ctx.restore();}
+  const name=`christmas-card-${which}-${c.width}x${c.height}.jpg`;$("status").textContent="Preparing file…";
   c.toBlob(async blob=>{
     if(!blob){$("status").textContent="Couldn't create the file. Try a smaller image.";return;}
     if(downloads){try{await downloads.save({filename:name,data:blob});$("status").textContent=`Saved ${name}`;$("fallback").hidden=true;return;}
@@ -472,10 +587,11 @@ function exportSpread(which){
     $("fallbackImg").src=URL.createObjectURL(blob);$("fallback").hidden=false;$("status").textContent=`${name} is ready below.`;
   },"image/jpeg",0.95);
 }
-$("saveOutside").addEventListener("click",()=>exportSpread("outside"));
-$("saveInside").addEventListener("click",()=>exportSpread("inside"));
+$("saveFull").addEventListener("click",()=>exportFile("full"));
+$("saveOutside").addEventListener("click",()=>exportFile("outside"));
+$("saveInside").addEventListener("click",()=>exportFile("inside"));
 
-const loads=FONTS.flatMap(f=>[document.fonts.load(`40px "${f}"`),document.fonts.load(`italic 40px "${f}"`),document.fonts.load(`600 40px "${f}"`)].map(p=>p.catch(()=>{})));
+const loads=FONTS.flatMap(f=>["","italic ","600 ","italic 600 "].map(s=>document.fonts.load(`${s}40px "${f}"`).catch(()=>{})));
 render();Promise.all(loads).then(schedule);
 if(document.fonts.addEventListener)document.fonts.addEventListener("loadingdone",schedule);
 })();
