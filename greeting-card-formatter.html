@@ -140,11 +140,22 @@ fieldset.collapsed > :not(legend){display:none!important}
         </div>
         <label for="zoom">Zoom <span class="spec" id="zoomVal">100%</span><input type="range" id="zoom" min="20" max="300" value="100"></label>
         <div class="btns"><button type="button" class="ghost" id="recenter">Re-centre image</button></div>
-        <h3>Front wording</h3>
-        <label for="fText">Text<input type="text" id="fText" value="Merry Christmas" placeholder="e.g. Gloria in Excelsis Deo"></label>
+        <label for="fLayout">Layout
+          <select id="fLayout"><option value="fill">Picture fills the front, text on top of it</option><option value="between">Picture between upper and lower text</option></select>
+        </label>
+        <div class="row" id="betweenRow">
+          <label for="picW">Picture width <input type="range" id="picW" min="40" max="100" value="100"></label>
+          <label class="check"><input type="checkbox" id="picLine" checked> Thin line around picture</label>
+        </div>
+        <h3>Upper text</h3>
+        <label for="fUText">Text<input type="text" id="fUText" placeholder="Optional, e.g. Gloria in Excelsis Deo"></label>
+        <div data-tctl="fU" data-font="Cinzel" data-size="20" data-style="regular" data-color="#f4e2a8"></div>
+        <div data-pctl="fUPos" data-val="0"></div>
+        <h3>Lower text</h3>
+        <label for="fText">Text<input type="text" id="fText" value="Merry Christmas" placeholder="e.g. Merry Christmas"></label>
         <div data-tctl="fT" data-font="Cinzel" data-size="28" data-style="regular" data-color="#f4e2a8"></div>
         <div data-pctl="fPos" data-val="100"></div>
-        <label class="check"><input type="checkbox" id="fBand" checked> Soft dark band behind wording</label>
+        <label class="check" id="bandRow"><input type="checkbox" id="fBand" checked> Soft dark band behind text on the picture</label>
       </fieldset>
 
       <fieldset data-view="outside">
@@ -507,16 +518,26 @@ function guides(ctx,d){
 }
 
 /* ---------- panels (each drawn on its own canvas with bleed on all four sides) ---------- */
+function textBlock(ctx,p,text,width){if(!text)return {lines:[],h:0,size:0};const size=pt2px(+v(p+"Size")||20);ctx.font=fontOf(p,size);const lines=wrapLines(ctx,text,width);return {lines,h:lines.length*size*1.2,size};}
+function paintBlock(ctx,p,B,cx,top,band,W){if(!B.lines.length)return;
+  if(band){const pad=B.size*.6,g=ctx.createLinearGradient(0,top-pad,0,top+B.h+pad);g.addColorStop(0,"rgba(0,0,0,0)");g.addColorStop(.25,"rgba(0,0,0,.45)");g.addColorStop(.75,"rgba(0,0,0,.45)");g.addColorStop(1,"rgba(0,0,0,0)");ctx.fillStyle=g;ctx.fillRect(0,top-pad,W,B.h+2*pad);}
+  ctx.font=fontOf(p,B.size);ctx.textAlign="center";ctx.fillStyle=v(p+"Color");B.lines.forEach((l,i)=>ctx.fillText(l,cx,top+(i+.82)*B.size*1.2));}
 function drawFront(ctx,pd){
-  const {W,H}=pd;ctx.fillStyle=v("frontBg");ctx.fillRect(0,0,W,H);
-  const src=img||sample,p=placement(src,W,H);ctx.imageSmoothingQuality="high";ctx.drawImage(src,p.x,p.y,p.dw,p.dh);
-  let r=pd.safe;if(v("frFront"))r=inset(pd.safe,drawFrame(ctx,pd.safe,v("frontBg")));
-  const t=v("fText").trim();
-  if(t){const size=pt2px(+v("fTSize")||28);ctx.font=fontOf("fT",size);ctx.textAlign="center";
-    const cx=(r.x0+r.x1)/2,lines=wrapLines(ctx,t,r.x1-r.x0),lh=size*1.2,bh=lines.length*lh;
-    const top=placeY(r,bh,+v("fPos"));
-    if(v("fBand")){const pad=size*.6,g=ctx.createLinearGradient(0,top-pad,0,top+bh+pad);g.addColorStop(0,"rgba(0,0,0,0)");g.addColorStop(.25,"rgba(0,0,0,.45)");g.addColorStop(.75,"rgba(0,0,0,.45)");g.addColorStop(1,"rgba(0,0,0,0)");ctx.fillStyle=g;ctx.fillRect(0,top-pad,W,bh+2*pad);}
-    ctx.fillStyle=v("fTColor");lines.forEach((l,i)=>ctx.fillText(l,cx,top+(i+.82)*lh));}
+  const {W,H}=pd,bg=v("frontBg"),src=img||sample;ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);ctx.imageSmoothingQuality="high";
+  let p,r=pd.safe;
+  if(v("fLayout")==="between"){
+    if(v("frFront"))r=inset(pd.safe,drawFrame(ctx,pd.safe,bg));
+    const tw=r.x1-r.x0,cx=(r.x0+r.x1)/2,U=textBlock(ctx,"fU",v("fUText").trim(),tw),L=textBlock(ctx,"fT",v("fText").trim(),tw),gap=mm2px(4);
+    const ay0=r.y0+(U.h?U.h+gap:0),ay1=r.y1-(L.h?L.h+gap:0),aw=tw*(+v("picW")/100),ah=Math.max(10,ay1-ay0),ax=cx-aw/2;
+    ctx.save();ctx.beginPath();ctx.rect(ax,ay0,aw,ah);ctx.clip();p=placement(src,aw,ah);ctx.drawImage(src,ax+p.x,ay0+p.y,p.dw,p.dh);ctx.restore();
+    if(v("picLine")){ctx.save();ctx.strokeStyle=v("fTColor");ctx.lineWidth=mm2px(.25);ctx.strokeRect(ax,ay0,aw,ah);ctx.restore();}
+    paintBlock(ctx,"fU",U,cx,r.y0,false,W);paintBlock(ctx,"fT",L,cx,r.y1-L.h,false,W);
+  }else{
+    p=placement(src,W,H);ctx.drawImage(src,p.x,p.y,p.dw,p.dh);
+    if(v("frFront"))r=inset(pd.safe,drawFrame(ctx,pd.safe,bg));
+    const tw=r.x1-r.x0,cx=(r.x0+r.x1)/2,U=textBlock(ctx,"fU",v("fUText").trim(),tw),L=textBlock(ctx,"fT",v("fText").trim(),tw);
+    paintBlock(ctx,"fU",U,cx,placeY(r,U.h,+v("fUPos")),v("fBand"),W);paintBlock(ctx,"fT",L,cx,placeY(r,L.h,+v("fPos")),v("fBand"),W);
+  }
   return p;
 }
 function drawBack(ctx,pd,forExport){
@@ -598,6 +619,7 @@ function render(){
   const cap=`${d.W} × ${d.H} px`;$("capO").textContent=cap;$("capI").textContent=cap;$("capF").textContent=`${fw*2} × ${fh} px`;
   $("spec").textContent=(d.trimW?`Flat trim ${2*d.trimW} × ${d.trimH} mm + ${d.bleed} mm bleed each edge. `:"Custom size. ")+`Full card file ${fw*2} × ${fh} px at 300 dpi`+(d.land?", panels turned on their side.":".");
   $("landRow").hidden=!d.land;
+  {const btw=v("fLayout")==="between";$("betweenRow").hidden=!btw;$("bandRow").hidden=btw;["fUPos","fPos"].forEach(id=>$(id+"Preset").closest(".row").hidden=btw);}
   if(img){const dpi=Math.round(DPI/p.sc),w=$("dpiWarn");w.hidden=dpi>=200;if(dpi<200)w.textContent=`Cover image prints at about ${dpi} dpi. Below 200 dpi it may look soft; try a larger original or less zoom.`;
     $("imgInfo").textContent=`${imgName} · ${img.naturalWidth} × ${img.naturalHeight} px · prints at about ${dpi} dpi`;}
   $("wireRow").hidden=v("frameStyle")!=="barbed";$("customRow").hidden=v("size")!=="custom";$("zoomVal").textContent=v("zoom")+"%";persist();
@@ -631,6 +653,8 @@ const end=()=>{drag=null;};
 oc.addEventListener("pointerup",end);oc.addEventListener("pointercancel",end);
 
 fields.forEach(el=>{el.addEventListener("input",schedule);el.addEventListener("change",schedule);});
+$("fLayout").addEventListener("change",()=>{const btw=$("fLayout").value==="between",from=btw?"#f4e2a8":"#1e3a2a",to=btw?"#1e3a2a":"#f4e2a8";
+  ["fUColor","fTColor"].forEach(id=>{if($(id).value.toLowerCase()===from)$(id).value=to;});panX=panY=0;schedule();});
 function setView(view){
   curView=view;schedule();
   try{localStorage.setItem("cardView",view);}catch(e){}
